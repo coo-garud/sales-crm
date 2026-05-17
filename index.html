@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Command Centre</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#00539B;--blue-dk:#003A6B;--blue-md:#1A6FBB;--blue-lt:#E6F0FA;--blue-xlt:#F0F6FC;
+  --red:#C62828;--red-bg:#FFF0F0;--red-bd:#FFCDD2;
+  --amber:#D84315;--amber-bg:#FFF3E0;--amber-bd:#FFCC80;
+  --green:#1B5E20;--green-bg:#F1FAF3;--green-bd:#A5D6A7;
+  --teal:#0277BD;--teal-bg:#E3F2FD;--teal-bd:#90CAF9;
+  --purple:#4527A0;--purple-bg:#EDE7F6;--purple-bd:#B39DDB;
+  --hot:#B71C1C;--hot-bg:#FFEBEE;--hot-bd:#EF9A9A;
+  --gold:#F57F17;--gold-bg:#FFF8E1;--gold-bd:#FFE082;
+  --wa:#25D366;--wa-dk:#128C7E;--wa-bg:#E8FFF0;
+  --gray-50:#FAFBFC;--gray-100:#F4F6F9;--gray-200:#E8ECF1;--gray-300:#CDD3DC;
+  --gray-400:#9AAAB8;--gray-500:#6B7A8D;--gray-700:#3D4F61;--gray-900:#1A2535;
+  --shadow-xs:0 1px 2px rgba(0,58,107,.06);--shadow-sm:0 2px 6px rgba(0,58,107,.09);--shadow-md:0 4px 16px rgba(0,58,107,.13);
+  --r:8px;--font-h:'Barlow Condensed',sans-serif;--font-b:'Plus Jakarta Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--gray-100);color:var(--gray-900);font-family:var(--font-b);font-size:13px;min-height:100vh;}
+header{background:var(--blue-dk);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;position:sticky;top:0;z-index:400;box-shadow:0 2px 10px rgba(0,0,0,.3);}
+.hlogo{display:flex;align-items:center;gap:11px;}
+.hcircle{width:32px;height:32px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:12px;font-weight:800;color:var(--blue-dk);flex-shrink:0;}
+.htitle{font-family:var(--font-h);font-size:18px;font-weight:700;}
+.hsub{font-size:9px;opacity:.65;letter-spacing:.6px;text-transform:uppercase;}
+.hright{display:flex;align-items:center;gap:10px;font-size:11px;opacity:.8;}
+#hclock{font-family:var(--font-h);font-size:15px;font-weight:600;opacity:1;}
+.loc-bar{background:var(--blue-dk);border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:6px;padding:5px 20px;position:sticky;top:52px;z-index:390;}
+.loc-btn{padding:4px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-family:var(--font-h);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.loc-btn:hover{border-color:rgba(255,255,255,.5);color:#fff;}
+.loc-btn.active{background:#fff;color:var(--blue-dk);border-color:#fff;}
+.loc-sep{width:1px;height:16px;background:rgba(255,255,255,.15);margin:0 2px;}
+.loc-label{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.5px;text-transform:uppercase;margin-right:2px;}
+nav{background:#fff;border-bottom:1px solid var(--gray-200);display:flex;padding:0 14px;position:sticky;top:84px;z-index:380;overflow-x:auto;box-shadow:var(--shadow-xs);}
+.tab{padding:10px 12px;cursor:pointer;font-family:var(--font-h);font-size:13px;font-weight:600;color:var(--gray-400);border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.tab:hover{color:var(--blue);}.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tbdg{background:var(--red);color:#fff;border-radius:8px;padding:1px 5px;font-size:8.5px;font-weight:700;font-family:var(--font-b);}
+.tbdg-a{background:var(--amber);}
+main{padding:14px 20px;max-width:1480px;margin:0 auto;}
+.section{display:none;}.section.active{display:block;animation:fi .18s ease;}
+@keyframes fi{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}
+.sh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.sh-title{font-family:var(--font-h);font-size:21px;font-weight:700;color:var(--blue-dk);}
+.sh-sub{font-size:11px;color:var(--gray-400);margin-top:1px;}
+.sh-acts{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+/* MORNING BRIEF */
+.morning-brief{background:linear-gradient(135deg,#003A6B,#00539B);border-radius:var(--r);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow-md);}
+.mb-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mb-title{font-family:var(--font-h);font-size:17px;font-weight:700;color:#fff;}
+.mb-date{font-size:11px;color:rgba(255,255,255,.65);margin-left:8px;}
+.mb-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;cursor:pointer;font-family:var(--font-b);}
+.mb-toggle:hover{background:rgba(255,255,255,.25);}
+.mb-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.mb-item{background:rgba(255,255,255,.12);border-radius:6px;padding:9px 12px;text-align:center;cursor:pointer;transition:background .15s;}
+.mb-item:hover{background:rgba(255,255,255,.2);}
+.mb-num{font-family:var(--font-h);font-size:26px;font-weight:800;line-height:1;}
+.mb-num.mb-r{color:#FF8A80;}.mb-num.mb-a{color:#FFD180;}.mb-num.mb-g{color:#CCFF90;}.mb-num.mb-b{color:#82B1FF;}
+.mb-lbl{font-size:10px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600;}
+.mb-body.col{display:none;}
+/* STAT CARDS */
+.srow{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:12px;}
+@media(max-width:1100px){.srow{grid-template-columns:repeat(3,1fr);}}@media(max-width:600px){.srow{grid-template-columns:repeat(2,1fr);}}
+.sc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 12px;box-shadow:var(--shadow-xs);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.sc:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
+.sc.ct::before{background:var(--blue);}.sc.cr::before{background:var(--red);}.sc.ca::before{background:var(--amber);}
+.sc.ch::before{background:var(--hot);}.sc.cg::before{background:var(--green);}.sc.cb::before{background:var(--teal);}
+.sc-lbl{font-size:9px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px;}
+.sc-num{font-family:var(--font-h);font-size:28px;font-weight:800;line-height:1;}
+.sc.ct .sc-num{color:var(--blue);}.sc.cr .sc-num{color:var(--red);}.sc.ca .sc-num{color:var(--amber);}
+.sc.ch .sc-num{color:var(--hot);}.sc.cg .sc-num{color:var(--green);}.sc.cb .sc-num{color:var(--teal);}
+.sc-sub{font-size:10px;color:var(--gray-400);margin-top:2px;}
+/* FUNNEL */
+.card-wrap{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:12px;}
+.card-hd{padding:10px 14px;font-family:var(--font-h);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.hd-blue{background:var(--blue-dk);color:#fff;}.hd-green{background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff;}
+.hd-amber{background:linear-gradient(135deg,#BF360C,#D84315);color:#fff;}.hd-teal{background:linear-gradient(135deg,#01579B,#0277BD);color:#fff;}
+.hd-wa{background:linear-gradient(135deg,#128C7E,#25D366);color:#fff;}
+.card-body{padding:12px 14px;}
+.fn-stage{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.fn-stage:last-child{margin-bottom:0;}
+.fn-label{font-size:12px;font-weight:700;color:var(--gray-700);min-width:90px;text-align:right;}
+.fn-bar-wrap{flex:1;height:24px;background:var(--gray-100);border-radius:4px;overflow:hidden;}
+.fn-bar{height:100%;display:flex;align-items:center;padding:0 8px;border-radius:4px;transition:width .6s;}
+.fnb0{background:linear-gradient(90deg,var(--blue),var(--blue-md));}.fnb1{background:linear-gradient(90deg,var(--amber),#FF8F00);}
+.fnb2{background:linear-gradient(90deg,var(--green),#2E7D32);}.fnb3{background:linear-gradient(90deg,var(--teal),var(--blue-md));}
+.fn-num{font-family:var(--font-h);font-size:14px;font-weight:800;color:#fff;}
+.fn-conv{font-size:11px;font-weight:700;min-width:55px;text-align:right;}
+.fc-hi{color:var(--green);}.fc-md{color:var(--amber);}.fc-lo{color:var(--red);}
+.fn-foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-100);font-size:12px;color:var(--gray-700);}
+.fn-foot span{font-weight:700;color:var(--blue);}
+/* FINANCE */
+.fin-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.fin-lbl{font-size:12px;color:var(--gray-700);min-width:70px;font-weight:600;}
+.fin-bw{flex:1;height:16px;background:var(--gray-100);border-radius:4px;overflow:hidden;}
+.fin-b{height:100%;border-radius:4px;transition:width .5s;}
+.fin-pct{font-family:var(--font-h);font-size:14px;font-weight:800;min-width:45px;text-align:right;}
+/* WAIT */
+.wait-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;}
+.wait-warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd);padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;}
+.wait-crit{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+/* DVS TABLE */
+.dvs-table{width:100%;border-collapse:collapse;font-size:12px;}
+.dvs-table th{background:var(--blue-dk);color:rgba(255,255,255,.85);padding:7px 12px;text-align:left;font-family:var(--font-h);font-size:10px;font-weight:600;letter-spacing:.5px;}
+.dvs-table td{padding:8px 12px;border-bottom:1px solid var(--gray-100);vertical-align:middle;}
+.dvs-table tr:last-child td{border-bottom:none;}.dvs-table tr:hover td{background:var(--blue-xlt);}
+.gap-cell{font-family:var(--font-h);font-size:16px;font-weight:800;}
+.gap-sh{color:var(--red);}.gap-ok{color:var(--amber);}.gap-su{color:var(--green);}
+.gb-sh{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;}
+.gb-ok{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd);padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;}
+.gb-su{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;}
+/* LOCATION TABLE */
+.lbt{width:100%;border-collapse:collapse;}
+.lbt th{padding:6px 12px;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--gray-400);text-align:left;border-bottom:1px solid var(--gray-200);background:var(--gray-50);}
+.lbt td{padding:8px 12px;border-bottom:1px solid var(--gray-100);font-size:12px;}
+.lbt .tot td{background:var(--blue-xlt);font-weight:700;color:var(--blue-dk);}
+.prog-wrap{background:var(--gray-200);border-radius:3px;height:6px;min-width:50px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:3px;transition:width .5s;}
+.prog-g{background:var(--green);}.prog-a{background:var(--amber);}.prog-r{background:var(--red);}
+/* TD LEADERBOARD */
+.td-hd{background:linear-gradient(135deg,#BF360C,var(--amber));color:#fff;padding:9px 14px;font-family:var(--font-h);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.td-row{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--gray-100);}
+.td-row:last-child{border-bottom:none;}
+.td-rank{font-family:var(--font-h);font-size:16px;font-weight:800;min-width:22px;}
+.r1{color:#F9A825;}.r2{color:#9E9E9E;}.r3{color:#8D5524;}
+.td-sp{font-weight:700;flex:1;font-size:12.5px;}
+.td-cnt{font-family:var(--font-h);font-size:18px;font-weight:800;color:var(--amber);}
+.td-bm{width:50px;height:6px;background:var(--gray-200);border-radius:3px;overflow:hidden;}
+.td-bf{height:100%;background:var(--amber);border-radius:3px;}
+/* COMPLIANCE */
+.comp-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:12px 14px;box-shadow:var(--shadow-sm);}
+.comp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.comp-title{font-family:var(--font-h);font-size:14px;font-weight:700;color:var(--blue-dk);}
+.comp-big{font-family:var(--font-h);font-size:22px;font-weight:800;}
+.cs-g{color:var(--green);}.cs-a{color:var(--amber);}.cs-r{color:var(--red);}
+.prog-full{background:var(--gray-200);border-radius:4px;height:7px;overflow:hidden;margin-bottom:8px;}
+.sp-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.sp-table th{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--gray-400);padding:4px 8px;text-align:left;border-bottom:1px solid var(--gray-200);}
+.sp-table td{padding:5px 8px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);}
+.sp-table tr:last-child td{border-bottom:none;}
+.sc-pill{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;}
+.sg{background:var(--green-bg);color:var(--green);}.sa{background:var(--amber-bg);color:var(--amber);}.sr{background:var(--red-bg);color:var(--red);}
+/* TARGET */
+.target-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);}
+.tc-hd{background:linear-gradient(135deg,#003A6B,#00539B);color:#fff;padding:9px 14px;font-family:var(--font-h);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.tc-hd button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-b);}
+.tc-body{padding:10px 14px;}
+.tc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.tc-name{font-weight:700;font-size:12px;min-width:85px;}
+.tc-nums{font-size:11px;color:var(--gray-500);white-space:nowrap;}
+.tc-prog{flex:1;min-width:60px;}
+.tc-pct{font-family:var(--font-h);font-size:13px;font-weight:700;min-width:38px;text-align:right;}
+.target-form{display:none;padding:12px 14px;border-top:1px solid var(--gray-200);background:var(--gray-50);}
+.target-form.open{display:block;}
+.tfi{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.tfi label{font-size:11px;font-weight:700;min-width:130px;color:var(--gray-700);}
+.tfi input{background:#fff;border:1.5px solid var(--gray-200);border-radius:5px;padding:5px 9px;font-family:var(--font-b);font-size:13px;width:80px;outline:none;}
+.tfi input:focus{border-color:var(--blue);}
+/* FILTERS */
+.filter-bar{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:8px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:11px;box-shadow:var(--shadow-xs);}
+.fi{background:var(--gray-100);border:1px solid var(--gray-200);color:var(--gray-900);border-radius:5px;padding:5px 9px;font-family:var(--font-b);font-size:12px;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--blue);background:#fff;}
+/* LEAD CARDS */
+.leads-list{display:flex;flex-direction:column;gap:9px;}
+.lc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow .15s;}
+.lc:hover{box-shadow:var(--shadow-md);}
+.lred{border-left:4px solid var(--red);}.lamber{border-left:4px solid var(--amber);}.lhot{border-left:4px solid var(--hot);}
+.lwarm{border-left:4px solid var(--blue);}.lgreen{border-left:4px solid var(--green);}
+.llost{border-left:4px solid var(--gray-300);opacity:.7;}.lcold{border-left:4px solid var(--gray-300);}
+.lc-head{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;}
+.lc-head:hover{background:var(--blue-xlt);}
+.lc-name{font-weight:700;font-size:13.5px;}
+.lc-phone{font-size:11.5px;color:var(--gray-500);}
+.lc-pills{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid;}
+.src-walkin{background:#E3F2FD;color:#1565C0;border-color:#90CAF9;}.src-telein{background:#F3E5F5;color:#6A1B9A;border-color:#CE93D8;}
+.src-cardekho{background:#FFF3E0;color:#E65100;border-color:#FFCC80;}.src-spinny{background:#E8F5E9;color:#1B5E20;border-color:#A5D6A7;}
+.src-meta{background:#EDE7F6;color:#311B92;border-color:#B39DDB;}.src-reference{background:#FFF8E1;color:#F57F17;border-color:#FFE082;}
+.pill-hot{background:var(--hot-bg);color:var(--hot);border-color:var(--hot-bd);}
+.pill-warm{background:var(--blue-lt);color:var(--blue);border-color:#BAD3EF;}
+.pill-cold{background:var(--gray-100);color:var(--gray-500);border-color:var(--gray-300);}
+.pill-booked{background:var(--green-bg);color:var(--green);border-color:var(--green-bd);}
+.pill-lost{background:var(--gray-100);color:var(--gray-500);border-color:var(--gray-300);}
+.pill-voc{background:#FFF3E0;color:#E65100;border-color:#FFCC80;}
+.lc-meta{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;flex-wrap:wrap;}
+.age-ok{background:var(--green-bg);color:var(--green);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
+.age-warn{background:var(--amber-bg);color:var(--amber);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
+.age-crit{background:var(--red-bg);color:var(--red);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
+.age-new{background:var(--blue-lt);color:var(--blue);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
+.lc-detail-row{display:flex;align-items:center;gap:10px;padding:5px 14px;background:var(--gray-50);border-top:1px solid var(--gray-100);flex-wrap:wrap;font-size:11px;color:var(--gray-700);}
+.lc-detail-row strong{color:var(--gray-900);}
+.lc-actions{display:flex;gap:5px;padding:7px 14px;border-top:1px solid var(--gray-100);background:var(--gray-50);flex-wrap:wrap;align-items:center;}
+.lc-exp{display:none;border-top:1px solid var(--gray-200);}.lc-exp.open{display:block;}
+.fu-log{padding:9px 14px;}
+.fu-log-title{font-size:9.5px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px;}
+.fu-item{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray-100);font-size:11px;}
+.fu-item:last-child{border-bottom:none;}
+.fu-dt{color:var(--gray-400);min-width:100px;font-size:10px;}.fu-method{font-weight:700;color:var(--blue);min-width:90px;}
+.fu-notes{color:var(--gray-700);flex:1;}.fu-by{color:var(--gray-400);font-size:10px;}
+.expand-arrow{font-size:11px;color:var(--gray-400);transition:transform .2s;margin-left:4px;}
+.expand-arrow.open{transform:rotate(180deg);}
+/* WA PICKER */
+.wa-picker{display:none;position:fixed;background:#fff;border:1.5px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--shadow-md);z-index:500;min-width:260px;overflow:hidden;right:20px;bottom:20px;}
+.wa-picker.open{display:block;}
+.wa-picker-hd{background:var(--wa-dk);color:#fff;padding:8px 12px;font-size:12px;font-weight:700;}
+.wa-tmpl{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--gray-100);cursor:pointer;transition:background .12s;font-size:12px;}
+.wa-tmpl:last-child{border-bottom:none;}.wa-tmpl:hover{background:var(--wa-bg);}
+.wa-tmpl-ico{font-size:16px;flex-shrink:0;}
+.wa-tmpl-name{font-weight:600;color:var(--gray-900);}
+.wa-tmpl-desc{font-size:10px;color:var(--gray-500);}
+/* FORMS */
+.form-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:14px;}
+.fch{padding:11px 16px;font-family:var(--font-h);font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;color:#fff;}
+.fch-blue{background:var(--blue-dk);}.fch-green{background:linear-gradient(135deg,#1B5E20,#2E7D32);}
+.fch-red{background:linear-gradient(135deg,#7B1D1D,#C62828);}.fch-amber{background:linear-gradient(135deg,#BF360C,#D84315);}
+.fch-stock{background:linear-gradient(135deg,#0D47A1,#1565C0);}
+.role-pill{margin-left:auto;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);padding:2px 8px;border-radius:7px;font-size:10px;font-weight:600;font-family:var(--font-b);}
+.fb{padding:14px 16px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.full{grid-column:1/-1;}
+@media(max-width:700px){.fg{grid-template-columns:1fr;}.full{grid-column:1;}}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:9.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--gray-500);}
+.field label .req{color:var(--red);}
+.auto-lbl{display:inline-block;background:var(--blue-lt);color:var(--blue);padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;margin-left:4px;vertical-align:middle;}
+.field input,.field select,.field textarea{background:var(--gray-100);border:1.5px solid var(--gray-200);color:var(--gray-900);border-radius:5px;padding:7px 10px;font-family:var(--font-b);font-size:13px;outline:none;transition:border-color .15s,background .15s;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(0,83,155,.07);}
+.field input.locked{background:var(--blue-lt);color:var(--blue-dk);border-color:#BAD3EF;cursor:not-allowed;font-weight:600;}
+.field .hint{font-size:10px;color:var(--gray-400);font-style:italic;}
+.field .err{font-size:10px;color:var(--red);display:none;}
+.field.invalid .err{display:block;}.field.invalid input,.field.invalid select{border-color:var(--red);}
+.field textarea{resize:vertical;min-height:56px;}
+.seg-group{display:flex;gap:6px;flex-wrap:wrap;}
+.seg-btn{padding:6px 12px;border-radius:5px;border:1.5px solid var(--gray-200);background:var(--gray-100);color:var(--gray-700);font-family:var(--font-h);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.seg-btn:hover{border-color:var(--blue);color:var(--blue);}
+.sel-src{background:var(--blue-lt);border-color:var(--blue);color:var(--blue-dk);}
+.sel-hot{background:var(--hot-bg);border-color:var(--hot);color:var(--hot);}
+.sel-warm{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.sel-cold{background:var(--gray-200);border-color:var(--gray-400);color:var(--gray-700);}
+.sel-palam{background:#E3F2FD;border-color:var(--blue);color:var(--blue-dk);}
+.sel-naj{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.sel-nar{background:var(--purple-bg);border-color:var(--purple);color:var(--purple);}
+.tog-row{display:flex;align-items:center;gap:10px;padding:7px 11px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:5px;cursor:pointer;transition:all .15s;}
+.tog-row:hover{border-color:var(--blue);background:var(--blue-xlt);}.tog-row.on{background:var(--blue-lt);border-color:var(--blue);}
+.tl{font-size:12.5px;color:var(--gray-700);flex:1;font-weight:500;}
+.tsw{width:34px;height:18px;background:var(--gray-300);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0;}
+.tog-row.on .tsw{background:var(--blue);}
+.tsw::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.tog-row.on .tsw::after{left:18px;}
+.quick-times{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.qt{padding:3px 9px;border-radius:11px;border:1px solid var(--gray-300);background:var(--gray-100);color:var(--gray-700);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all .15s;}
+.qt:hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 15px;border-radius:5px;border:none;cursor:pointer;font-family:var(--font-h);font-size:13.5px;font-weight:700;letter-spacing:.2px;transition:all .15s;outline:none;}
+.btn-primary{background:var(--blue);color:#fff;}.btn-primary:hover{background:var(--blue-dk);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,83,155,.28);}
+.btn-secondary{background:var(--gray-200);color:var(--gray-700);}.btn-secondary:hover{background:var(--gray-300);}
+.btn-ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue);}.btn-ghost:hover{background:var(--blue-lt);}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red-bd);}.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-success{background:var(--green);color:#fff;}.btn-success:hover{background:#1a6326;}
+.btn-wa{background:var(--wa);color:#fff;border:none;}.btn-wa:hover{background:var(--wa-dk);}
+.btn-sm{padding:4px 11px;font-size:12px;}.btn-xs{padding:3px 8px;font-size:11px;}
+.ffoot{padding:11px 16px;border-top:1px solid var(--gray-200);background:var(--gray-50);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.smsg{font-size:11.5px;padding:4px 10px;border-radius:4px;font-weight:600;display:none;}
+.smsg.ok{background:var(--green-bg);color:var(--green);display:inline-block;}
+.smsg.err{background:var(--red-bg);color:var(--red);display:inline-block;}
+.smsg.ld{background:var(--blue-lt);color:var(--blue);display:inline-block;}
+.lookup-box{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:5px;overflow:hidden;margin-bottom:10px;max-height:200px;overflow-y:auto;}
+.lr{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--gray-200);cursor:pointer;transition:background .12s;}
+.lr:last-child{border-bottom:none;}.lr:hover{background:var(--blue-lt);}
+.lr-name{font-weight:700;color:var(--gray-900);font-size:12.5px;}
+.lr-detail{font-size:11.5px;color:var(--gray-700);flex:1;}
+.sel-bar{background:var(--blue-lt);border:1px solid #BAD3EF;border-radius:5px;padding:7px 12px;display:flex;align-items:center;gap:9px;margin-bottom:10px;font-size:12px;color:var(--blue-dk);font-weight:600;}
+.divlbl{text-align:center;margin:11px 0;position:relative;}
+.divlbl::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--gray-200);}
+.divlbl span{background:#fff;padding:0 10px;font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;position:relative;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+.side-col{display:flex;flex-direction:column;gap:11px;}
+.bk-tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:11px;background:#fff;border-radius:var(--r) var(--r) 0 0;overflow:hidden;}
+.btab{padding:9px 16px;cursor:pointer;font-family:var(--font-h);font-size:13px;font-weight:600;color:var(--gray-400);border-bottom:3px solid transparent;transition:all .15s;}
+.btab:hover{color:var(--blue);}.btab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-xlt);}
+.bk-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:11px 14px;box-shadow:var(--shadow-xs);margin-bottom:8px;}
+.bk-stk{border-left:4px solid var(--green);}.bk-ord{border-left:4px solid var(--amber);}.bk-del{border-left:4px solid var(--blue);}
+.bk-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.bk-name{font-weight:700;font-size:13px;}
+.bk-id{font-family:var(--font-h);font-size:11px;color:var(--gray-400);font-weight:600;}
+.bk-body{display:flex;gap:12px;font-size:11.5px;color:var(--gray-700);flex-wrap:wrap;margin-bottom:6px;}
+.bk-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.t-exc{background:#E8F5E9;color:var(--green);border:1px solid var(--green-bd);}
+.t-ins{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd);}
+.t-disc{background:var(--hot-bg);color:var(--hot);border:1px solid var(--hot-bd);}
+.t-vc{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd);}
+.t-asap{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd);}
+.bk-foot{display:flex;align-items:center;justify-content:space-between;padding-top:7px;border-top:1px solid var(--gray-100);flex-wrap:wrap;gap:5px;}
+.stock-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 14px;box-shadow:var(--shadow-xs);margin-bottom:8px;}
+.s-av{border-left:4px solid var(--green);}.s-al{border-left:4px solid var(--blue);}.s-so{border-left:4px solid var(--gray-300);opacity:.7;}
+.chassis-no{font-family:var(--font-h);font-size:15px;font-weight:800;color:var(--blue);letter-spacing:.5px;cursor:pointer;}
+.chassis-no:hover{text-decoration:underline;}
+.av-bdg{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;}
+.al-bdg{background:var(--blue-lt);color:var(--blue);border:1px solid #BAD3EF;padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;}
+.so-bdg{background:var(--gray-100);color:var(--gray-500);border:1px solid var(--gray-300);padding:2px 9px;border-radius:9px;font-size:10px;font-weight:700;}
+.stock-chips{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.scp{background:#fff;border:1px solid var(--gray-200);border-radius:6px;padding:7px 12px;text-align:center;flex:1;min-width:70px;box-shadow:var(--shadow-xs);}
+.scp-num{font-family:var(--font-h);font-size:20px;font-weight:800;}
+.scp-lbl{font-size:9px;color:var(--gray-400);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.clr{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--gray-100);}
+.clr:last-child{border-bottom:none;}.clr:hover{background:var(--blue-xlt);}
+.clr-info{flex:1;}.clr-name{font-weight:700;font-size:12.5px;}.clr-sub{font-size:11px;color:var(--gray-500);}
+.clr-meta{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.lt-p{display:inline-block;background:#E3F2FD;color:var(--blue-dk);border:1px solid #90CAF9;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;}
+.lt-n{display:inline-block;background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;}
+.lt-nr{display:inline-block;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd);border-radius:4px;padding:1px 6px;font-size:10px;font-weight:700;}
+.ref-btn{background:#fff;border:1.5px solid var(--blue);color:var(--blue);padding:5px 12px;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-h);transition:all .15s;}
+.ref-btn:hover{background:var(--blue);color:#fff;}
+.exp-btn{background:var(--gray-100);border:1px solid var(--gray-200);color:var(--gray-500);padding:5px 11px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-b);}
+.last-ref{font-size:11px;color:var(--gray-400);}
+.empty-st{text-align:center;padding:36px 20px;color:var(--gray-400);}
+.empty-st .ico{font-size:30px;margin-bottom:8px;}
+.tbl-btn{background:var(--blue-lt);border:1px solid #BAD3EF;color:var(--blue-dk);padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-h);transition:all .15s;}
+.tbl-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.ot{font-family:var(--font-h);font-size:11px;font-weight:700;color:var(--red);background:var(--red-bg);padding:2px 7px;border-radius:4px;}
+.dt{font-family:var(--font-h);font-size:11px;font-weight:700;color:var(--amber);background:var(--amber-bg);padding:2px 7px;border-radius:4px;}
+.info-note{background:var(--blue-lt);border:1px solid #BAD3EF;border-radius:5px;padding:7px 12px;font-size:11px;color:var(--blue-dk);display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.rc{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--shadow-xs);overflow:hidden;}
+.rc-hd{padding:9px 14px;font-family:var(--font-h);font-size:14px;font-weight:700;color:#fff;}
+.rc-body{padding:12px 14px;font-size:12.5px;line-height:1.9;color:var(--gray-700);}
+.rc-body ol{padding-left:18px;display:flex;flex-direction:column;gap:4px;}
+#setup-banner{background:#FFF3E0;border-bottom:1px solid #FFB74D;padding:6px 20px;font-size:12px;color:#7B4F00;display:flex;align-items:center;gap:8px;}
+#setup-banner a{color:var(--blue);font-weight:700;cursor:pointer;}
+.code-block{background:#0D1829;border-radius:var(--r);padding:14px;position:relative;margin:11px 0;}
+.code-block pre{font-family:'Courier New',monospace;font-size:10.5px;color:#90A4C0;white-space:pre;overflow-x:auto;line-height:1.7;}
+.copy-btn{position:absolute;top:9px;right:9px;background:var(--blue);color:#fff;border:none;border-radius:4px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-b);}
+.ci{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.ci input{flex:1;background:var(--gray-100);border:1.5px solid var(--gray-200);color:var(--gray-900);border-radius:5px;padding:8px 11px;font-family:var(--font-b);font-size:13px;outline:none;}
+.steps{display:flex;flex-direction:column;gap:8px;}
+.step{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 14px;box-shadow:var(--shadow-xs);}
+.step-n{width:22px;height:22px;background:var(--blue);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:12px;font-weight:700;flex-shrink:0;}
+.step-t{font-size:12px;line-height:1.7;color:var(--gray-700);}
+.step-t strong{color:var(--gray-900);}.step-t code{background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:3px;font-size:11px;}
+.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+@media(max-width:1100px){.dash-grid{grid-template-columns:1fr;}}
+.dash-sec{margin-bottom:11px;}
+.dash-sec-hd{font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--blue-dk);margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+.alert-body{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);overflow:hidden;}
+.cnt-r{background:var(--red);color:#fff;border-radius:8px;padding:1px 7px;font-size:10.5px;font-weight:700;font-family:var(--font-b);}
+.cnt-a{background:var(--amber);color:#fff;border-radius:8px;padding:1px 7px;font-size:10.5px;font-weight:700;font-family:var(--font-b);}
+.cnt-b{background:var(--blue);color:#fff;border-radius:8px;padding:1px 7px;font-size:10.5px;font-weight:700;font-family:var(--font-b);}
+.new-bk-form{display:none;margin-bottom:12px;}.new-bk-form.open{display:block;}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2.5px dashed var(--blue);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--blue-xlt);}
+.upload-zone:hover,.upload-zone.drag{background:var(--blue-lt);border-color:var(--blue-dk);}
+.upload-zone .uz-ico{font-size:28px;margin-bottom:6px;}
+.upload-zone .uz-title{font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--blue-dk);}
+.upload-zone .uz-sub{font-size:11px;color:var(--gray-500);margin-top:3px;}
+/* CONVERT MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.2);width:420px;max-width:95vw;overflow:hidden;}
+.modal-hd{padding:12px 16px;font-family:var(--font-h);font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1B5E20,#2E7D32);display:flex;align-items:center;justify-content:space-between;}
+.modal-hd button{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:14px;cursor:pointer;font-family:var(--font-b);}
+.modal-body{padding:16px;}
+/* DELIVERY STAT ROW */
+.del-srow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px;}
+.del-sc{background:linear-gradient(135deg,var(--blue-dk),var(--blue));border-radius:var(--r);padding:10px 14px;color:#fff;text-align:center;}
+.del-sc-lbl{font-size:9px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;opacity:.7;margin-bottom:4px;}
+.del-sc-num{font-family:var(--font-h);font-size:26px;font-weight:800;line-height:1;}
+.del-sc-sub{font-size:10px;opacity:.7;margin-top:2px;}
+/* NEXT DELIVERIES */
+.nd-row{display:flex;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid var(--gray-100);}
+.nd-row:last-child{border-bottom:none;}.nd-row:hover{background:var(--blue-xlt);}
+.nd-date{font-family:var(--font-h);font-size:13px;font-weight:800;color:var(--blue);min-width:80px;}
+.nd-name{font-weight:700;font-size:12px;flex:1;}
+.nd-model{font-size:11px;color:var(--gray-500);}
+.nd-days{font-family:var(--font-h);font-size:11px;font-weight:700;padding:2px 7px;border-radius:9px;}
+.nd-today{background:var(--red-bg);color:var(--red);}.nd-soon{background:var(--amber-bg);color:var(--amber);}.nd-ok{background:var(--green-bg);color:var(--green);}
+/* UPLOAD PREVIEW TABLE */
+.preview-tbl{width:100%;border-collapse:collapse;font-size:11px;max-height:220px;overflow-y:auto;display:block;}
+.preview-tbl th{background:var(--blue-dk);color:#fff;padding:5px 8px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;}
+.preview-tbl td{padding:4px 8px;border-bottom:1px solid var(--gray-100);white-space:nowrap;}
+.preview-tbl tr:hover td{background:var(--blue-xlt);}
+
+/* SALESMAN LEADERBOARD */
+.sl-hd{background:linear-gradient(135deg,#1A237E,#283593);color:#fff;padding:9px 14px;font-family:var(--font-h);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+.sl-row{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid var(--gray-100);transition:background .12s;}
+.sl-row:last-child{border-bottom:none;}.sl-row:hover{background:var(--blue-xlt);}
+.sl-medal{font-size:18px;min-width:24px;text-align:center;}
+.sl-name{font-weight:700;font-size:12.5px;flex:1;color:var(--gray-900);}
+.sl-loc{font-size:10px;color:var(--gray-400);}
+.sl-bk{font-family:var(--font-h);font-size:20px;font-weight:800;color:var(--blue-dk);min-width:24px;text-align:center;}
+.sl-stats{display:flex;flex-direction:column;gap:2px;min-width:110px;}
+.sl-stat-row{display:flex;align-items:center;gap:5px;}
+.sl-stat-lbl{font-size:9px;color:var(--gray-400);font-weight:700;letter-spacing:.4px;text-transform:uppercase;min-width:24px;}
+.sl-bar-w{flex:1;height:5px;background:var(--gray-200);border-radius:3px;overflow:hidden;}
+.sl-bar-fill{height:100%;border-radius:3px;transition:width .5s;}
+.sl-stat-pct{font-size:10px;font-weight:700;min-width:30px;text-align:right;}
+.sl-fin-ok{background:var(--teal);}.sl-fin-bad{background:var(--red);}
+.sl-ins-ok{background:var(--green);}.sl-ins-bad{background:var(--amber);}
+.sl-td-cnt{font-size:10px;font-weight:700;color:var(--amber);min-width:22px;text-align:right;}
+/* PENETRATION CARD EXTENSIONS */
+.pen-section{padding:10px 14px;border-bottom:1px solid var(--gray-100);}
+.pen-title{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:7px;}
+.pen-target-ok{color:var(--green);font-weight:700;}
+.pen-target-bad{color:var(--red);font-weight:700;}
+</style>
+</head>
+<body>
+<header>
+  <div class="hlogo"><div class="hcircle">TM</div><div><div class="htitle">Sales Command Centre</div><div class="hsub">Lead Tracking · Follow-up Compliance · Bookings · Stock</div></div></div>
+  <div class="hright"><span id="hdate"></span><span id="hclock" style="margin-left:6px;">--:--:--</span></div>
+</header>
+<div id="setup-banner">⚙ &nbsp;<strong>Setup required:</strong>&nbsp;<a onclick="showTab('setup')">Go to Setup</a> to connect to Google Sheet.</div>
+<div class="loc-bar">
+  <span class="loc-label">Location:</span>
+  <button class="loc-btn active" onclick="setLoc('ALL')">📍 All</button>
+  <button class="loc-btn" onclick="setLoc('Palam')">🏢 Palam</button><div class="loc-sep"></div>
+  <button class="loc-btn" onclick="setLoc('Najafgarh')">🏢 Najafgarh</button><div class="loc-sep"></div>
+  <button class="loc-btn" onclick="setLoc('Narela')">🏢 Narela</button>
+</div>
+<nav>
+  <div class="tab active" onclick="showTab('dashboard')">📊 Command Centre <span class="tbdg" id="alert-badge" style="display:none">0</span></div>
+  <div class="tab" onclick="showTab('leads')">📋 All Leads <span class="tbdg tbdg-a" id="fu-badge" style="display:none">0</span></div>
+  <div class="tab" onclick="showTab('new-lead')">➕ New Lead</div>
+  <div class="tab" onclick="showTab('followup')">📞 Log Follow-up</div>
+  <div class="tab" onclick="showTab('bookings')">🚗 Bookings</div>
+  <div class="tab" onclick="showTab('stock')">📦 Stock</div>
+  <div class="tab" onclick="showTab('setup')">⚙ Setup</div>
+</nav>
+<main>
+<!-- ═══════ COMMAND CENTRE ═══════ -->
+<div id="tab-dashboard" class="section active">
+  <div class="sh">
+    <div><div class="sh-title">Command Centre</div><div class="sh-sub" id="dash-sub">All Locations · Live Data</div></div>
+    <div class="sh-acts"><span class="last-ref" id="last-ref"></span><button class="exp-btn" onclick="exportLeadsCSV()">↓ Export</button><button class="ref-btn" id="ref-btn" onclick="loadAll()">↻ Refresh</button></div>
+  </div>
+  <!-- MORNING BRIEF -->
+  <div class="morning-brief">
+    <div class="mb-hd"><div><span class="mb-title">☀ Daily Morning Brief</span><span class="mb-date" id="mb-date"></span></div><button class="mb-toggle" onclick="toggleMB()">Collapse ▲</button></div>
+    <div class="mb-body" id="mb-body">
+      <div class="mb-items">
+        <div class="mb-item" onclick="filterLeadsNav('red')"><div class="mb-num mb-r" id="mb-red">—</div><div class="mb-lbl">Needs Action NOW</div></div>
+        <div class="mb-item" onclick="filterLeadsNav('amber')"><div class="mb-num mb-a" id="mb-amber">—</div><div class="mb-lbl">Follow-ups Due Today</div></div>
+        <div class="mb-item" onclick="showTab('new-lead')"><div class="mb-num mb-b" id="mb-new">—</div><div class="mb-lbl">New Leads Today</div></div>
+        <div class="mb-item" onclick="filterLeadsNav('hot')"><div class="mb-num mb-g" id="mb-hot">—</div><div class="mb-lbl">Hot Leads Active</div></div>
+        <div class="mb-item" onclick="showTab('bookings')"><div class="mb-num mb-r" id="mb-wait">—</div><div class="mb-lbl">Waiting &gt;Threshold Days</div></div>
+        <div class="mb-item" onclick="filterLeadsNav('thin')"><div class="mb-num mb-a" id="mb-voc">—</div><div class="mb-lbl">⚠ Thin VoC (1+ FUs)</div></div>
+        <div class="mb-item" onclick="showTab('bookings')"><div class="mb-num mb-g" id="mb-del-today">—</div><div class="mb-lbl">🚗 Delivered Today</div></div>
+        <div class="mb-item" onclick="showTab('bookings')"><div class="mb-num mb-b" id="mb-del-month">—</div><div class="mb-lbl">🚗 Delivered This Month</div></div>
+        <div class="mb-item" onclick="showTab('bookings')"><div class="mb-num mb-g" id="mb-del-total">—</div><div class="mb-lbl">🚗 Total Deliveries</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- STAT CARDS -->
+  <div class="srow">
+    <div class="sc ct" onclick="showTab('leads')"><div class="sc-lbl">Total Active Leads</div><div class="sc-num" id="s-total">—</div><div class="sc-sub" id="s-today">— today</div></div>
+    <div class="sc cr" onclick="filterLeadsNav('red')"><div class="sc-lbl">🚨 Action Now</div><div class="sc-num" id="s-red">—</div><div class="sc-sub">Uncontacted / Overdue</div></div>
+    <div class="sc ca" onclick="filterLeadsNav('amber')"><div class="sc-lbl">⚠ Follow-up Due</div><div class="sc-num" id="s-amber">—</div><div class="sc-sub">Due today</div></div>
+    <div class="sc ch" onclick="filterLeadsNav('hot')"><div class="sc-lbl">🔥 Hot Pipeline</div><div class="sc-num" id="s-hot">—</div><div class="sc-sub">High intent</div></div>
+    <div class="sc cg" onclick="showTab('bookings')"><div class="sc-lbl">🚗 Bookings (Month)</div><div class="sc-num" id="s-booked">—</div><div class="sc-sub" id="s-tdc">— test drives</div></div>
+    <div class="sc cb"><div class="sc-lbl">📈 Compliance</div><div class="sc-num" id="s-comp">—</div><div class="sc-sub">Leads on time</div></div>
+  </div>
+  <!-- DELIVERY STATS ROW -->
+  <div class="del-srow">
+    <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">🚗 Delivered Today</div><div class="del-sc-num" id="sd-today">—</div><div class="del-sc-sub" id="sd-today-names">—</div></div>
+    <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">📅 Delivered This Month</div><div class="del-sc-num" id="sd-month">—</div><div class="del-sc-sub" id="sd-month-val">bookings</div></div>
+    <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">🏆 Total All-Time</div><div class="del-sc-num" id="sd-total">—</div><div class="del-sc-sub">deliveries</div></div>
+  </div>
+  <div class="dash-grid">
+    <div>
+      <!-- CONVERSION FUNNEL -->
+      <div class="card-wrap">
+        <div class="card-hd hd-blue">📊 Conversion Funnel — This Month <span style="font-size:11px;font-weight:400;opacity:.7;" id="fn-loc"></span></div>
+        <div class="card-body">
+          <div class="fn-stage"><div class="fn-label">Enquiries</div><div class="fn-bar-wrap"><div class="fn-bar fnb0" id="fn0" style="width:100%"><span class="fn-num" id="fnn0">—</span></div></div><div class="fn-conv fc-hi" id="fnc0">100%</div></div>
+          <div class="fn-stage"><div class="fn-label">Test Drives</div><div class="fn-bar-wrap"><div class="fn-bar fnb1" id="fn1" style="width:60%"><span class="fn-num" id="fnn1">—</span></div></div><div class="fn-conv" id="fnc1">—</div></div>
+          <div class="fn-stage"><div class="fn-label">Bookings</div><div class="fn-bar-wrap"><div class="fn-bar fnb2" id="fn2" style="width:30%"><span class="fn-num" id="fnn2">—</span></div></div><div class="fn-conv" id="fnc2">—</div></div>
+          <div class="fn-stage"><div class="fn-label">Delivered</div><div class="fn-bar-wrap"><div class="fn-bar fnb3" id="fn3" style="width:15%"><span class="fn-num" id="fnn3">—</span></div></div><div class="fn-conv" id="fnc3">—</div></div>
+          <div class="fn-foot" id="fn-foot"></div>
+        </div>
+      </div>
+      <!-- CRITICAL ALERTS -->
+      <div class="dash-sec">
+        <div class="dash-sec-hd">🚨 Needs Immediate Action <span class="cnt-r" id="cnt-red">0</span></div>
+        <div class="alert-body" id="dash-red-list"><div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">✅</div><p style="font-size:12px;">No critical alerts!</p></div></div>
+      </div>
+      <!-- FOLLOW-UP TODAY -->
+      <div class="dash-sec">
+        <div class="dash-sec-hd">⚠ Follow-ups Due Today <span class="cnt-a" id="cnt-amber">0</span></div>
+        <div class="alert-body" id="dash-amber-list"><div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">📅</div><p style="font-size:12px;">All clear!</p></div></div>
+      </div>
+      <!-- HOT PIPELINE -->
+      <div class="dash-sec">
+        <div class="dash-sec-hd">🔥 Hot Pipeline <span class="cnt-b" id="cnt-hot">0</span></div>
+        <div class="alert-body" id="dash-hot-list"><div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">🎯</div><p style="font-size:12px;">No hot leads yet.</p></div></div>
+      </div>
+      <!-- WAIT TIME ALERTS -->
+      <div class="dash-sec">
+        <div class="dash-sec-hd">⏳ Long-Waiting Customers (On Order) <span class="cnt-r" id="cnt-wait">0</span></div>
+        <div class="alert-body" id="dash-wait-list"><div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">✅</div><p style="font-size:12px;">No customers waiting beyond threshold.</p></div></div>
+      </div>
+    </div>
+    <!-- RIGHT COLUMN -->
+    <div class="side-col">
+      <!-- TARGETS + LOCATION BREAKDOWN -->
+      <div class="target-card">
+        <div class="tc-hd">🎯 Monthly Targets &amp; Bookings <button onclick="toggleTargetForm()">✏ Set</button></div>
+        <div class="tc-body" id="tc-body"></div>
+        <div class="target-form" id="target-form">
+          <div style="font-size:9.5px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;">Monthly Targets</div>
+          <div class="tfi"><label>Palam Bookings</label><input type="number" id="tgt-palam" placeholder="e.g. 20" min="0"></div>
+          <div class="tfi"><label>Najafgarh Bookings</label><input type="number" id="tgt-naj" placeholder="e.g. 15" min="0"></div>
+          <div class="tfi"><label>Narela Bookings</label><input type="number" id="tgt-nar" placeholder="e.g. 10" min="0"></div>
+          <div class="tfi"><label>Test Drives (All)</label><input type="number" id="tgt-td" placeholder="e.g. 40" min="0"></div>
+          <div class="tfi"><label>Finance Target %</label><input type="number" id="tgt-fin" placeholder="75" min="0" max="100"></div>
+          <div class="tfi"><label>Insurance Target %</label><input type="number" id="tgt-ins" placeholder="91" min="0" max="100"></div>
+          <div class="tfi"><label>Wait Alert (days)</label><input type="number" id="tgt-wait" placeholder="e.g. 30" min="1"></div>
+          <button class="btn btn-primary btn-sm" style="margin-top:4px;" onclick="saveTargets()">Save Targets</button>
+        </div>
+      </div>
+      <!-- NEXT 10 PLANNED DELIVERIES -->
+      <div class="card-wrap" style="overflow:hidden;">
+        <div class="card-hd hd-green">📅 Next Planned Deliveries</div>
+        <div id="next-del-list"><div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No planned deliveries set.</div></div>
+      </div>
+      <!-- FINANCE PENETRATION -->
+      <div class="card-wrap">
+        <div class="card-hd hd-teal">💳 Finance Penetration Rate</div>
+        <div class="card-body">
+          <div class="fin-row"><div class="fin-lbl">Finance</div><div class="fin-bw"><div class="fin-b" id="fin-bar" style="width:0%;background:var(--teal);"></div></div><div class="fin-pct" id="fin-pct" style="color:var(--teal);">—%</div></div>
+          <div class="fin-row"><div class="fin-lbl">Cash</div><div class="fin-bw"><div class="fin-b" id="cash-bar" style="width:0%;background:var(--gray-300);"></div></div><div class="fin-pct" id="cash-pct" style="color:var(--gray-500);">—%</div></div>
+          <div style="font-size:11px;color:var(--gray-500);margin-top:7px;padding-top:7px;border-top:1px solid var(--gray-100);" id="fin-tgt-line">Target: —%</div>
+        </div>
+      </div>
+      <!-- SALESMAN MONTHLY LEADERBOARD -->
+      <div class="card-wrap" style="overflow:hidden;">
+        <div class="sl-hd">🏅 Salesman Leaderboard — This Month <span id="sl-month-lbl" style="font-size:11px;font-weight:400;opacity:.8;"></span></div>
+        <div id="sl-leaderboard"><div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No bookings this month.</div></div>
+      </div>
+      <!-- TD LEADERBOARD -->
+      <div class="card-wrap" style="overflow:hidden;">
+        <div class="td-hd">🏆 Test Drive Leaderboard <span id="td-month-lbl" style="font-size:11px;font-weight:400;opacity:.8;"></span></div>
+        <div id="td-leaderboard"><div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No test drives logged.</div></div>
+      </div>
+      <!-- COMPLIANCE -->
+      <div class="comp-card">
+        <div class="comp-hd"><div class="comp-title">📈 Follow-up Compliance</div><div class="comp-big" id="comp-big">—%</div></div>
+        <div class="prog-full"><div class="prog-bar" id="comp-bar" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--gray-400);margin-bottom:8px;">&gt;80% Good · 60–80% Improve · &lt;60% Critical</div>
+        <table class="sp-table">
+          <thead><tr><th>Salesperson</th><th>Leads</th><th>On Time</th><th>Overdue</th><th>TDs</th><th>VoC⚠</th><th>Score</th></tr></thead>
+          <tbody id="sp-tbody"><tr><td colspan="7" style="color:var(--gray-400);padding:10px;">No data.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════ ALL LEADS ═══════ -->
+<div id="tab-leads" class="section">
+  <div class="sh">
+    <div><div class="sh-title">All Leads</div><div class="sh-sub">⚠ Thin VoC = 1+ follow-up with &lt;30 char notes · 💬 WhatsApp on every lead</div></div>
+    <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="showTab('new-lead')">➕ New Lead</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div>
+  </div>
+  <div class="filter-bar">
+    <input type="text" class="fi" id="fl-search" placeholder="Name / Phone / Model…" style="width:170px;" oninput="applyFilters()">
+    <select class="fi" id="fl-status" onchange="applyFilters()"><option value="">All Status</option><option value="red">🚨 Action Now</option><option value="amber">⚠ FU Due</option><option value="hot">🔥 Hot</option><option value="warm">🔵 Warm</option><option value="green">✅ Booked</option><option value="lost">❌ Lost</option></select>
+    <select class="fi" id="fl-src" onchange="applyFilters()"><option value="">All Sources</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option></select>
+    <select class="fi" id="fl-sp" onchange="applyFilters()"><option value="">All Salespeople</option></select>
+    <select class="fi" id="fl-model" onchange="applyFilters()"><option value="">All Models</option></select>
+    <select class="fi" id="fl-voc" onchange="applyFilters()"><option value="">All VoC</option><option value="thin">⚠ Thin VoC only</option></select>
+    <button class="btn-ghost btn btn-sm" onclick="clearFilters()">Clear</button>
+    <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="leads-count"></span>
+  </div>
+  <div class="leads-list" id="leads-list"><div class="empty-st"><div class="ico">📋</div><p>Connect Google Sheet to load leads.<br><button class="btn btn-primary btn-sm" onclick="showTab('setup')" style="margin-top:10px;">Go to Setup →</button></p></div></div>
+</div>
+<!-- ═══════ NEW LEAD ═══════ -->
+<div id="tab-new-lead" class="section">
+  <div class="sh"><div><div class="sh-title">New Lead Entry</div><div class="sh-sub">Under 60 seconds · Required fields only</div></div></div>
+  <div class="two-col">
+    <div>
+      <div class="form-card">
+        <div class="fch fch-blue">New Lead <span class="role-pill">SALES STAFF</span></div>
+        <div class="fb">
+          <div class="field" style="margin-bottom:11px;"><label>Lead Source <span class="req">*</span></label>
+            <div class="seg-group" id="src-grp"><button class="seg-btn" onclick="selSrc('Walk-in',this)">🚶 Walk-in</button><button class="seg-btn" onclick="selSrc('Tele-in',this)">📞 Tele-in</button><button class="seg-btn" onclick="selSrc('CarDekho',this)">🔶 CarDekho</button><button class="seg-btn" onclick="selSrc('Spinny',this)">🟢 Spinny</button><button class="seg-btn" onclick="selSrc('Meta',this)">🔷 Meta Ads</button><button class="seg-btn" onclick="selSrc('Reference',this)">🤝 Reference</button></div>
+            <input type="hidden" id="nl-source"><span class="err" id="err-src" style="display:none;font-size:10px;color:var(--red);">Select a source</span></div>
+          <div class="field" style="margin-bottom:11px;"><label>Showroom Location <span class="req">*</span></label>
+            <div class="seg-group" id="loc-grp"><button class="seg-btn" onclick="selLocNL('Palam (Dwarka)',this,'sel-palam')">🏢 Palam (Dwarka)</button><button class="seg-btn" onclick="selLocNL('Najafgarh',this,'sel-naj')">🏢 Najafgarh</button><button class="seg-btn" onclick="selLocNL('Narela',this,'sel-nar')">🏢 Narela</button></div>
+            <input type="hidden" id="nl-loc"><span class="err" id="err-loc" style="display:none;font-size:10px;color:var(--red);">Select a location</span></div>
+          <div class="fg">
+            <div class="field"><label>Lead Created <span class="auto-lbl">AUTO</span></label><input type="text" id="nl-created" class="locked" readonly></div>
+            <div class="field"><label>Salesperson <span class="req">*</span></label><input type="text" id="nl-sp" placeholder="Assigned salesperson"><span class="err">Required</span></div>
+            <div class="field"><label>Customer Name <span class="req">*</span></label><input type="text" id="nl-name" placeholder="Full name"><span class="err">Required</span></div>
+            <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="nl-phone" placeholder="10-digit mobile"><span class="err">Required</span></div>
+            <div class="field"><label>Alternate Phone</label><input type="tel" id="nl-altphone" placeholder="Optional"></div>
+            <div class="field"><label>Model of Interest <span class="req">*</span></label>
+              <select id="nl-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
+            <div class="field"><label>Variant Preference</label><input type="text" id="nl-variant" placeholder="e.g. XZ+"></div>
+            <div class="field"><label>Color Preference</label><input type="text" id="nl-color" placeholder="e.g. Pristine White"></div>
+            <div class="field"><label>Budget (₹ Approx.)</label><input type="text" id="nl-budget" placeholder="e.g. 10–12 lakhs"></div>
+            <div class="field"><label>Finance / Cash</label><select id="nl-finance"><option value="">Select…</option><option>Finance</option><option>Cash</option><option>Undecided</option></select></div>
+            <div class="field"><label>Customer's Area / Locality</label><input type="text" id="nl-area" placeholder="e.g. Dwarka Sec 10, Rohini…"></div>
+            <div class="field"><label>Customer's City</label><input type="text" id="nl-city" placeholder="e.g. New Delhi"></div>
+            <div class="field full"><label>Customer's Expected Delivery</label>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <label style="text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="nl-asap" onchange="toggleAsap('nl')"> ASAP</label>
+                <input type="date" id="nl-del-date" style="flex:1;min-width:150px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:5px;padding:7px 10px;font-family:var(--font-b);font-size:13px;outline:none;">
+              </div><span class="hint">When does the customer want the vehicle?</span></div>
+          </div>
+          <div class="field" style="margin-top:10px;"><label>Initial Interest Level <span class="req">*</span></label>
+            <div class="seg-group" id="int-grp"><button class="seg-btn" onclick="selInt('Hot',this)">🔥 Hot</button><button class="seg-btn sel-warm" onclick="selInt('Warm',this)">🔵 Warm</button><button class="seg-btn" onclick="selInt('Cold',this)">❄ Cold</button></div>
+            <input type="hidden" id="nl-interest" value="Warm"></div>
+          <div class="field" style="margin-top:10px;"><label>Next Follow-up Date &amp; Time</label><input type="datetime-local" id="nl-nextfu">
+            <div class="quick-times"><span style="font-size:10px;color:var(--gray-500);">Quick:</span><button class="qt" onclick="setNextFU(1,'nl-nextfu')">Tomorrow</button><button class="qt" onclick="setNextFU(3,'nl-nextfu')">+3 Days</button><button class="qt" onclick="setNextFU(7,'nl-nextfu')">+1 Week</button></div></div>
+          <div class="field" style="margin-top:10px;"><label>Initial Notes / Voice of Customer</label><textarea id="nl-notes" placeholder="Requirements, concerns, first impressions…"></textarea></div>
+        </div>
+        <div class="ffoot"><button class="btn btn-primary" onclick="submitNewLead()">Save Lead →</button><button class="btn btn-secondary" onclick="clearNLForm()">Clear</button><span class="smsg" id="nl-status"></span></div>
+      </div>
+    </div>
+    <div class="side-col">
+      <div class="rc"><div class="rc-hd" style="background:var(--red);">⏱ First Contact SLAs</div>
+        <div class="rc-body" style="display:flex;flex-direction:column;gap:7px;font-size:12px;">
+          <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:5px;padding:7px 10px;"><strong>Walk-in / Tele-in</strong> → Log within <strong>1 hour</strong></div>
+          <div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:5px;padding:7px 10px;"><strong>CarDekho / Spinny / Meta</strong> → First call within <strong>4 hours</strong></div>
+          <div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:5px;padding:7px 10px;"><strong>Reference</strong> → First call within <strong>24 hours</strong></div>
+        </div>
+      </div>
+      <div class="rc"><div class="rc-hd hd-wa">💬 WhatsApp Quick-send</div>
+        <div class="rc-body" style="font-size:12px;line-height:1.8;">
+          <p style="margin-bottom:7px;">Every lead card has a <strong style="color:var(--wa-dk);">💬 WhatsApp</strong> button. Click it, pick a template, and WhatsApp opens with the message pre-filled — ready to send in one tap.</p>
+          <ol style="padding-left:16px;display:flex;flex-direction:column;gap:3px;">
+            <li>🆕 <strong>Initial Greeting</strong> — first contact</li>
+            <li>🔄 <strong>Follow-up Reminder</strong> — general nudge</li>
+            <li>🏁 <strong>Test Drive Invite</strong> — invite to TD</li>
+            <li>🔥 <strong>Special Offer Alert</strong> — for hot leads</li>
+            <li>✅ <strong>Post-Test Drive</strong> — after TD done</li>
+          </ol>
+          <p style="margin-top:7px;color:var(--gray-500);font-size:11px;">Opens WhatsApp app (mobile) or WhatsApp Web (desktop). Message is pre-written but editable before sending. Zero cost, no API, no setup needed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════ LOG FOLLOW-UP ═══════ -->
+<div id="tab-followup" class="section">
+  <div class="sh"><div><div class="sh-title">Log Follow-up / Update Lead</div><div class="sh-sub">Search · Log contact · Schedule next · Record VoC</div></div></div>
+  <div class="two-col">
+    <div class="form-card">
+      <div class="fch fch-blue">Follow-up Log <span class="role-pill">SALES STAFF</span></div>
+      <div class="fb">
+        <div class="field" style="margin-bottom:10px;"><label>Search Lead (Phone or Name) <span class="req">*</span></label>
+          <div style="display:flex;gap:8px;"><input type="text" id="fu-search" placeholder="Phone or name…" style="flex:1;"><button class="btn btn-primary btn-sm" onclick="fuSearch()">Find</button></div></div>
+        <div id="fu-results" style="display:none;"><div style="font-size:9.5px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;">Select lead:</div><div class="lookup-box" id="fu-list"></div></div>
+        <div id="fu-lead-info" style="display:none;margin-bottom:10px;">
+          <div class="sel-bar"><span>✏</span><span id="fu-sel-text" style="flex:1;"></span><button class="btn btn-secondary btn-xs" onclick="fuClearSel()">Change</button></div>
+          <div id="fu-lead-card" style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;padding:9px 12px;font-size:11px;color:var(--gray-700);display:flex;gap:10px;flex-wrap:wrap;"></div>
+        </div>
+        <input type="hidden" id="fu-lead-id">
+        <div class="divlbl"><span>Log Today's Contact</span></div>
+        <div class="fg">
+          <div class="field"><label>Contact Method <span class="req">*</span></label>
+            <select id="fu-method" onchange="checkTDFields()"><option value="">Select…</option><option>Phone Call</option><option>Walk-in Visit</option><option>WhatsApp</option><option>Video Call</option><option>Test Drive Conducted</option><option>Site Visit</option></select><span class="err">Required</span></div>
+          <div class="field"><label>Outcome <span class="req">*</span></label>
+            <select id="fu-outcome"><option value="">Select…</option><option>Not Reachable / No Answer</option><option>Spoke — Follow up required</option><option>Spoke — Test Drive scheduled</option><option>Spoke — Booking likely soon</option><option>Spoke — Ready to book NOW</option><option>Spoke — Not interested anymore</option><option>Test Drive done — Very interested</option><option>Test Drive done — Interested</option><option>Test Drive done — Not convinced</option><option>Came to showroom — Booking done</option></select><span class="err">Required</span></div>
+        </div>
+        <div id="td-fields" style="display:none;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:6px;padding:10px;margin-top:8px;">
+          <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.7px;text-transform:uppercase;margin-bottom:7px;">🏁 Test Drive Details</div>
+          <div class="fg"><div class="field"><label>Model Test-Driven</label><input type="text" id="td-model" placeholder="Model driven"></div><div class="field"><label>Post-TD Interest</label><select id="td-interest"><option>Hot</option><option>Warm</option><option>Cold</option></select></div></div>
+        </div>
+        <div class="divlbl"><span>Update Lead Status</span></div>
+        <div class="fg">
+          <div class="field"><label>Update Interest Level</label>
+            <div class="seg-group"><button class="seg-btn btn-sm" id="fui-hot" onclick="selFUInt('Hot',this)">🔥 Hot</button><button class="seg-btn btn-sm" id="fui-warm" onclick="selFUInt('Warm',this)">🔵 Warm</button><button class="seg-btn btn-sm" id="fui-cold" onclick="selFUInt('Cold',this)">❄ Cold</button></div>
+            <input type="hidden" id="fu-interest"></div>
+          <div class="field"><label>Update Lead Status</label>
+            <select id="fu-status-upd"><option value="Active">Active (continuing)</option><option value="Booked">Booked — Converted! 🎉</option><option value="Lost">Lost — Not pursuing</option></select></div>
+          <div class="field full" id="fu-lost-row" style="display:none;"><label>Lost Reason</label>
+            <select id="fu-lost-reason"><option value="">Select…</option><option>Bought from competitor</option><option>Bought different brand</option><option>No longer buying</option><option>Price too high</option><option>Finance not approved</option><option>Unreachable (multiple attempts)</option><option>Other</option></select></div>
+        </div>
+        <div class="divlbl"><span>Schedule Next Follow-up</span></div>
+        <div class="field"><label>Next Follow-up Date &amp; Time</label><input type="datetime-local" id="fu-nextdt">
+          <div class="quick-times"><span style="font-size:10px;color:var(--gray-500);">Quick:</span><button class="qt" onclick="setNextFU(0.167,'fu-nextdt')">4 Hours</button><button class="qt" onclick="setNextFU(1,'fu-nextdt')">Tomorrow</button><button class="qt" onclick="setNextFU(3,'fu-nextdt')">+3 Days</button><button class="qt" onclick="setNextFU(7,'fu-nextdt')">+1 Week</button></div></div>
+        <div class="divlbl"><span>Voice of Customer</span></div>
+        <div class="field">
+          <label>What did the customer say? <span style="color:var(--amber);font-size:9px;font-weight:700;background:var(--amber-bg);padding:1px 6px;border-radius:3px;margin-left:4px;">REQUIRED after 1st follow-up</span></label>
+          <textarea id="fu-notes" placeholder="Budget updated? Concerns raised? Competing cars? Decision timeline? Objections? Trigger to buy? Be specific — generic notes don't count…" style="min-height:70px;"></textarea>
+          <span class="hint">Example: "Budget max ₹12L, wife prefers white, comparing Creta, decision before Diwali, needs finance"</span>
+        </div>
+      </div>
+      <div class="ffoot"><button class="btn btn-primary" onclick="submitFollowUp()">Log Follow-up →</button><button class="btn btn-secondary" onclick="fuClearForm()">Clear</button><button class="btn btn-success btn-sm" onclick="showTab('bookings')" style="margin-left:auto;">🚗 Book →</button><span class="smsg" id="fu-status"></span></div>
+    </div>
+    <div class="side-col">
+      <div class="rc"><div class="rc-hd" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">💡 VoC Capture Guide</div>
+        <div class="rc-body"><ol><li><strong>Budget</strong> — Changed? Flexed up or down?</li><li><strong>Timeline</strong> — Buying this month? Festive?</li><li><strong>Decision maker</strong> — Spouse, parent involved?</li><li><strong>Competing cars</strong> — Which brands are they seeing?</li><li><strong>Objection</strong> — Price, colour, delivery, variant?</li><li><strong>Trigger</strong> — What would make them book TODAY?</li></ol></div>
+      </div>
+      <div class="rc"><div class="rc-hd" style="background:var(--hot);">⚠ VoC Quality Alert — 1+ Follow-ups</div>
+        <div class="rc-body" style="font-size:12px;line-height:1.8;">
+          <p>The <strong>⚠ Thin VoC</strong> badge appears on any lead where <strong>1 or more follow-ups have been logged but the VoC notes are less than 30 characters.</strong></p>
+          <p style="margin-top:6px;">This means the salesperson is making calls but not capturing anything useful — a critical compliance issue.</p>
+        </div>
+      </div>
+      <div class="rc"><div class="rc-hd" style="background:var(--hot);">🏁 Test Drive Rules</div>
+        <div class="rc-body"><ol><li>Offer a test drive to <strong>every warm/hot lead</strong></li><li>Test drives convert at <strong>3–5× higher</strong> rate</li><li>Follow up within <strong>24 hours</strong> of every test drive</li><li>If TD done but not booked in 3 days → escalate</li></ol></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════ BOOKINGS ═══════ -->
+<div id="tab-bookings" class="section">
+  <div class="sh"><div><div class="sh-title">Bookings Tracker</div><div class="sh-sub">In Stock · On Order · Source · Exchange · Insurance · Discount · Wait Time</div></div>
+    <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="toggleNewBkForm()">+ New Booking</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div></div>
+  <!-- BOOKING FORM -->
+  <div class="form-card new-bk-form" id="new-bk-form">
+    <div class="fch fch-green">New Booking <span class="role-pill">SALES / MANAGER</span></div>
+    <div class="fb">
+      <div class="info-note">💡 Search an existing lead to pre-fill customer details.</div>
+      <div class="field" style="margin-bottom:10px;"><label>Link to Lead</label>
+        <div style="display:flex;gap:8px;"><input type="text" id="bk-ls" placeholder="Phone or name…" style="flex:1;"><button class="btn btn-primary btn-sm" onclick="bkLeadSearch()">Find Lead</button></div></div>
+      <div id="bk-lr" style="display:none;"><div class="lookup-box" id="bk-ll"></div></div>
+      <div id="bk-sel" class="sel-bar" style="display:none;"><span>🔗</span><span id="bk-sel-txt" style="flex:1;"></span><button class="btn btn-secondary btn-xs" onclick="bkClearLead()">Change</button></div>
+      <input type="hidden" id="bk-lead-id">
+      <div class="divlbl"><span>Customer &amp; Vehicle</span></div>
+      <div class="fg">
+        <div class="field"><label>Customer Name <span class="req">*</span></label><input type="text" id="bk-name" placeholder="Full name"><span class="err">Required</span></div>
+        <div class="field"><label>Phone <span class="req">*</span></label><input type="tel" id="bk-phone" placeholder="10-digit"><span class="err">Required</span></div>
+        <div class="field"><label>Showroom Location <span class="req">*</span></label><select id="bk-loc"><option value="">Select…</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Lead Source</label><select id="bk-src"><option value="">Select…</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option></select></div>
+        <div class="field"><label>Model <span class="req">*</span></label><select id="bk-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Variant</label><input type="text" id="bk-variant" placeholder="e.g. XZ+"></div>
+        <div class="field"><label>Color</label><input type="text" id="bk-color" placeholder="e.g. White"></div>
+        <div class="field"><label>Product VC Number</label><input type="text" id="bk-vc" placeholder="Tata Motors VC No."></div>
+        <div class="field"><label>Booking Amount (₹) <span class="req">*</span></label><input type="number" id="bk-amount" placeholder="e.g. 11000"><span class="err">Required</span></div>
+        <div class="field"><label>Payment Mode</label><select id="bk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
+        <div class="field"><label>Discount Offered (₹)</label><input type="number" id="bk-discount" placeholder="e.g. 25000"></div>
+        <div class="field"><label>Salesperson <span class="req">*</span></label><input type="text" id="bk-sp" placeholder="Name"><span class="err">Required</span></div>
+        <div class="field"><label>Booking Date <span class="auto-lbl">AUTO</span></label><input type="text" id="bk-dt" class="locked" readonly></div>
+        <div class="field full"><label>Customer's Expected Delivery</label>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="bk-asap" onchange="toggleAsap('bk')"> ASAP</label>
+            <input type="date" id="bk-cust-del" style="flex:1;min-width:150px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:5px;padding:7px 10px;font-family:var(--font-b);font-size:13px;outline:none;">
+          </div></div>
+      </div>
+      <div class="divlbl"><span>Exchange &amp; Insurance</span></div>
+      <div class="fg">
+        <div class="field full"><label>Old Car Exchange?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-exc-y" onclick="togExc('yes')" style="flex:1;"><span class="tl">✅ Yes — Exchange</span><div class="tsw"></div></div><div class="tog-row" id="t-exc-n" onclick="togExc('no')" style="flex:1;"><span class="tl">❌ No Exchange</span><div class="tsw"></div></div></div></div>
+        <div class="field" id="exc-make-r" style="display:none;"><label>Old Car Make</label><input type="text" id="bk-exc-make" placeholder="e.g. Maruti"></div>
+        <div class="field" id="exc-model-r" style="display:none;"><label>Old Car Model</label><input type="text" id="bk-exc-model" placeholder="e.g. Swift"></div>
+        <div class="field" id="exc-year-r" style="display:none;"><label>Mfg. Year</label><input type="number" id="bk-exc-year" placeholder="e.g. 2018"></div>
+        <div class="field" id="exc-val-r" style="display:none;"><label>Exchange Value (₹ Approx.)</label><input type="number" id="bk-exc-val" placeholder="e.g. 350000"></div>
+        <div class="field full"><label>In-house Insurance?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-ins-y" onclick="togIns('yes')" style="flex:1;"><span class="tl">✅ Yes — In-house</span><div class="tsw"></div></div><div class="tog-row" id="t-ins-n" onclick="togIns('no')" style="flex:1;"><span class="tl">❌ External / None</span><div class="tsw"></div></div></div></div>
+      </div>
+      <div class="divlbl"><span>Vehicle Availability</span></div>
+      <div class="fg">
+        <div class="field full"><label>Vehicle In Stock?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-stk-y" onclick="togStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-stk-n" onclick="togStk('no')" style="flex:1;"><span class="tl">🔄 No — On Order</span><div class="tsw"></div></div></div></div>
+        <div class="field" id="bk-ref-r" style="display:none;"><label>Chassis / Stock Ref No.</label><input type="text" id="bk-stock-ref" placeholder="Chassis No."></div>
+        <div class="field" id="bk-syard-r" style="display:none;"><label>Stockyard</label><select id="bk-stockyard"><option>Common Stockyard</option><option>Palam Stockyard</option><option>Najafgarh Stockyard</option><option>Narela Stockyard</option></select></div>
+        <div class="field" id="bk-edel-r" style="display:none;"><label>Expected Arrival (Dealer)</label><input type="date" id="bk-expected-del"><span class="hint">When vehicle arrives at dealership</span></div>
+      </div>
+      <div class="field" style="margin-top:10px;"><label>Notes</label><textarea id="bk-notes" placeholder="Special requests, accessories, commitments…" style="min-height:44px;"></textarea></div>
+    </div>
+    <div class="ffoot"><button class="btn btn-success" onclick="submitBooking()">Confirm Booking →</button><button class="btn btn-secondary" onclick="toggleNewBkForm()">Cancel</button><span class="smsg" id="bk-status"></span></div>
+  </div>
+  <div class="bk-tabs"><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 On Order</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div></div>
+  <div class="filter-bar" style="margin-bottom:10px;">
+    <select class="fi" id="bk-floc" onchange="renderBookings()"><option value="">All Locations</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select>
+    <select class="fi" id="bk-fmodel" onchange="renderBookings()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
+    <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="bk-count"></span>
+  </div>
+  <div id="bk-is"><div class="leads-list" id="bk-il"><div class="empty-st"><div class="ico">📦</div><p>No in-stock bookings.</p></div></div></div>
+  <div id="bk-oo" style="display:none;"><div class="leads-list" id="bk-ol"><div class="empty-st"><div class="ico">🔄</div><p>No orders pending.</p></div></div></div>
+  <div id="bk-dv" style="display:none;"><div class="leads-list" id="bk-dl"><div class="empty-st"><div class="ico">🚗</div><p>No deliveries yet.</p></div></div></div>
+</div>
+<!-- ═══════ STOCK ═══════ -->
+<div id="tab-stock" class="section">
+  <div class="sh"><div><div class="sh-title">Stock Tracker</div><div class="sh-sub">Live inventory · Allocated vs Available · Model Demand vs Stock Gap</div></div>
+    <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="toggleAddStock()">+ Add Vehicle</button><button class="btn btn-ghost btn-sm" onclick="toggleUploadStock()">📤 Upload Excel</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div></div>
+  <div class="form-card" id="add-stock-form" style="display:none;margin-bottom:12px;">
+    <div class="fch fch-stock">Add Vehicle to Stock</div>
+    <div class="fb">
+      <div class="fg">
+        <div class="field"><label>Chassis Number <span class="req">*</span></label><input type="text" id="stk-chassis" placeholder="Full chassis number (VIN)"><span class="err">Required</span></div>
+        <div class="field"><label>Model <span class="req">*</span></label><select id="stk-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Variant</label><input type="text" id="stk-variant" placeholder="e.g. XZ+"></div>
+        <div class="field"><label>Color</label><input type="text" id="stk-color" placeholder="e.g. Pristine White"></div>
+        <div class="field"><label>Current Location <span class="req">*</span></label><select id="stk-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Notes</label><input type="text" id="stk-notes" placeholder="Any notes…"></div>
+      </div>
+    </div>
+    <div class="ffoot"><button class="btn btn-primary" onclick="submitAddStock()">Add to Stock →</button><button class="btn btn-secondary" onclick="toggleAddStock()">Cancel</button><span class="smsg" id="stk-status"></span></div>
+  </div>
+
+  <!-- UPLOAD STOCK FROM EXCEL -->
+  <div class="form-card" id="upload-stock-form" style="display:none;margin-bottom:12px;">
+    <div class="fch fch-stock">📤 Upload Stock from Excel / CSV <span class="role-pill">MANAGER</span></div>
+    <div class="fb">
+      <div class="info-note" style="margin-bottom:12px;">💡 Upload the Tata Motors stock report Excel. Columns detected automatically: <strong>Chassis No, Model, Product Line, VC#, Color, Location, Physical Status, Allotted/Unallotted.</strong></div>
+      <div class="upload-zone" id="upload-zone" ondragover="uzDragOver(event)" ondragleave="uzDragLeave()" ondrop="uzDrop(event)" onclick="document.getElementById('stk-file').click()">
+        <div class="uz-ico">📊</div>
+        <div class="uz-title">Click to browse or drag &amp; drop your Excel / CSV file</div>
+        <div class="uz-sub">Supports .xlsx, .xls, .csv · Tata Motors stock report format</div>
+      </div>
+      <input type="file" id="stk-file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleStockFile(this)">
+      <div id="upload-preview" style="display:none;margin-top:12px;">
+        <div style="font-family:var(--font-h);font-size:13px;font-weight:700;color:var(--blue-dk);margin-bottom:7px;">Preview — <span id="upload-row-count">0</span> vehicles detected · Scroll to review before uploading</div>
+        <div style="overflow-x:auto;max-height:230px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:5px;">
+          <table class="preview-tbl"><thead><tr id="preview-thead"></tr></thead><tbody id="preview-tbody"></tbody></table>
+        </div>
+        <div class="info-note" style="margin-top:10px;background:var(--amber-bg);border-color:var(--amber-bd);color:#5D3000;">
+          ⚠ Duplicate chassis numbers already in your stock will be <strong>skipped automatically</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="ffoot">
+      <button class="btn btn-primary" id="upload-confirm-btn" onclick="uploadStockBatch()" style="display:none;">Upload <span id="upload-confirm-count">0</span> Vehicles →</button>
+      <button class="btn btn-secondary" onclick="toggleUploadStock()">Cancel</button>
+      <span class="smsg" id="upload-status"></span>
+    </div>
+  </div>
+  <div class="stock-chips" id="stock-chips">
+    <div class="scp"><div class="scp-num" id="scp-av" style="color:var(--green);">—</div><div class="scp-lbl">Available</div></div>
+    <div class="scp"><div class="scp-num" id="scp-al" style="color:var(--blue);">—</div><div class="scp-lbl">Allocated</div></div>
+    <div class="scp"><div class="scp-num" id="scp-so" style="color:var(--gray-400);">—</div><div class="scp-lbl">Delivered (Month)</div></div>
+    <div class="scp"><div class="scp-num" id="scp-tot" style="color:var(--blue-dk);">—</div><div class="scp-lbl">Total Active Stock</div></div>
+  </div>
+  <div class="filter-bar">
+    <select class="fi" id="stk-floc" onchange="renderStock()"><option value="">All Locations</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select>
+    <select class="fi" id="stk-fm" onchange="renderStock()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
+    <select class="fi" id="stk-fs" onchange="renderStock()"><option value="">All Status</option><option value="Available">Available</option><option value="Allocated">Allocated</option><option value="Sold">Delivered</option></select>
+    <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="stk-count"></span>
+  </div>
+  <div class="leads-list" id="stock-list"><div class="empty-st"><div class="ico">📦</div><p>No stock records yet.</p></div></div>
+  <!-- DEMAND VS STOCK -->
+  <div style="margin-top:20px;">
+    <div class="sh"><div><div class="sh-title" style="font-size:18px;">Model Demand vs Stock Gap</div><div class="sh-sub">Active leads vs available vehicles · Red = shortage, Green = surplus</div></div><button class="ref-btn" onclick="renderDVS()">↻ Update</button></div>
+    <div class="card-wrap">
+      <div class="card-hd hd-blue">📊 Demand vs Available Stock — All Models</div>
+      <div style="overflow-x:auto;"><table class="dvs-table"><thead><tr><th>Model</th><th>Active Demand (Leads)</th><th>In Stock (Available)</th><th>Gap</th><th>Status</th><th>Action</th></tr></thead><tbody id="dvs-tbody"><tr><td colspan="6" style="padding:20px;text-align:center;color:var(--gray-400);">Load data to see analysis.</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════ SETUP ═══════ -->
+<div id="tab-setup" class="section">
+  <div class="sh"><div class="sh-title">Setup — Connect to Google Sheet</div></div>
+  <div class="form-card" style="margin-bottom:12px;">
+    <div class="fch fch-blue">⚙ Paste Your Apps Script Web App URL</div>
+    <div class="fb"><div class="ci"><input type="text" id="script-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"><button class="btn btn-primary" onclick="saveURL()">Save &amp; Connect</button></div><div id="conn-status" style="font-size:12px;font-weight:600;margin-top:8px;"></div></div>
+  </div>
+  <div class="steps" style="margin-bottom:12px;">
+    <div class="step"><div class="step-n">1</div><div class="step-t"><strong>Open Google Sheet</strong> → <code>Extensions → Apps Script</code></div></div>
+    <div class="step"><div class="step-n">2</div><div class="step-t"><strong>Delete all existing code</strong> and paste the full script below. Creates 5 sheets automatically: <code>Leads</code>, <code>FollowUps</code>, <code>Bookings</code>, <code>TestDrives</code>, <code>Stock</code></div></div>
+    <div class="step"><div class="step-n">3</div><div class="step-t"><code>Deploy → New Deployment</code> → Type: <code>Web App</code> → Execute as: <code>Me</code> → Access: <code>Anyone</code> → Deploy → Authorize</div></div>
+    <div class="step"><div class="step-n">4</div><div class="step-t">Copy the Web App URL → paste above → Save &amp; Connect</div></div>
+  </div>
+  <div class="code-block"><button class="copy-btn" onclick="copyScript()">Copy All</button><pre id="script-code">// Sales Command Centre — Apps Script v3
+// Auto-creates 5 sheets: Leads, FollowUps, Bookings, TestDrives, Stock
+
+const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
+const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
+const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes"];
+const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
+const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
+
+function doGet(e){return handleReq(e);}
+function doPost(e){return handleReq(e);}
+function handleReq(e){
+  const p=(e&&e.parameter)?e.parameter:{};let res;
+  try{
+    switch(p.action){
+      case "getAll":res=getAll();break;case "addLead":res=addLead(JSON.parse(p.data));break;
+      case "addFollowUp":res=addFollowUp(JSON.parse(p.data));break;case "addBooking":res=addBooking(JSON.parse(p.data));break;
+      case "updateBooking":res=updateBooking(JSON.parse(p.data));break;case "addStock":res=addStock(JSON.parse(p.data));break;case "bulkAddStock":res=bulkAddStock(JSON.parse(p.data));break;
+      case "updateStock":res=updateStock(JSON.parse(p.data));break;
+      default:res={status:"ok",msg:"Sales CRM API v3 running"};
+    }
+  }catch(err){res={status:"error",msg:err.toString()};}
+  return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+}
+function getOrCreate(name,headers){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName(name);
+  if(!sh){sh=ss.insertSheet(name);const r=sh.getRange(1,1,1,headers.length);r.setValues([headers]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);}
+  return sh;
+}
+function sheetToArr(sh,headers){
+  const last=sh.getLastRow();if(last<2)return[];
+  const tz=Session.getScriptTimeZone();
+  return sh.getRange(2,1,last-1,headers.length).getValues().filter(r=>r.some(c=>c!=="")).map((r,i)=>{
+    const obj={rowIndex:i+2};headers.forEach((h,j)=>{let v=r[j];if(v instanceof Date)v=Utilities.formatDate(v,tz,"yyyy-MM-dd HH:mm");obj[h]=(v===null||v===undefined)?"":String(v);});return obj;
+  });
+}
+function getAll(){return{status:"ok",leads:sheetToArr(getOrCreate("Leads",LH),LH),followups:sheetToArr(getOrCreate("FollowUps",FH),FH),bookings:sheetToArr(getOrCreate("Bookings",BH),BH),testdrives:sheetToArr(getOrCreate("TestDrives",TH),TH),stock:sheetToArr(getOrCreate("Stock",SH),SH)};}
+function addLead(d){
+  const sh=getOrCreate("Leads",LH);const tz=Session.getScriptTimeZone();
+  d["Lead ID"]="LEAD-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");d["Status"]=d["Status"]||"Active";d["Interest Level"]=d["Interest Level"]||"Warm";d["Followup Count"]="0";
+  sh.appendRow(LH.map(h=>d[h]||""));return{status:"ok",leadId:d["Lead ID"]};
+}
+function addFollowUp(d){
+  const fsh=getOrCreate("FollowUps",FH);const lsh=getOrCreate("Leads",LH);
+  const tz=Session.getScriptTimeZone();const now=Utilities.formatDate(new Date(),tz,"yyyy-MM-dd HH:mm");
+  d["FU ID"]="FU-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");fsh.appendRow(FH.map(h=>d[h]||""));
+  if(d["Is TD"]==="yes"){
+    const tsh=getOrCreate("TestDrives",TH);const td={};
+    td["TD ID"]="TD-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");td["Lead ID"]=d["Lead ID"];td["DateTime"]=now;
+    td["Customer Name"]=d["Customer Name"]||"";td["Phone"]=d["Phone"]||"";td["Location"]=d["Location"]||"";
+    td["Model"]=d["TD Model"]||"";td["Salesperson"]=d["Salesperson"]||"";td["Post-TD Interest"]=d["TD Interest"]||"";td["Notes"]=d["Notes"]||"";
+    tsh.appendRow(TH.map(h=>td[h]||""));
+  }
+  const lid=d["Lead ID"];const lr=lsh.getLastRow();
+  if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(lid);
+    if(ix>=0){const rn=ix+2;const li=h=>LH.indexOf(h)+1;
+      if(!lsh.getRange(rn,li("First Contact DT")).getValue())lsh.getRange(rn,li("First Contact DT")).setValue(now);
+      lsh.getRange(rn,li("Last Contact DT")).setValue(now);
+      if(d["Next Followup DT"])lsh.getRange(rn,li("Next Followup DT")).setValue(d["Next Followup DT"]);
+      if(d["Status After"])lsh.getRange(rn,li("Status")).setValue(d["Status After"]);
+      if(d["Interest After"])lsh.getRange(rn,li("Interest Level")).setValue(d["Interest After"]);
+      if(d["Notes"])lsh.getRange(rn,li("VoC Notes")).setValue(d["Notes"]);
+      if(d["Status After"]==="Lost"&&d["Lost Reason"])lsh.getRange(rn,li("Lost Reason")).setValue(d["Lost Reason"]);
+      const cnt=parseInt(lsh.getRange(rn,li("Followup Count")).getValue())||0;lsh.getRange(rn,li("Followup Count")).setValue(cnt+1);
+    }
+  }
+  return{status:"ok",msg:"Follow-up logged"};
+}
+function addBooking(d){
+  const sh=getOrCreate("Bookings",BH);const tz=Session.getScriptTimeZone();
+  d["Booking ID"]="BK-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");d["Status"]=d["Status"]||"Booked";
+  sh.appendRow(BH.map(h=>d[h]||""));
+  if(d["Lead ID"]){const lsh=getOrCreate("Leads",LH);const lr=lsh.getLastRow();if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(d["Lead ID"]);if(ix>=0)lsh.getRange(ix+2,LH.indexOf("Status")+1).setValue("Booked");}}
+  return{status:"ok",bookingId:d["Booking ID"]};
+}
+function updateBooking(d){
+  const sh=getOrCreate("Bookings",BH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  ["Status","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Notes"].forEach(col=>{const ci=BH.indexOf(col)+1;if(ci>0&&d[col]!==undefined&&d[col]!=="")sh.getRange(ri,ci).setValue(d[col]);});
+  return{status:"ok"};
+}
+function bulkAddStock(d){
+  const sh=getOrCreate("Stock",SH);const tz=Session.getScriptTimeZone();const today=Utilities.formatDate(new Date(),tz,"yyyy-MM-dd");
+  const existing=sh.getLastRow()>=2?sh.getRange(2,1,sh.getLastRow()-1,2).getValues().map(r=>String(r[1]).trim().toUpperCase()):[];
+  let added=0,skipped=0;
+  (d.items||[]).forEach(item=>{
+    const cn=String(item["Chassis No"]||"").trim().toUpperCase();
+    if(!cn){skipped++;return;}
+    if(existing.includes(cn)){skipped++;return;}
+    const row=SH.map(h=>item[h]||"");row[0]="STK-"+Date.now()+"-"+added;row[5]=today;
+    sh.appendRow(row);existing.push(cn);added++;
+  });
+  return{status:"ok",added:added,skipped:skipped};
+}
+function addStock(d){
+  const sh=getOrCreate("Stock",SH);const tz=Session.getScriptTimeZone();
+  d["Stock ID"]="STK-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");d["Added Date"]=Utilities.formatDate(new Date(),tz,"yyyy-MM-dd");d["Status"]=d["Status"]||"Available";
+  sh.appendRow(SH.map(h=>d[h]||""));return{status:"ok",stockId:d["Stock ID"]};
+}
+function updateStock(d){
+  const sh=getOrCreate("Stock",SH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  ["Status","Current Location","Allocated To","Booking ID","Notes"].forEach(col=>{const ci=SH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
+  return{status:"ok"};
+}</pre></div>
+</div>
+</main>
+
+<!-- CONVERT ON-ORDER TO IN-STOCK MODAL -->
+<div class="modal-overlay" id="convert-modal">
+  <div class="modal-box">
+    <div class="modal-hd">✅ Mark as In Stock <button onclick="closeConvertModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="conv-ri">
+      <input type="hidden" id="conv-bkid">
+      <div class="field" style="margin-bottom:10px;"><label>Chassis Number <span class="req">*</span></label><input type="text" id="conv-chassis" placeholder="Full chassis number"></div>
+      <div class="field" style="margin-bottom:10px;"><label>Stockyard Location <span class="req">*</span></label>
+        <select id="conv-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-success" style="flex:1;" onclick="confirmConvertToStock()">Confirm — Vehicle Arrived ✅</button>
+        <button class="btn btn-secondary" onclick="closeConvertModal()">Cancel</button>
+      </div>
+      <span class="smsg" id="conv-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- PLANNED DELIVERY DATE MODAL -->
+<div class="modal-overlay" id="planned-del-modal">
+  <div class="modal-box">
+    <div class="modal-hd" style="background:linear-gradient(135deg,#0D47A1,#1565C0);">📅 Set Planned Delivery Date <button onclick="closePlannedModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="pd-ri">
+      <input type="hidden" id="pd-bkid">
+      <div class="field" style="margin-bottom:10px;"><label>Customer Name</label><input type="text" id="pd-cname" class="locked" readonly></div>
+      <div class="field" style="margin-bottom:10px;"><label>Planned Delivery Date <span class="req">*</span></label><input type="date" id="pd-date"></div>
+      <div class="field" style="margin-bottom:14px;"><label>Note for customer / internal</label><input type="text" id="pd-note" placeholder="e.g. Awaiting RTO clearance, confirmed with customer…"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="confirmPlannedDelivery()">Save Planned Date →</button>
+        <button class="btn btn-secondary" onclick="closePlannedModal()">Cancel</button>
+      </div>
+      <span class="smsg" id="pd-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP PICKER (fixed bottom-right) -->
+<div class="wa-picker" id="wa-picker">
+  <div class="wa-picker-hd">💬 WhatsApp — Choose Template</div>
+  <div class="wa-tmpl" onclick="sendWA('new')"><div class="wa-tmpl-ico">🆕</div><div><div class="wa-tmpl-name">Initial Greeting</div><div class="wa-tmpl-desc">For new / uncontacted leads</div></div></div>
+  <div class="wa-tmpl" onclick="sendWA('followup')"><div class="wa-tmpl-ico">🔄</div><div><div class="wa-tmpl-name">Follow-up Reminder</div><div class="wa-tmpl-desc">General follow-up nudge</div></div></div>
+  <div class="wa-tmpl" onclick="sendWA('td_invite')"><div class="wa-tmpl-ico">🏁</div><div><div class="wa-tmpl-name">Test Drive Invite</div><div class="wa-tmpl-desc">Invite customer for a TD</div></div></div>
+  <div class="wa-tmpl" onclick="sendWA('hot')"><div class="wa-tmpl-ico">🔥</div><div><div class="wa-tmpl-name">Special Offer Alert</div><div class="wa-tmpl-desc">Urgency for hot leads</div></div></div>
+  <div class="wa-tmpl" onclick="sendWA('post_td')"><div class="wa-tmpl-ico">✅</div><div><div class="wa-tmpl-name">Post-Test Drive</div><div class="wa-tmpl-desc">Follow-up after TD done</div></div></div>
+  <div style="padding:8px 12px;border-top:1px solid var(--gray-100);"><button class="btn btn-secondary btn-sm" style="width:100%;" onclick="closeWAPicker()">Cancel</button></div>
+</div>
+<script>
+// ═══ STATE ═══
+let SCRIPT_URL=localStorage.getItem('scc_url')||'';
+let allLeads=[],allFU=[],allBK=[],allTD=[],allStock=[];
+let currentLoc='ALL',currentBkTab='instock';
+let nlSrc='',nlLocV='',nlInt='Warm';
+let bkExc=null,bkIns=null,bkStk=null;
+let fuInt='';
+let waLead=null;
+let mbCol=sessionStorage.getItem('mbCol')==='1';
+
+// ═══ UTILS ═══
+function fmtDT(d){return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
+function fmtDate(d){return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function parseD(s){if(!s)return null;try{return new Date(s);}catch(e){return null;}}
+function daysBetween(a,b){return Math.floor((b-a)/86400000);}
+function hoursBetween(a,b){return(b-a)/3600000;}
+function monthStart(){const d=new Date();d.setDate(1);d.setHours(0,0,0,0);return d;}
+function setNextFU(days,id){const d=new Date();if(days<1){d.setHours(d.getHours()+Math.round(days*24),0,0,0);}else{d.setDate(d.getDate()+days);d.setHours(10,0,0,0);}document.getElementById(id).value=d.toISOString().slice(0,16);}
+function toggleAsap(pfx){const cb=document.getElementById(pfx+'-asap');const df=document.getElementById(pfx+'-del-date')||document.getElementById(pfx+'-cust-del');if(df)df.disabled=cb.checked;}
+function setMsg(el,t,msg){el.className='smsg '+t;el.textContent=msg;if(t==='ok')setTimeout(()=>{el.className='smsg';el.textContent='';},4000);}
+function getTargets(){return JSON.parse(localStorage.getItem('scc_targets')||'{}');}
+function saveTargets(){const t={palam:+document.getElementById('tgt-palam').value||0,naj:+document.getElementById('tgt-naj').value||0,nar:+document.getElementById('tgt-nar').value||0,td:+document.getElementById('tgt-td').value||0,fin:+document.getElementById('tgt-fin').value||75,ins:+document.getElementById('tgt-ins').value||91,wait:+document.getElementById('tgt-wait').value||30};localStorage.setItem('scc_targets',JSON.stringify(t));document.getElementById('target-form').classList.remove('open');renderDashboard();alert('Targets saved!');}
+function toggleTargetForm(){const f=document.getElementById('target-form');f.classList.toggle('open');if(f.classList.contains('open')){const t=getTargets();['palam','naj','nar','td','fin','ins','wait'].forEach(k=>{const el=document.getElementById('tgt-'+k);if(el&&(t[k]||t[k]===0))el.value=t[k];});}}
+
+// ═══ CLOCK ═══
+function tick(){const n=new Date();document.getElementById('hclock').textContent=n.toLocaleTimeString('en-IN',{hour12:false});document.getElementById('hdate').textContent=n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const nl=document.getElementById('nl-created');if(nl)nl.value=fmtDT(n);const bd=document.getElementById('bk-dt');if(bd)bd.value=fmtDT(n);}
+setInterval(tick,1000);tick();
+
+// ═══ API ═══
+async function api(params){if(!SCRIPT_URL)throw new Error('Not configured. Go to Setup tab.');const url=new URL(SCRIPT_URL);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));const res=await fetch(url.toString(),{redirect:'follow'});const json=await res.json();if(json.status==='error')throw new Error(json.msg);return json;}
+async function loadAll(){
+  const btn=document.getElementById('ref-btn');if(btn)btn.textContent='↻ Loading…';
+  try{const d=await api({action:'getAll'});allLeads=d.leads||[];allFU=d.followups||[];allBK=d.bookings||[];allTD=d.testdrives||[];allStock=d.stock||[];populateFilters();renderDashboard();renderLeads(filterLeadsData());renderBookings();renderStock();renderDVS();document.getElementById('last-ref').textContent='Updated '+new Date().toLocaleTimeString('en-IN');document.getElementById('setup-banner').style.display='none';}
+  catch(e){if(!SCRIPT_URL)document.getElementById('setup-banner').style.display='flex';}
+  if(btn)btn.textContent='↻ Refresh';
+}
+
+// ═══ BUCKET LOGIC ═══
+function fcThr(src){if(['Walk-in','Tele-in'].includes(src))return 1;if(['CarDekho','Spinny','Meta'].includes(src))return 4;return 24;}
+function calcBucket(l){
+  const st=l['Status'];if(st==='Booked'||st==='Delivered')return 'green';if(st==='Lost')return 'lost';
+  const now=new Date();const cr=parseD(l['Created DT']);const lc=parseD(l['Last Contact DT']);const nf=parseD(l['Next Followup DT']);
+  if(!lc&&cr&&hoursBetween(cr,now)>fcThr(l['Source']))return 'red';
+  if(nf){const ho=hoursBetween(nf,now);if(ho>24)return 'red';if(ho>0)return 'amber';const tod=new Date();tod.setHours(23,59,59,999);if(nf<=tod)return 'amber';}
+  const i=l['Interest Level'];if(i==='Hot')return 'hot';if(i==='Cold')return 'cold';return 'warm';
+}
+function isVocThin(l){return (parseInt(l['Followup Count'])||0)>=1&&(l['VoC Notes']||'').trim().length<30;}
+function locFilt(arr,f='Location'){if(currentLoc==='ALL')return arr;return arr.filter(x=>(x[f]||'').includes(currentLoc));}
+
+// ═══ NAV ═══
+function showTab(t){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');const m={dashboard:0,leads:1,'new-lead':2,followup:3,bookings:4,stock:5,setup:6};document.querySelectorAll('.tab')[m[t]]?.classList.add('active');if(t==='dashboard')renderDashboard();if(t==='leads')renderLeads(filterLeadsData());if(t==='bookings')renderBookings();if(t==='stock'){renderStock();renderDVS();}}
+function setLoc(loc){currentLoc=loc;document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('active'));const m={ALL:0,Palam:1,Najafgarh:2,Narela:3};document.querySelectorAll('.loc-btn')[m[loc]].classList.add('active');document.getElementById('dash-sub').textContent=(loc==='ALL'?'All Locations':loc)+' · Live Data';renderDashboard();renderLeads(filterLeadsData());renderBookings();}
+function filterLeadsNav(b){
+  if(b==='thin'){showTab('leads');setTimeout(()=>{document.getElementById('fl-voc').value='thin';applyFilters();},50);return;}
+  showTab('leads');setTimeout(()=>{document.getElementById('fl-status').value=b;applyFilters();},50);
+}
+
+// ═══ MORNING BRIEF ═══
+function toggleMB(){mbCol=!mbCol;sessionStorage.setItem('mbCol',mbCol?'1':'0');document.getElementById('mb-body').classList.toggle('col',mbCol);document.querySelector('.mb-toggle').textContent=mbCol?'Expand ▼':'Collapse ▲';}
+function renderMB(leads,bks){
+  const today=new Date();today.setHours(0,0,0,0);const a=locFilt(leads).filter(l=>l['Status']!=='Lost'&&l['Status']!=='Delivered');
+  const thr=getTargets().wait||30;
+  document.getElementById('mb-red').textContent=a.filter(l=>calcBucket(l)==='red').length;
+  document.getElementById('mb-amber').textContent=a.filter(l=>calcBucket(l)==='amber').length;
+  document.getElementById('mb-new').textContent=locFilt(leads).filter(l=>{const c=parseD(l['Created DT']);return c&&daysBetween(today,c)===0;}).length;
+  document.getElementById('mb-hot').textContent=a.filter(l=>l['Interest Level']==='Hot').length;
+  document.getElementById('mb-wait').textContent=locFilt(bks).filter(b=>{if(b['In Stock']!=='No'||b['Status']==='Delivered')return false;const bd=parseD(b['Booking DT']);return bd&&daysBetween(bd,new Date())>thr;}).length;
+  document.getElementById('mb-voc').textContent=a.filter(isVocThin).length;
+  document.getElementById('mb-date').textContent=' · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long'});
+  if(mbCol){document.getElementById('mb-body').classList.add('col');document.querySelector('.mb-toggle').textContent='Expand ▼';}
+}
+
+// ═══ DASHBOARD ═══
+function renderDashboard(){
+  const leads=locFilt(allLeads);const bks=locFilt(allBK);const tds=locFilt(allTD);
+  const active=leads.filter(l=>l['Status']!=='Lost'&&l['Status']!=='Delivered');
+  const ms=monthStart();const today=new Date();today.setHours(0,0,0,0);
+  const mBks=bks.filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
+  const mTDs=tds.filter(t=>{const d=parseD(t['DateTime']);return d&&d>=ms;});
+  const delivered=mBks.filter(b=>b['Status']==='Delivered');
+  const todayLeads=leads.filter(l=>{const c=parseD(l['Created DT']);return c&&daysBetween(today,c)===0;});
+  const bkts=active.map(l=>({lead:l,b:calcBucket(l)}));
+  const reds=bkts.filter(x=>x.b==='red');const ambs=bkts.filter(x=>x.b==='amber');const hots=bkts.filter(x=>x.b==='hot');
+  document.getElementById('s-total').textContent=active.length;document.getElementById('s-today').textContent=todayLeads.length+' today';
+  document.getElementById('s-red').textContent=reds.length;document.getElementById('s-amber').textContent=ambs.length;
+  document.getElementById('s-hot').textContent=hots.length;document.getElementById('s-booked').textContent=mBks.length;document.getElementById('s-tdc').textContent=mTDs.length+' test drives';
+  const onT=active.filter(l=>calcBucket(l)!=='red');const comp=active.length?Math.round(onT.length/active.length*100):100;
+  document.getElementById('s-comp').textContent=comp+'%';
+  const cb=document.getElementById('comp-big');const cbar=document.getElementById('comp-bar');const cc=comp>=80?'cs-g':comp>=60?'cs-a':'cs-r';
+  cb.className='comp-big '+cc;cb.textContent=comp+'%';cbar.className='prog-bar '+(comp>=80?'prog-g':comp>=60?'prog-a':'prog-r');cbar.style.width=comp+'%';
+  const abn=reds.length+ambs.length;const abEl=document.getElementById('alert-badge');abEl.textContent=abn;abEl.style.display=abn>0?'inline-block':'none';
+  const fbEl=document.getElementById('fu-badge');fbEl.textContent=ambs.length;fbEl.style.display=ambs.length>0?'inline-block':'none';
+  document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
+  renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
+  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(mBks);renderSPTable(active,mTDs);renderMB(allLeads,allBK);
+}
+function renderDashSec(id,leads,type){
+  const el=document.getElementById(id);const shown=leads.slice(0,8);const now=new Date();
+  const em={red:'No critical alerts!',amber:'All clear!',hot:'No hot leads yet.'};const ic={red:'✅',amber:'📅',hot:'🎯'};
+  if(!shown.length){el.innerHTML=`<div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">${ic[type]}</div><p style="font-size:12px;">${em[type]}</p></div>`;return;}
+  el.innerHTML=shown.map(l=>{
+    const age=Math.floor(hoursBetween(parseD(l['Created DT'])||now,now)/24);
+    let timeTag='';
+    if(type==='red'){const lc=parseD(l['Last Contact DT']);const cr=parseD(l['Created DT']);if(!lc&&cr){const hrs=Math.round(hoursBetween(cr,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">${hrs}h uncontacted</span>`;}else{const nf=parseD(l['Next Followup DT']);if(nf){const ho=Math.round(hoursBetween(nf,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">FU ${ho}h overdue</span>`;}}}
+    else if(type==='amber'){const nf=parseD(l['Next Followup DT']);if(nf){const d=daysBetween(nf,now);timeTag=d>0?`<span class="ot">${d}d overdue</span>`:`<span class="dt">Due Today</span>`;}}
+    const le=encodeURIComponent(JSON.stringify(l));
+    return `<div class="clr"><div class="clr-info"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span></div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
+  }).join('');
+  if(leads.length>8)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('leads')" style="color:var(--blue);cursor:pointer;font-weight:700;">View all ${leads.length} →</a></div>`;
+}
+function renderWaitAlerts(bks){
+  const thr=getTargets().wait||30;const now=new Date();
+  const waiting=bks.filter(b=>{if(b['In Stock']!=='No'||b['Status']==='Delivered')return false;const bd=parseD(b['Booking DT']);return bd&&daysBetween(bd,now)>thr;}).sort((a,b)=>new Date(a['Booking DT'])-new Date(b['Booking DT']));
+  const el=document.getElementById('dash-wait-list');document.getElementById('cnt-wait').textContent=waiting.length;
+  if(!waiting.length){el.innerHTML='<div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">✅</div><p style="font-size:12px;">No customers waiting beyond '+thr+' days.</p></div>';return;}
+  el.innerHTML=waiting.map(b=>{const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';return `<div class="clr"><div class="clr-info"><div class="clr-name">${b['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${b['Phone']||''}</span></div><div class="clr-sub">${locTagHtml(b['Location'])} ${b['Model']||'—'} ${b['Variant']||''} · ETA: ${b['Expected Arrival']||'Not set'} · ${b['Salesperson']||'—'}</div></div><div class="clr-meta"><span class="${wc}">⏳ ${days}d waiting</span></div></div>`;}).join('');
+  if(waiting.length>6)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('bookings')" style="color:var(--blue);cursor:pointer;font-weight:700;">All on-order bookings →</a></div>`;
+}
+function renderFunnel(leads,tds,bks,delivered){
+  const ms=monthStart();const mL=leads.filter(l=>{const d=parseD(l['Created DT']);return d&&d>=ms;});
+  const L=mL.length,T=tds.length,B=bks.length,D=delivered.length;
+  const pct=(a,b)=>b?Math.round(a/b*100):0;const max=Math.max(L,1);
+  const setFn=(i,n,num,den)=>{document.getElementById('fn'+i).style.width=Math.max(4,L?pct(n,L):0)+'%';document.getElementById('fnn'+i).textContent=n;const c=i===0?'100%':(den?pct(n,den)+'%':'—');const ce=document.getElementById('fnc'+i);ce.textContent=c;const p=i===0?100:(den?pct(n,den):0);ce.className='fn-conv '+(p>=40?'fc-hi':p>=20?'fc-md':'fc-lo');};
+  setFn(0,L,L,L);setFn(1,T,T,L);setFn(2,B,B,T||L);setFn(3,D,D,B||1);
+  const ov=L?pct(D,L):0;document.getElementById('fn-foot').innerHTML=`Overall: <span>${ov}%</span> conversion (Enquiry→Delivery) · <span>${L}</span>→<span>${T}</span>→<span>${B}</span>→<span>${D}</span>`;
+  document.getElementById('fn-loc').textContent=currentLoc==='ALL'?'':`(${currentLoc})`;
+}
+function renderFinPen(bks){
+  // Finance penetration
+  const fin=bks.filter(b=>b['Payment Mode']==='Finance'||b['Payment Mode']==='Cash + Finance').length;const tot=bks.length;const fp=tot?Math.round(fin/tot*100):0;const cp=tot?100-fp:0;
+  document.getElementById('fin-bar').style.width=fp+'%';document.getElementById('fin-pct').textContent=fp+'%';document.getElementById('cash-bar').style.width=cp+'%';document.getElementById('cash-pct').textContent=cp+'%';
+  const ftgt=getTargets().fin||75;const fclr=fp>=ftgt?'var(--green)':'var(--red)';
+  document.getElementById('fin-tgt-line').innerHTML='Target: <strong>'+ftgt+'%</strong> · Actual: <strong style="color:'+fclr+';">'+fp+'% finance</strong> · <strong>'+tot+'</strong> bookings this month';
+  // Insurance penetration
+  const insCount=bks.filter(b=>b['In-house Insurance']==='Yes').length;const ip=tot?Math.round(insCount/tot*100):0;const ep=tot?100-ip:0;
+  document.getElementById('ins-bar').style.width=ip+'%';document.getElementById('ins-pct').textContent=ip+'%';
+  document.getElementById('ext-ins-bar').style.width=ep+'%';document.getElementById('ext-ins-pct').textContent=ep+'%';
+  const itgt=getTargets().ins||91;const iclr=ip>=itgt?'var(--green)':'var(--red)';
+  document.getElementById('ins-tgt-line').innerHTML='Target: <strong>'+itgt+'%</strong> · Actual: <strong style="color:'+iclr+';">'+ip+'% in-house</strong> · <strong>'+insCount+'</strong> of '+tot+' bookings';
+}
+function renderTDBoard(tds){
+  const tgt=getTargets().td||40;document.getElementById('td-month-lbl').textContent=`${tds.length}/${tgt} this month`;
+  const map={};tds.forEach(t=>{const sp=t['Salesperson']||'Unknown';map[sp]=(map[sp]||0)+1;});
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6);const maxN=sorted[0]?.[1]||1;
+  document.getElementById('td-leaderboard').innerHTML=sorted.length?sorted.map(([sp,n],i)=>`<div class="td-row"><div class="td-rank r${i+1}">${i+1}</div><div class="td-sp">${sp}</div><div class="td-bm"><div class="td-bf" style="width:${Math.round(n/maxN*100)}%;"></div></div><div class="td-cnt">${n}</div><div style="font-size:10px;color:var(--gray-500);">TDs</div></div>`).join(''):`<div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No test drives this month.</div>`;
+}
+function renderTargetCard(mBks){
+  const t=getTargets();const locs=[{k:'palam',name:'Palam (Dwarka)',tgt:t.palam||0,n:'Palam'},{k:'naj',name:'Najafgarh',tgt:t.naj||0,n:'Najafgarh'},{k:'nar',name:'Narela',tgt:t.nar||0,n:'Narela'}];
+  let html='';let tB=0,tT=0;
+  locs.forEach(l=>{
+    const ins=mBks.filter(b=>b['Location']===l.name&&b['In Stock']==='Yes').length;const ood=mBks.filter(b=>b['Location']===l.name&&b['In Stock']==='No').length;const tot=ins+ood;tB+=tot;tT+=l.tgt;
+    const p=l.tgt?Math.round(tot/l.tgt*100):0;const pc=p>=100?'prog-g':p>=70?'prog-a':'prog-r';
+    html+=`<div class="tc-row"><span class="tc-name">${l.n}</span><span class="tc-nums">${ins} in-stk · ${ood} order</span><div class="tc-prog"><div class="prog-wrap"><div class="prog-bar ${pc}" style="width:${Math.min(100,p)}%;"></div></div></div><span class="tc-pct" style="color:${p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)'};">${tot}/${l.tgt||'—'}</span></div>`;
+  });
+  const tp=tT?Math.round(tB/tT*100):0;html+=`<div style="border-top:1px solid var(--gray-200);margin-top:4px;padding-top:6px;display:flex;justify-content:space-between;font-size:12px;"><span style="font-weight:700;">Total</span><span>${tB}/${tT||'—'} (${tp}%)</span></div>`;
+  document.getElementById('tc-body').innerHTML=html;
+}
+function renderSPTable(active,tds){
+  const map={};active.forEach(l=>{const sp=l['Salesperson']||'Unassigned';if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].t++;const b=calcBucket(l);if(b==='red')map[sp].ov++;else map[sp].o++;if(isVocThin(l))map[sp].v++;});
+  tds.forEach(t=>{const sp=t['Salesperson']||'Unassigned';if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].td++;});
+  const rows=Object.entries(map).sort((a,b)=>b[1].t-a[1].t);
+  document.getElementById('sp-tbody').innerHTML=rows.length?rows.map(([sp,d])=>{const sc=d.t?Math.round(d.o/d.t*100):100;const cl=sc>=80?'sg':sc>=60?'sa':'sr';return `<tr><td style="font-weight:600;">${sp}</td><td>${d.t}</td><td style="color:var(--green);">${d.o}</td><td style="color:${d.ov?'var(--red)':'var(--gray-400)'};">${d.ov}</td><td style="color:var(--amber);font-weight:700;">${d.td}</td><td style="color:${d.v?'var(--red)':'var(--gray-400)'};">${d.v||'—'}</td><td><span class="sc-pill ${cl}">${sc}%</span></td></tr>`;}).join(''):'<tr><td colspan="7" style="color:var(--gray-400);padding:10px;">No active leads.</td></tr>';
+}
+
+// ═══ LEAD CARDS ═══
+function srcCls(s){return {'Walk-in':'src-walkin','Tele-in':'src-telein','CarDekho':'src-cardekho','Spinny':'src-spinny','Meta':'src-meta','Reference':'src-reference'}[s]||'src-reference';}
+function locTagHtml(loc){if(!loc)return '';if(loc.includes('Palam'))return '<span class="lt-p">Palam</span>';if(loc==='Najafgarh')return '<span class="lt-n">Najafgarh</span>';if(loc==='Narela')return '<span class="lt-nr">Narela</span>';return '';}
+function intPill(i){if(i==='Hot')return '<span class="pill pill-hot">🔥 Hot</span>';if(i==='Cold')return '<span class="pill pill-cold">❄ Cold</span>';return '<span class="pill pill-warm">🔵 Warm</span>';}
+function stPill(s){if(s==='Booked')return '<span class="pill pill-booked">✅ Booked</span>';if(s==='Lost')return '<span class="pill pill-lost">❌ Lost</span>';return '';}
+function vocBadge(l){return isVocThin(l)?'<span class="pill pill-voc">⚠ Thin VoC</span>':'';}
+function filterLeadsData(){
+  const q=(document.getElementById('fl-search')||{}).value?.toLowerCase()||'';
+  const st=(document.getElementById('fl-status')||{}).value||'';const src=(document.getElementById('fl-src')||{}).value||'';
+  const sp=(document.getElementById('fl-sp')||{}).value||'';const model=(document.getElementById('fl-model')||{}).value||'';const vf=(document.getElementById('fl-voc')||{}).value||'';
+  let leads=locFilt(allLeads);
+  leads=leads.filter(l=>{if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}if(src&&l['Source']!==src)return false;if(sp&&l['Salesperson']!==sp)return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}return true;});
+  const pri={red:6,amber:5,hot:4,warm:3,cold:2,green:1,lost:0};leads.sort((a,b)=>(pri[calcBucket(b)]||0)-(pri[calcBucket(a)]||0));return leads;
+}
+function applyFilters(){renderLeads(filterLeadsData());}
+function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});applyFilters();}
+function populateFilters(){const sps=[...new Set(allLeads.map(l=>l['Salesperson']).filter(Boolean))].sort();const mods=[...new Set(allLeads.map(l=>l['Model Interest']).filter(Boolean))].sort();const sp=document.getElementById('fl-sp');if(sp)sp.innerHTML='<option value="">All Salespeople</option>'+sps.map(s=>`<option>${s}</option>`).join('');const ml=document.getElementById('fl-model');if(ml)ml.innerHTML='<option value="">All Models</option>'+mods.map(m=>`<option>${m}</option>`).join('');}
+function renderLeads(leads){
+  const list=document.getElementById('leads-list');if(!list)return;document.getElementById('leads-count').textContent=leads.length+' lead'+(leads.length!==1?'s':'');
+  if(!leads.length){list.innerHTML='<div class="empty-st"><div class="ico">📋</div><p>No leads match the filter.</p></div>';return;}
+  const now=new Date();
+  list.innerHTML=leads.map((l,i)=>{
+    const b=calcBucket(l);const age=Math.floor(hoursBetween(parseD(l['Created DT'])||now,now)/24);
+    let aTxt='',aCls='';if(l['Created DT']){aTxt=age===0?'Today':age===1?'Yesterday':`${age}d old`;aCls=age>7?'age-crit':age>3?'age-warn':age===0?'age-new':'age-ok';}
+    const nf=parseD(l['Next Followup DT']);let fuTxt='—';if(nf){const dO=daysBetween(nf,now);const tod=new Date();tod.setHours(0,0,0,0);const fd=new Date(nf);fd.setHours(0,0,0,0);if(dO>0)fuTxt=`<span class="ot">⚠ ${dO}d overdue</span>`;else if(fd.getTime()===tod.getTime())fuTxt='<span class="dt">Due Today</span>';else fuTxt=fmtDate(nf);}
+    const lcTxt=l['Last Contact DT']?fmtDate(parseD(l['Last Contact DT'])):'Never contacted';
+    const fuH=allFU.filter(f=>f['Lead ID']===l['Lead ID']).sort((a,b)=>new Date(b['DateTime'])-new Date(a['DateTime']));
+    const fuHtml=fuH.length?fuH.map(f=>`<div class="fu-item"><span class="fu-dt">${f['DateTime']||''}</span><span class="fu-method">${f['Method']||''}</span><span class="fu-notes">${f['Outcome']||''}${f['Notes']?' · '+f['Notes']:''}</span><span class="fu-by">${f['Salesperson']||''}</span></div>`).join(''):`<div style="padding:10px;text-align:center;font-size:11.5px;color:var(--gray-400);">No follow-ups logged yet.</div>`;
+    const lc={red:'lred',amber:'lamber',hot:'lhot',warm:'lwarm',green:'lgreen',lost:'llost',cold:'lcold'}[b]||'lwarm';
+    const le=encodeURIComponent(JSON.stringify(l));
+    return `<div class="lc ${lc}" id="lc-${i}">
+      <div class="lc-head" onclick="togLC(${i})"><div><div class="lc-name">${l['Customer Name']||'—'}</div><div class="lc-phone">${l['Phone']||''}${l['Alt Phone']?' · '+l['Alt Phone']:''}</div></div>
+        <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${vocBadge(l)}</div>
+        <div class="lc-meta"><div style="font-size:11px;">👤 <strong>${l['Salesperson']||'—'}</strong></div>${aTxt?`<div class="${aCls}">${aTxt}</div>`:''}<span class="expand-arrow" id="arr-${i}">▾</span></div></div>
+      <div class="lc-detail-row">
+        <span>🚗 <strong>${l['Model Interest']||'—'}</strong>${l['Variant']?' '+l['Variant']:''}</span>
+        <span>💰 ${l['Budget']||'—'}</span><span>💳 ${l['Finance/Cash']||'—'}</span>
+        ${l['Customer Area']?`<span>📍 ${l['Customer Area']}${l['Customer City']?', '+l['Customer City']:''}</span>`:''}
+        ${l['Customer Expected Delivery']?`<span>📅 Wants: <strong>${l['Customer Expected Delivery']}</strong></span>`:''}
+        <span>📞 Last: <strong>${lcTxt}</strong></span><span>📅 Next: ${fuTxt}</span>
+        <span>🔁 ${l['Followup Count']||0} FU${(l['Followup Count']||0)!=1?'s':''}</span>
+      </div>
+      ${l['VoC Notes']?`<div style="padding:5px 14px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong> ${l['VoC Notes']}</div>`:''}
+      <div class="lc-actions">
+        <button class="btn btn-ghost btn-xs" onclick="prefillFU('${le}')">📞 Log Follow-up</button>
+        <button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬 WhatsApp</button>
+        <button class="btn btn-success btn-xs" onclick="prefillBooking('${le}')">🚗 Book</button>
+        <button class="btn btn-danger btn-xs" onclick="prefillFULost('${le}')">❌ Mark Lost</button>
+        <span style="font-size:10px;color:var(--gray-400);margin-left:auto;">ID: ${l['Lead ID']||'—'}</span>
+        <span class="expand-arrow" style="cursor:pointer;" onclick="togLC(${i})">▾</span>
+      </div>
+      <div class="lc-exp" id="lce-${i}"><div class="fu-log"><div class="fu-log-title">Follow-up History (${fuH.length})</div>${fuHtml}</div></div>
+    </div>`;
+  }).join('');
+}
+function togLC(i){const d=document.getElementById('lce-'+i);const a=document.getElementById('arr-'+i);d.classList.toggle('open');a?.classList.toggle('open');}
+
+// ═══ WHATSAPP ═══
+function openWAPicker(enc){waLead=JSON.parse(decodeURIComponent(enc));document.getElementById('wa-picker').classList.add('open');}
+function closeWAPicker(){document.getElementById('wa-picker').classList.remove('open');waLead=null;}
+function sendWA(tmpl){
+  if(!waLead){closeWAPicker();return;}
+  const name=(waLead['Customer Name']||'').split(' ')[0]||'there';const model=waLead['Model Interest']||'our latest model';const sp=waLead['Salesperson']||'our team';const loc=(waLead['Location']||'our showroom').replace(' (Dwarka)','');
+  const msgs={
+    new:`Hi ${name}! 👋\n\nI'm ${sp} from *${loc}* — Tata Motors Authorized Dealer.\n\nThank you for your interest in the *${model}*! 🚗\n\nI'd love to schedule a visit or test drive. When would be a good time?`,
+    followup:`Hi ${name}! 😊\n\nThis is ${sp} from *${loc} (Tata Motors)*.\n\nFollowing up on your enquiry about the *${model}*.\n\nWe have some great offers this month — would love to share! Are you free for a quick chat?`,
+    td_invite:`Hi ${name}! 🏁\n\nThis is ${sp} from *${loc} (Tata Motors)*.\n\nWould you like to experience the *${model}* with a test drive? We can arrange one at your preferred date and time — even at your doorstep! 🚗\n\nWhen works for you?`,
+    hot:`Hi ${name}! 🔥\n\nExciting news from *${loc} (Tata Motors)*!\n\nWe have a *special limited-time offer* on the *${model}* this month.\n\nI'd love to share the details — are you free for a quick call?`,
+    post_td:`Hi ${name}! 🚗✅\n\nThank you for experiencing the *${model}* with us!\n\nIt was great meeting you. Hope you enjoyed the drive!\n\nI'm here to answer any questions. Shall we talk soon? 😊`
+  };
+  let phone=(waLead['Phone']||'').replace(/[^0-9]/g,'');if(phone.length===10)phone='91'+phone;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msgs[tmpl]||msgs.followup)}`,'_blank');
+  closeWAPicker();
+}
+document.addEventListener('click',e=>{if(!e.target.closest('#wa-picker')&&!e.target.closest('.btn-wa')&&!(e.target.textContent||'').includes('💬'))closeWAPicker();});
+
+// ═══ NEW LEAD ═══
+function selSrc(src,btn){nlSrc=src;document.getElementById('nl-source').value=src;document.querySelectorAll('#src-grp .seg-btn').forEach(b=>b.classList.remove('sel-src'));btn.classList.add('sel-src');document.getElementById('err-src').style.display='none';setNextFU(1,'nl-nextfu');}
+function selLocNL(loc,btn,cls){nlLocV=loc;document.getElementById('nl-loc').value=loc;document.querySelectorAll('#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-palam','sel-naj','sel-nar'));btn.classList.add(cls);document.getElementById('err-loc').style.display='none';}
+function selInt(val,btn){nlInt=val;document.getElementById('nl-interest').value=val;document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));btn.classList.add('sel-'+val.toLowerCase());}
+async function submitNewLead(){
+  if(!nlSrc){document.getElementById('err-src').style.display='block';return;}if(!nlLocV){document.getElementById('err-loc').style.display='block';return;}
+  const reqs=[{id:'nl-name',key:'Customer Name'},{id:'nl-sp',key:'Salesperson'},{id:'nl-phone',key:'Phone'},{id:'nl-model',key:'Model Interest'}];let ok=true;const d={};
+  reqs.forEach(f=>{const el=document.getElementById(f.id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[f.key]=el.value.trim();}});
+  if(!ok){setMsg(document.getElementById('nl-status'),'err','✗ Fill required fields');return;}
+  d['Source']=nlSrc;d['Location']=nlLocV;d['Created DT']=fmtDT(new Date());d['Interest Level']=nlInt||'Warm';
+  d['Alt Phone']=document.getElementById('nl-altphone').value;d['Variant']=document.getElementById('nl-variant').value;d['Color Pref']=document.getElementById('nl-color').value;
+  d['Budget']=document.getElementById('nl-budget').value;d['Finance/Cash']=document.getElementById('nl-finance').value;
+  d['Customer Area']=document.getElementById('nl-area').value;d['Customer City']=document.getElementById('nl-city').value;
+  d['VoC Notes']=document.getElementById('nl-notes').value;d['Next Followup DT']=document.getElementById('nl-nextfu').value;d['Status']='Active';
+  const asap=document.getElementById('nl-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('nl-del-date').value||'');
+  const st=document.getElementById('nl-status');setMsg(st,'ld','⟳ Saving…');
+  try{const r=await api({action:'addLead',data:JSON.stringify(d)});setMsg(st,'ok','✓ Lead saved! '+r.leadId);clearNLForm();allLeads.push({...d,'Lead ID':r.leadId,'Followup Count':'0'});renderDashboard();}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
+function clearNLForm(){['nl-name','nl-sp','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());}
+
+// ═══ FOLLOW-UP ═══
+function checkTDFields(){const m=document.getElementById('fu-method').value;document.getElementById('td-fields').style.display=m==='Test Drive Conducted'?'block':'none';}
+function fuSearch(){const q=document.getElementById('fu-search').value.trim().toLowerCase();if(!q)return;const m=allLeads.filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).filter(l=>l['Status']!=='Lost').slice(0,10);const res=document.getElementById('fu-results');const list=document.getElementById('fu-list');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No active leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="fuSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</span><span class="pill ${srcCls(l['Source']||'')}" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span></div>`;}).join('');}
+function fuSelLead(l){fuSelectedLead=l;document.getElementById('fu-lead-id').value=l['Lead ID'];document.getElementById('fu-sel-text').textContent=`${l['Customer Name']} (${l['Phone']}) — ${l['Model Interest']||'—'}`;document.getElementById('fu-lead-info').style.display='block';document.getElementById('fu-results').style.display='none';const b=calcBucket(l);const bT={red:'🚨 Needs action',amber:'⚠ FU overdue',hot:'🔥 Hot',warm:'🔵 Warm',cold:'❄ Cold',green:'✅ Booked'}[b]||b;document.getElementById('fu-lead-card').innerHTML=`<span>📍 ${l['Location']||'—'}</span><span>📢 ${l['Source']||'—'}</span><span>🚗 ${l['Model Interest']||'—'}</span><span>🔁 ${l['Followup Count']||0} FUs</span><span>📊 ${bT}</span><span style="color:${isVocThin(l)?'var(--red)':'var(--gray-500)'};">VoC: ${isVocThin(l)?'⚠ THIN':'OK'} — "${(l['VoC Notes']||'None').substring(0,60)}"</span>`;if(l['Interest Level'])selFUInt(l['Interest Level'],null);}
+var fuSelectedLead=null;
+function fuClearSel(){fuSelectedLead=null;document.getElementById('fu-lead-id').value='';document.getElementById('fu-lead-info').style.display='none';document.getElementById('fu-search').value='';document.getElementById('fu-results').style.display='none';}
+function selFUInt(val,btn){fuInt=val;['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});if(btn)btn.classList.add('sel-'+val.toLowerCase());else{const el=document.getElementById('fui-'+val.toLowerCase());if(el)el.classList.add('sel-'+val.toLowerCase());}document.getElementById('fu-interest').value=val;}
+document.addEventListener('change',e=>{if(e.target.id==='fu-status-upd')document.getElementById('fu-lost-row').style.display=e.target.value==='Lost'?'block':'none';});
+async function submitFollowUp(){
+  const lid=document.getElementById('fu-lead-id').value;if(!lid){setMsg(document.getElementById('fu-status'),'err','✗ Select a lead first');return;}
+  const method=document.getElementById('fu-method').value;const outcome=document.getElementById('fu-outcome').value;
+  if(!method){document.getElementById('fu-method').closest('.field').classList.add('invalid');return;}if(!outcome){document.getElementById('fu-outcome').closest('.field').classList.add('invalid');return;}
+  const isTD=method==='Test Drive Conducted';
+  const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':document.getElementById('fu-status-upd').value,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||''};
+  const st=document.getElementById('fu-status');setMsg(st,'ld','⟳ Logging…');
+  try{await api({action:'addFollowUp',data:JSON.stringify(d)});setMsg(st,'ok','✓ Logged!'+(isTD?' + Test Drive!':''));fuClearForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
+function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
+function prefillFU(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);},100);}
+function prefillFULost(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);document.getElementById('fu-status-upd').value='Lost';document.getElementById('fu-lost-row').style.display='block';},100);}
+function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());},150);}
+
+// ═══ BOOKINGS ═══
+function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={instock:0,onorder:1,delivered:2};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';}
+function togExc(v){bkExc=v;document.getElementById('t-exc-y').classList.toggle('on',v==='yes');document.getElementById('t-exc-n').classList.toggle('on',v==='no');['exc-make-r','exc-model-r','exc-year-r','exc-val-r'].forEach(id=>document.getElementById(id).style.display=v==='yes'?'block':'none');}
+function togIns(v){bkIns=v;document.getElementById('t-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ins-n').classList.toggle('on',v==='no');}
+function togStk(v){bkStk=v;document.getElementById('t-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-stk-n').classList.toggle('on',v==='no');document.getElementById('bk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-edel-r').style.display=v==='no'?'block':'none';}
+function toggleNewBkForm(){const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open'))document.getElementById('bk-dt').value=fmtDT(new Date());}
+function bkLeadSearch(){const q=document.getElementById('bk-ls').value.trim().toLowerCase();if(!q)return;const m=allLeads.filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).slice(0,8);const res=document.getElementById('bk-lr');const list=document.getElementById('bk-ll');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="bkSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Location']||''}</span></div>`;}).join('');}
+function bkSelLead(l){document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-lr').style.display='none';document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';}
+function bkClearLead(){document.getElementById('bk-lead-id').value='';document.getElementById('bk-sel').style.display='none';document.getElementById('bk-ls').value='';document.getElementById('bk-lr').style.display='none';}
+async function submitBooking(){
+  const reqs=[{id:'bk-name',key:'Customer Name'},{id:'bk-phone',key:'Phone'},{id:'bk-loc',key:'Location'},{id:'bk-model',key:'Model'},{id:'bk-amount',key:'Booking Amount'},{id:'bk-sp',key:'Salesperson'}];let ok=true;const d={};
+  reqs.forEach(f=>{const el=document.getElementById(f.id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[f.key]=el.value.trim();}});
+  if(!ok){setMsg(document.getElementById('bk-status'),'err','✗ Fill required fields');return;}
+  if(!bkStk){setMsg(document.getElementById('bk-status'),'err','✗ Set vehicle availability');return;}
+  d['Lead ID']=document.getElementById('bk-lead-id').value;d['Booking DT']=fmtDT(new Date());d['Variant']=document.getElementById('bk-variant').value;d['Color']=document.getElementById('bk-color').value;d['Payment Mode']=document.getElementById('bk-payment').value;d['Lead Source']=document.getElementById('bk-src').value;d['VC Number']=document.getElementById('bk-vc').value;d['Discount Amount']=document.getElementById('bk-discount').value;d['Exchange']=bkExc==='yes'?'Yes':'No';d['Old Car Make']=document.getElementById('bk-exc-make').value;d['Old Car Model']=document.getElementById('bk-exc-model').value;d['Old Car Year']=document.getElementById('bk-exc-year').value;d['Exchange Value']=document.getElementById('bk-exc-val').value;d['In-house Insurance']=bkIns==='yes'?'Yes':'No';d['In Stock']=bkStk==='yes'?'Yes':'No';d['Stock Ref']=document.getElementById('bk-stock-ref').value;d['Stockyard']=document.getElementById('bk-stockyard').value;d['Expected Arrival']=document.getElementById('bk-expected-del').value;const asap=document.getElementById('bk-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('bk-cust-del').value||'');d['Notes']=document.getElementById('bk-notes').value;d['Status']='Booked';
+  const st=document.getElementById('bk-status');setMsg(st,'ld','⟳ Saving…');
+  try{const r=await api({action:'addBooking',data:JSON.stringify(d)});setMsg(st,'ok','✅ Booking confirmed! '+r.bookingId);toggleNewBkForm();clearBkForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
+function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-sp','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));}
+function renderBookings(){
+  let bks=locFilt(allBK);const lf=document.getElementById('bk-floc')?.value||'';const mf=document.getElementById('bk-fmodel')?.value||'';
+  if(lf)bks=bks.filter(b=>b['Location']===lf);if(mf)bks=bks.filter(b=>b['Model']===mf);
+  const ins=bks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered');const ood=bks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered');const del=bks.filter(b=>b['Status']==='Delivered');
+  document.getElementById('bk-count').textContent=`${ins.length} in-stock · ${ood.length} on order · ${del.length} delivered`;
+  renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');
+}
+function renderBkList(id,bks,type){
+  const el=document.getElementById(id);if(!bks.length){el.innerHTML=`<div class="empty-st"><div class="ico">${type==='stk'?'📦':type==='ord'?'🔄':'🚗'}</div><p>No ${type==='stk'?'in-stock bookings':type==='ord'?'orders pending':'deliveries'}.</p></div>`;return;}
+  const now=new Date();const thr=getTargets().wait||30;
+  el.innerHTML=bks.map(b=>{
+    const ri=b['rowIndex']||'';const bkId=b['Booking ID']||'';const cname=(b['Customer Name']||'').replace(/'/g,'');const pd=b['Planned Delivery']||'';const pdLbl=pd?'Update':'Set';
+    const btnConvert=type==='ord'?('<button class="tbl-btn" style="background:var(--green-bg);color:var(--green);border-color:var(--green-bd);" onclick="openConvertModal(\'' +ri+ '\',\'' +bkId+ '\')">✅ Vehicle Arrived — Mark In Stock</button>'):'';
+    const btnPlan=type!=='del'?('<button class="tbl-btn" onclick="openPlannedModal(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\',\'' +pd+ '\')">📅 '+pdLbl+' Planned Delivery</button>'):'';
+    const btnDeliv=type!=='del'?('<button class="tbl-btn" onclick="markDeliv(\'' +ri+ '\',\'' +bkId+ '\')">🚗 Mark Delivered</button>'):('<span class="pill pill-booked">✅ Delivered '+b['Actual Delivery']+' </span>');
+    const bkFootBtns=btnConvert+btnPlan+btnDeliv;
+    const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
+    let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
+    const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
+    return `<div class="${cls}">
+      <div class="bk-head"><span class="bk-name">${b['Customer Name']||'—'}</span><span style="font-size:11.5px;color:var(--gray-500);">${b['Phone']||''}</span>${locTagHtml(b['Location'])}<span class="bk-id">${b['Booking ID']||'—'}</span>${wBadge}</div>
+      <div class="bk-body"><span>🚗 <strong>${b['Model']||'—'}</strong> ${b['Variant']||''} ${b['Color']?'· '+b['Color']:''}</span><span>💰 ₹${(+b['Booking Amount']||0).toLocaleString('en-IN')}</span><span>💳 ${b['Payment Mode']||'—'}</span>${b['Lead Source']?`<span>📢 ${b['Lead Source']}</span>`:''}<span>👤 ${b['Salesperson']||'—'}</span>${b['Stock Ref']?`<span>🔢 ${b['Stock Ref']}</span>`:''}</div>
+      ${tags?`<div class="bk-tags">${tags}</div>`:''}
+      ${type==='ord'&&b['Expected Arrival']?`<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:4px;">📅 Dealer ETA: ${b['Expected Arrival']}</div>`:''}
+      ${b['Planned Delivery']?'<div style="font-size:11px;font-weight:700;color:var(--blue-dk);background:var(--blue-lt);border:1px solid #BAD3EF;border-radius:4px;padding:3px 9px;display:inline-block;margin-bottom:4px;">🗓 Planned Delivery: <strong>'+b['Planned Delivery']+'</strong></div>':''}
+      <div class="bk-foot"><span style="font-size:11px;color:var(--gray-400);">Booked: ${b['Booking DT']||'—'}</span>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${bkFootBtns}</div></div>
+    </div>`;
+  }).join('');
+}
+async function markDeliv(ri,bkId){if(!confirm('Mark '+bkId+' as Delivered?'))return;try{await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,Status:'Delivered','Actual Delivery':new Date().toISOString().split('T')[0]})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+
+// ═══ STOCK ═══
+function toggleAddStock(){const f=document.getElementById('add-stock-form');f.style.display=f.style.display==='none'?'block':'none';}
+async function submitAddStock(){
+  const reqs=[{id:'stk-chassis',key:'Chassis No'},{id:'stk-model',key:'Model'},{id:'stk-loc',key:'Current Location'}];let ok=true;const d={};
+  reqs.forEach(f=>{const el=document.getElementById(f.id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[f.key]=el.value.trim();}});
+  if(!ok){setMsg(document.getElementById('stk-status'),'err','✗ Fill required fields');return;}
+  d['Variant']=document.getElementById('stk-variant').value;d['Color']=document.getElementById('stk-color').value;d['Notes']=document.getElementById('stk-notes').value;d['Status']='Available';
+  const st=document.getElementById('stk-status');setMsg(st,'ld','⟳ Adding…');
+  try{await api({action:'addStock',data:JSON.stringify(d)});setMsg(st,'ok','✓ Added to stock');toggleAddStock();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
+function renderStock(){
+  const fl=document.getElementById('stk-floc')?.value||'';const fm=document.getElementById('stk-fm')?.value||'';const fs=document.getElementById('stk-fs')?.value||'';
+  let stk=allStock;if(fl)stk=stk.filter(s=>s['Current Location']===fl);if(fm)stk=stk.filter(s=>s['Model']===fm);if(fs)stk=stk.filter(s=>s['Status']===fs);
+  const av=allStock.filter(s=>s['Status']==='Available').length;const al=allStock.filter(s=>s['Status']==='Allocated').length;const so=allStock.filter(s=>s['Status']==='Sold').length;
+  document.getElementById('scp-av').textContent=av;document.getElementById('scp-al').textContent=al;document.getElementById('scp-so').textContent=so;document.getElementById('scp-tot').textContent=allStock.filter(s=>s['Status']!=='Sold').length;
+  document.getElementById('stk-count').textContent=stk.length+' vehicles';
+  const list=document.getElementById('stock-list');
+  if(!stk.length){list.innerHTML='<div class="empty-st"><div class="ico">📦</div><p>No stock records.</p></div>';return;}
+  list.innerHTML=stk.map(s=>{
+    const cls=s['Status']==='Available'?'s-av':s['Status']==='Allocated'?'s-al':'s-so';
+    const badge=s['Status']==='Available'?'<span class="av-bdg">● Available</span>':s['Status']==='Allocated'?'<span class="al-bdg">● Allocated</span>':'<span class="so-bdg">● Delivered</span>';
+    const lc=(s['Current Location']||'').toLowerCase();const ltcls=lc.includes('palam')?'lt-p':lc.includes('naj')?'lt-n':'lt-nr';
+    return `<div class="stock-card ${cls}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="chassis-no" onclick="navigator.clipboard.writeText('${s['Chassis No']||''}').then(()=>alert('Copied!'))" title="Click to copy">${s['Chassis No']||'—'}</span>
+        <span style="font-weight:700;font-size:13px;">${s['Model']||'—'} ${s['Variant']||''}</span>
+        <span style="font-size:12px;color:var(--gray-500);">${s['Color']||'—'}</span>
+        ${badge}<span class="${ltcls}">${s['Current Location']||'—'}</span>
+      </div>
+      ${s['Allocated To']?`<div style="font-size:11.5px;color:var(--blue-dk);margin-top:5px;">🔗 Allocated to: <strong>${s['Allocated To']}</strong>${s['Booking ID']?' ('+s['Booking ID']+')':''}</div>`:''}
+      ${s['Notes']?`<div style="font-size:11px;color:var(--gray-500);margin-top:3px;">${s['Notes']}</div>`:''}
+      <div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;">
+        ${s['Status']==='Available'?`<button class="tbl-btn" onclick="allocStk('${s['rowIndex']}')">Allocate →</button>`:''}
+        <button class="tbl-btn" onclick="moveStk('${s['rowIndex']}')">Update Location</button>
+        ${s['Status']!=='Sold'?`<button class="tbl-btn" onclick="markStkSold('${s['rowIndex']}')">Mark Delivered</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function allocStk(ri){const c=prompt('Customer Name (for allocation):');if(!c)return;const bk=prompt('Booking ID (optional):');try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,Status:'Allocated','Allocated To':c,'Booking ID':bk||''})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+async function moveStk(ri){const loc=prompt('New location (e.g. Palam Showroom, Najafgarh Stockyard):');if(!loc)return;try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,'Current Location':loc})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+async function markStkSold(ri){if(!confirm('Mark as Delivered?'))return;try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,Status:'Sold'})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+function renderDVS(){
+  const MODELS=['Tata Punch','Tata Nexon','Tata Harrier','Tata Safari','Tata Curvv','Tata Altroz','Tata Tiago','Tata Tigor','Tata Sierra'];
+  const active=locFilt(allLeads).filter(l=>l['Status']==='Active'||l['Status']==='');
+  const avail=allStock.filter(s=>s['Status']==='Available');
+  const rows=MODELS.map(m=>{
+    const demand=active.filter(l=>l['Model Interest']===m).length;const stock=avail.filter(s=>s['Model']===m).length;const gap=stock-demand;
+    if(demand===0&&stock===0)return null;
+    const gc=gap<0?'gap-sh':gap===0?'gap-ok':'gap-su';const badge=gap<-2?`<span class="gb-sh">🔴 ${Math.abs(gap)} shortage</span>`:gap<0?`<span class="gb-sh">🔴 ${Math.abs(gap)} short</span>`:gap===0?`<span class="gb-ok">🟡 Balanced</span>`:`<span class="gb-su">🟢 ${gap} surplus</span>`;
+    const action=gap<0?`<button class="tbl-btn" onclick="showTab('leads')">View Leads →</button>`:gap>3?`<button class="tbl-btn" onclick="showTab('stock')">Check Stock →</button>`:'—';
+    return `<tr><td style="font-weight:700;">${m}</td><td style="text-align:center;font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--blue);">${demand}</td><td style="text-align:center;font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--green);">${stock}</td><td style="text-align:center;"><span class="gap-cell ${gc}">${gap>0?'+':''}${gap}</span></td><td>${badge}</td><td>${action}</td></tr>`;
+  }).filter(Boolean);
+  document.getElementById('dvs-tbody').innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--gray-400);">Add leads and stock data to see analysis.</td></tr>';
+}
+
+// ═══ SETUP ═══
+function saveURL(){const url=document.getElementById('script-url').value.trim();if(!url)return;SCRIPT_URL=url;localStorage.setItem('scc_url',url);const cs=document.getElementById('conn-status');cs.textContent='Testing…';cs.style.color='var(--amber)';api({action:'ping'}).then(()=>{cs.textContent='✓ Connected!';cs.style.color='var(--green)';document.getElementById('setup-banner').style.display='none';}).catch(()=>{cs.textContent='✓ URL saved. Try refreshing Dashboard.';cs.style.color='var(--blue)';document.getElementById('setup-banner').style.display='none';});}
+function copyScript(){navigator.clipboard.writeText(document.getElementById('script-code').textContent).then(()=>{const b=document.querySelector('.copy-btn');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='Copy All',2000);});}
+function exportLeadsCSV(){if(!allLeads.length)return;const cols=['Lead ID','Created DT','Location','Source','Customer Name','Phone','Alt Phone','Model Interest','Variant','Budget','Finance/Cash','Salesperson','Status','Interest Level','First Contact DT','Last Contact DT','Next Followup DT','Followup Count','Lost Reason','VoC Notes','Customer Area','Customer City','Customer Expected Delivery'];const csv=[cols.join(','),...allLeads.map(l=>cols.map(c=>JSON.stringify(l[c]||'')).join(','))].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();}
+
+
+
+// ═══ SALESMAN MONTHLY LEADERBOARD ═══
+function renderSalesLeaderboard(mBks,mTDs){
+  const ftgt=getTargets().fin||75;const itgt=getTargets().ins||91;
+  // Build per-salesperson stats from this month's bookings
+  const map={};
+  mBks.forEach(b=>{
+    const sp=b['Salesperson']||'Unassigned';
+    if(!map[sp])map[sp]={name:sp,bk:0,fin:0,ins:0,td:0,loc:b['Location']||''};
+    map[sp].bk++;
+    if(b['Payment Mode']==='Finance'||b['Payment Mode']==='Cash + Finance')map[sp].fin++;
+    if(b['In-house Insurance']==='Yes')map[sp].ins++;
+  });
+  mTDs.forEach(t=>{
+    const sp=t['Salesperson']||'Unassigned';
+    if(!map[sp])map[sp]={name:sp,bk:0,fin:0,ins:0,td:0,loc:t['Location']||''};
+    map[sp].td++;
+  });
+  const sorted=Object.values(map).sort((a,b)=>b.bk-a.bk||b.fin-a.fin||b.ins-a.ins);
+  const medals=['🥇','🥈','🥉'];
+  const total=sorted.reduce((s,r)=>s+r.bk,0);
+  document.getElementById('sl-month-lbl').textContent=total+' total bookings';
+  if(!sorted.length){document.getElementById('sl-leaderboard').innerHTML='<div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No bookings this month.</div>';return;}
+  document.getElementById('sl-leaderboard').innerHTML=sorted.map((r,i)=>{
+    const fp=r.bk?Math.round(r.fin/r.bk*100):0;
+    const ip=r.bk?Math.round(r.ins/r.bk*100):0;
+    const finCls=fp>=ftgt?'sl-fin-ok':'sl-fin-bad';
+    const insCls=ip>=itgt?'sl-ins-ok':'sl-ins-bad';
+    const medal=i<3?medals[i]:('<span style="font-family:var(--font-h);font-size:14px;font-weight:800;color:var(--gray-300);">'+(i+1)+'</span>');
+    const locShort=(r.loc||'').replace(' (Dwarka)','').replace(' Stockyard','').replace('Stockyard','');
+    return '<div class="sl-row">'
+      +'<div class="sl-medal">'+medal+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div class="sl-name">'+r.name+'</div>'
+        +'<div class="sl-loc">'+locShort+' · '+r.td+' TDs</div>'
+      +'</div>'
+      +'<div class="sl-stats">'
+        +'<div class="sl-stat-row"><span class="sl-stat-lbl">Fin</span><div class="sl-bar-w"><div class="sl-bar-fill '+finCls+'" style="width:'+Math.min(fp,100)+'%;"></div></div><span class="sl-stat-pct" style="color:'+(fp>=ftgt?'var(--teal)':'var(--red)')+';">'+fp+'%</span></div>'
+        +'<div class="sl-stat-row"><span class="sl-stat-lbl">Ins</span><div class="sl-bar-w"><div class="sl-bar-fill '+insCls+'" style="width:'+Math.min(ip,100)+'%;"></div></div><span class="sl-stat-pct" style="color:'+(ip>=itgt?'var(--green)':'var(--amber)')+';">'+ip+'%</span></div>'
+      +'</div>'
+      +'<div style="text-align:center;min-width:36px;"><div class="sl-bk">'+r.bk+'</div><div style="font-size:9px;color:var(--gray-400);font-weight:700;text-transform:uppercase;">bkgs</div></div>'
+    +'</div>';
+  }).join('');
+}
+
+// ═══ DELIVERY STATS ═══
+function getDeliveryStats(bks){
+  const now=new Date();const ms=monthStart();const today=new Date();today.setHours(0,0,0,0);
+  const allDel=bks.filter(b=>b['Status']==='Delivered');
+  const monthDel=allDel.filter(b=>{const d=parseD(b['Actual Delivery']);return d&&d>=ms;});
+  const todayDel=allDel.filter(b=>{const d=parseD(b['Actual Delivery']);if(!d)return false;const dd=new Date(d);dd.setHours(0,0,0,0);return dd.getTime()===today.getTime();});
+  return{all:allDel.length,month:monthDel.length,today:todayDel.length,todayNames:todayDel.map(b=>b['Customer Name']||'—').join(', ')};
+}
+
+// ═══ NEXT PLANNED DELIVERIES ═══
+function renderNextDeliveries(bks){
+  const now=new Date();now.setHours(0,0,0,0);
+  const upcoming=locFilt(bks).filter(b=>b['Status']!=='Delivered'&&b['Planned Delivery']).map(b=>({...b,pd:parseD(b['Planned Delivery'])})).filter(b=>b.pd).sort((a,b)=>a.pd-b.pd).slice(0,10);
+  const el=document.getElementById('next-del-list');
+  if(!upcoming.length){el.innerHTML='<div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No planned deliveries set. Use 📅 Set Planned Delivery on booking cards.</div>';return;}
+  el.innerHTML=upcoming.map(b=>{
+    const daysTo=daysBetween(now,b.pd);
+    let dcls='nd-ok',dtxt=daysTo===0?'Today':daysTo<0?`${Math.abs(daysTo)}d overdue`:`${daysTo}d away`;
+    if(daysTo<0)dcls='nd-today';else if(daysTo<=3)dcls='nd-soon';
+    const locT=locTagHtml(b['Location']);
+    return `<div class="nd-row">
+      <div class="nd-date">${b['Planned Delivery']}</div>
+      <div><div class="nd-name">${b['Customer Name']||'—'}</div><div class="nd-model">${locT} ${b['Model']||'—'} ${b['Variant']||''} · ${b['Salesperson']||'—'}</div></div>
+      <span class="nd-days ${dcls}">${dtxt}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══ DELIVERY STAT RENDERING ═══
+function renderDeliveryStats(bks){
+  const s=getDeliveryStats(locFilt(bks));
+  document.getElementById('mb-del-today').textContent=s.today;
+  document.getElementById('mb-del-month').textContent=s.month;
+  document.getElementById('mb-del-total').textContent=s.all;
+  document.getElementById('sd-today').textContent=s.today;
+  document.getElementById('sd-today-names').textContent=s.todayNames||'—';
+  document.getElementById('sd-month').textContent=s.month;
+  document.getElementById('sd-total').textContent=s.all;
+}
+
+// ═══ SHOW BOOKINGS TAB AT SPECIFIC SUB-TAB ═══
+function showBkTabNav(t){showTab('bookings');setTimeout(()=>showBkTab(t),80);}
+
+// ═══ CONVERT ON-ORDER TO IN-STOCK MODAL ═══
+function openConvertModal(ri,bkId){
+  document.getElementById('conv-ri').value=ri;
+  document.getElementById('conv-bkid').value=bkId;
+  document.getElementById('conv-chassis').value='';
+  document.getElementById('conv-loc').value='';
+  document.getElementById('conv-status').className='smsg';
+  document.getElementById('convert-modal').classList.add('open');
+}
+function closeConvertModal(){document.getElementById('convert-modal').classList.remove('open');}
+async function confirmConvertToStock(){
+  const chassis=document.getElementById('conv-chassis').value.trim();
+  const loc=document.getElementById('conv-loc').value;
+  const ri=document.getElementById('conv-ri').value;
+  const bkId=document.getElementById('conv-bkid').value;
+  if(!chassis){setMsg(document.getElementById('conv-status'),'err','✗ Enter chassis number');return;}
+  if(!loc){setMsg(document.getElementById('conv-status'),'err','✗ Select stockyard');return;}
+  setMsg(document.getElementById('conv-status'),'ld','⟳ Updating…');
+  try{
+    await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,'In Stock':'Yes','Stock Ref':chassis,'Stockyard':loc})});
+    // Also add to stock tracker
+    await api({action:'addStock',data:JSON.stringify({'Chassis No':chassis,'Model':'','Variant':'','Color':'','Current Location':loc,'Status':'Allocated','Notes':'From booking '+bkId,'Added Date':new Date().toISOString().split('T')[0]})});
+    setMsg(document.getElementById('conv-status'),'ok','✅ Converted to In Stock!');
+    setTimeout(()=>{closeConvertModal();loadAll();},1200);
+  }catch(e){setMsg(document.getElementById('conv-status'),'err','✗ '+e.message);}
+}
+
+// ═══ PLANNED DELIVERY MODAL ═══
+function openPlannedModal(ri,bkId,cname,existing){
+  document.getElementById('pd-ri').value=ri;
+  document.getElementById('pd-bkid').value=bkId;
+  document.getElementById('pd-cname').value=cname;
+  document.getElementById('pd-date').value=existing||'';
+  document.getElementById('pd-note').value='';
+  document.getElementById('pd-status').className='smsg';
+  document.getElementById('planned-del-modal').classList.add('open');
+}
+function closePlannedModal(){document.getElementById('planned-del-modal').classList.remove('open');}
+async function confirmPlannedDelivery(){
+  const date=document.getElementById('pd-date').value;
+  const ri=document.getElementById('pd-ri').value;
+  if(!date){setMsg(document.getElementById('pd-status'),'err','✗ Select a date');return;}
+  setMsg(document.getElementById('pd-status'),'ld','⟳ Saving…');
+  try{
+    await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,'Planned Delivery':date})});
+    setMsg(document.getElementById('pd-status'),'ok','✅ Planned date saved!');
+    const bk=allBK.find(b=>b.rowIndex==ri);if(bk)bk['Planned Delivery']=date;
+    renderNextDeliveries(allBK);renderBookings();
+    setTimeout(()=>closePlannedModal(),1000);
+  }catch(e){setMsg(document.getElementById('pd-status'),'err','✗ '+e.message);}
+}
+
+// ═══ EXCEL / CSV STOCK UPLOAD ═══
+let parsedStockRows=[];
+function toggleUploadStock(){
+  const f=document.getElementById('upload-stock-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='none'){parsedStockRows=[];document.getElementById('upload-preview').style.display='none';document.getElementById('upload-confirm-btn').style.display='none';}
+}
+function uzDragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag');}
+function uzDragLeave(){document.getElementById('upload-zone').classList.remove('drag');}
+function uzDrop(e){e.preventDefault();uzDragLeave();const f=e.dataTransfer.files[0];if(f)processStockFile(f);}
+function handleStockFile(input){if(input.files[0])processStockFile(input.files[0]);}
+function processStockFile(file){
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let data;
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    }catch(err){setMsg(document.getElementById('upload-status'),'err','✗ Could not read file: '+err.message);return;}
+    parseStockData(data);
+  };
+  reader.readAsBinaryString(file);
+}
+function parseStockData(rows){
+  if(!rows||rows.length<2){setMsg(document.getElementById('upload-status'),'err','✗ No data found in file');return;}
+  // Auto-detect header row (find row with "Chassis" in it)
+  let hdrIdx=0;
+  for(let i=0;i<Math.min(5,rows.length);i++){if(rows[i].some(c=>String(c).toLowerCase().includes('chassis'))){hdrIdx=i;break;}}
+  const headers=rows[hdrIdx].map(h=>String(h).trim().toLowerCase());
+  // Column index detection
+  const ci=(names)=>{for(const n of names){const idx=headers.findIndex(h=>h.includes(n.toLowerCase()));if(idx>=0)return idx;}return -1;};
+  const colChassis=ci(['chassis no','chassis']);
+  const colModel=ci(['model']);
+  const colProductLine=ci(['product line','product_line']);
+  const colVC=ci(['product/vc','vc#','product_vc','vc number']);
+  const colDesc=ci(['product desc','description','product_desc']);
+  const colColor=ci(['chassis color','color','colour']);
+  const colLoc=ci(['location']);
+  const colStatus=ci(['allotted','allotted/unallotted','physical status','status']);
+  const colPhysical=ci(['physical status','physical_status']);
+  const colEngineNo=ci(['engine no','engine_no','engine']);
+  const colMfgDate=ci(['manufacturing date','mfg date','manufacturing_date']);
+  const colInvDate=ci(['tm invoice','invoice date','invoice_date']);
+
+  // Location normalizer
+  function normLoc(raw){
+    const r=(raw||'').toLowerCase().trim();
+    if(r.includes('bijwasan')||r.includes('palam'))return 'Common Stockyard';
+    if(r.includes('najaf')||r.includes('nafaj'))return 'Najafgarh Stockyard';
+    if(r.includes('dabari')||r.includes('dabri'))return 'Palam Stockyard';
+    if(r.includes('narela'))return 'Narela Stockyard';
+    return raw||'Common Stockyard';
+  }
+  // Model normalizer
+  function normModel(raw){
+    const r=(raw||'').toLowerCase().trim();
+    if(r.includes('punch'))return 'Tata Punch';
+    if(r.includes('nexon'))return 'Tata Nexon';
+    if(r.includes('harrier'))return 'Tata Harrier';
+    if(r.includes('safari'))return 'Tata Safari';
+    if(r.includes('curvv'))return 'Tata Curvv';
+    if(r.includes('altroz'))return 'Tata Altroz';
+    if(r.includes('tiago'))return 'Tata Tiago';
+    if(r.includes('tigor'))return 'Tata Tigor';
+    if(r.includes('sierra'))return 'Tata Sierra';
+    return raw||'Other';
+  }
+  // Color normalizer
+  function normColor(raw){
+    const map={'daytona_grey':'Daytona Grey','daytona grey':'Daytona Grey','pristin_whte':'Pristine White','pristine white':'Pristine White','pure_grey':'Pure Grey','pure grey':'Pure Grey','coorg_clouds':'Coorg Clouds','dyngry_gcnbk':'Dyn Grey / Gunmetal Black','bengal_rogue':'Bengal Rouge','caramel':'Caramel','prwt_gycrnbk':'Pristine White / Gunmetal Black','arizona_blue':'Arizona Blue','ocn_blue':'Ocean Blue','ocean blue':'Ocean Blue'};
+    const k=(raw||'').toLowerCase().trim();return map[k]||(raw||'');
+  }
+  // Status normalizer
+  function normStatus(phys,allot){
+    if((allot||'').toLowerCase().includes('allotted')&&!(allot||'').toLowerCase().includes('unallotted'))return 'Allocated';
+    if((phys||'').toLowerCase()==='transit')return 'Available';
+    return 'Available';
+  }
+
+  const dataRows=rows.slice(hdrIdx+1).filter(r=>r.some(c=>c!==''));
+  parsedStockRows=dataRows.map(r=>{
+    const cn=String(r[colChassis]||'').trim();
+    if(!cn)return null;
+    const physRaw=colPhysical>=0?String(r[colPhysical]||''):'';
+    const allotRaw=colStatus>=0?String(r[colStatus]||''):'';
+    return {
+      'Chassis No':cn,
+      'Model':normModel(colModel>=0?String(r[colModel]||''):''),
+      'Variant':colProductLine>=0?String(r[colProductLine]||''):'',
+      'Color':normColor(colColor>=0?String(r[colColor]||''):''),
+      'Current Location':normLoc(colLoc>=0?String(r[colLoc]||''):''),
+      'Status':normStatus(physRaw,allotRaw),
+      'Notes':[colVC>=0?'VC:'+r[colVC]:'',colEngineNo>=0?'Eng:'+r[colEngineNo]:'',colMfgDate>=0?'Mfg:'+r[colMfgDate]:''].filter(Boolean).join(' | ')
+    };
+  }).filter(Boolean);
+
+  // Check duplicates against existing stock
+  const existingChassis=new Set(allStock.map(s=>(s['Chassis No']||'').toUpperCase().trim()));
+  parsedStockRows=parsedStockRows.map(r=>({...r,_dup:existingChassis.has(r['Chassis No'].toUpperCase().trim())}));
+
+  const newCount=parsedStockRows.filter(r=>!r._dup).length;
+  const dupCount=parsedStockRows.filter(r=>r._dup).length;
+
+  // Show preview
+  const thead=document.getElementById('preview-thead');
+  const tbody=document.getElementById('preview-tbody');
+  thead.innerHTML='<th>#</th><th>Chassis No</th><th>Model</th><th>Variant</th><th>Color</th><th>Location</th><th>Status</th><th>Duplicate?</th>';
+  tbody.innerHTML=parsedStockRows.map((r,i)=>`<tr style="${r._dup?'opacity:.5;':''}"><td>${i+1}</td><td style="font-weight:700;font-family:var(--font-h);">${r['Chassis No']}</td><td>${r['Model']}</td><td style="font-size:10px;">${r['Variant']}</td><td>${r['Color']}</td><td style="font-size:10px;">${r['Current Location']}</td><td><span style="color:${r['Status']==='Available'?'var(--green)':'var(--blue)'};">${r['Status']}</span></td><td>${r._dup?'<span style="color:var(--amber);font-weight:700;">Skip</span>':'<span style="color:var(--green);font-weight:700;">New ✓</span>'}</td></tr>`).join('');
+  document.getElementById('upload-row-count').textContent=parsedStockRows.length+' total, '+newCount+' new, '+dupCount+' duplicates (will skip)';
+  document.getElementById('upload-preview').style.display='block';
+  document.getElementById('upload-confirm-count').textContent=newCount;
+  document.getElementById('upload-confirm-btn').style.display=newCount>0?'inline-flex':'none';
+  if(newCount===0)setMsg(document.getElementById('upload-status'),'err','All chassis numbers already exist in stock.');
+  else setMsg(document.getElementById('upload-status'),'ok','Ready to upload '+newCount+' new vehicles.');
+}
+async function uploadStockBatch(){
+  const toUpload=parsedStockRows.filter(r=>!r._dup);
+  if(!toUpload.length){setMsg(document.getElementById('upload-status'),'err','Nothing to upload.');return;}
+  setMsg(document.getElementById('upload-status'),'ld','⟳ Uploading '+toUpload.length+' vehicles…');
+  try{
+    const res=await api({action:'bulkAddStock',data:JSON.stringify({items:toUpload})});
+    setMsg(document.getElementById('upload-status'),'ok','✅ Added '+res.added+' vehicles. '+(res.skipped?res.skipped+' skipped (already exist).':''));
+    parsedStockRows=[];document.getElementById('upload-preview').style.display='none';document.getElementById('upload-confirm-btn').style.display='none';
+    await loadAll();
+  }catch(e){setMsg(document.getElementById('upload-status'),'err','✗ '+e.message);}
+}
+
+// ═══ INIT ═══
+window.onload=function(){
+  setNextFU(1,'nl-nextfu');document.getElementById('nl-interest').value='Warm';
+  document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');
+  document.getElementById('nl-created').value=fmtDT(new Date());
+  const saved=localStorage.getItem('scc_url');
+  if(saved){document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';loadAll();}
+};
+</script>
+</body>
+</html>
