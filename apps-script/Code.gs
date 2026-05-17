@@ -31,8 +31,9 @@ function handleReq(e){
   }catch(err){res={status:"error",msg:err.toString()};}
   return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
 }
+const SPREADSHEET_ID='1pw6BeI8uRd_hMHDdGyNi3AWfnBp8v0r_vSvg4fxcnwY';
 function getOrCreate(name,headers){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName(name);
+  const ss=SpreadsheetApp.openById(SPREADSHEET_ID);let sh=ss.getSheetByName(name);
   if(!sh){sh=ss.insertSheet(name);const r=sh.getRange(1,1,1,headers.length);r.setValues([headers]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);}
   return sh;
 }
@@ -111,7 +112,7 @@ function updateStock(d){
   return{status:"ok"};
 }
 function getUsersSheet(){
-  const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName("Users");
+  const ss=SpreadsheetApp.openById(SPREADSHEET_ID);let sh=ss.getSheetByName("Users");
   if(!sh){
     sh=ss.insertSheet("Users");
     const r=sh.getRange(1,1,1,UH.length);r.setValues([UH]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);
