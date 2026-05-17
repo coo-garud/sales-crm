@@ -1,11 +1,17 @@
 // Sales Command Centre — Apps Script v3
-// Auto-creates 5 sheets: Leads, FollowUps, Bookings, TestDrives, Stock
+// Auto-creates 6 sheets: Leads, FollowUps, Bookings, TestDrives, Stock, Users
 
 const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
 const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
+const UH=["Username","Password","Role","Display Name"];
+const DEFAULT_USERS=[
+  ["masteradmin","Admin@123","masteradmin","Master Admin"],
+  ["manager",    "Manager@123","manager",  "Manager"],
+  ["salesperson","Sales@123","salesperson","Sales Staff"]
+];
 
 function doGet(e){return handleReq(e);}
 function doPost(e){return handleReq(e);}
@@ -17,6 +23,9 @@ function handleReq(e){
       case "addFollowUp":res=addFollowUp(JSON.parse(p.data));break;case "addBooking":res=addBooking(JSON.parse(p.data));break;
       case "updateBooking":res=updateBooking(JSON.parse(p.data));break;case "addStock":res=addStock(JSON.parse(p.data));break;case "bulkAddStock":res=bulkAddStock(JSON.parse(p.data));break;
       case "updateStock":res=updateStock(JSON.parse(p.data));break;
+      case "getUsers":res=getUsers();break;
+      case "saveUser":res=saveUser(JSON.parse(p.data));break;
+      case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
       default:res={status:"ok",msg:"Sales CRM API v3 running"};
     }
   }catch(err){res={status:"error",msg:err.toString()};}
@@ -99,5 +108,33 @@ function addStock(d){
 function updateStock(d){
   const sh=getOrCreate("Stock",SH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
   ["Status","Current Location","Allocated To","Booking ID","Notes"].forEach(col=>{const ci=SH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
+  return{status:"ok"};
+}
+function getUsersSheet(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName("Users");
+  if(!sh){
+    sh=ss.insertSheet("Users");
+    const r=sh.getRange(1,1,1,UH.length);r.setValues([UH]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);
+    DEFAULT_USERS.forEach(row=>sh.appendRow(row));
+  }
+  return sh;
+}
+function getUsers(){
+  const sh=getUsersSheet();const last=sh.getLastRow();if(last<2)return{status:"ok",users:[]};
+  const rows=sh.getRange(2,1,last-1,UH.length).getValues();
+  const users=rows.filter(r=>r[0]).map(r=>({username:String(r[0]),password:String(r[1]),role:String(r[2]),display:String(r[3]||r[0])}));
+  return{status:"ok",users};
+}
+function saveUser(d){
+  const sh=getUsersSheet();const last=sh.getLastRow();let found=false;
+  if(last>=2){const ids=sh.getRange(2,1,last-1,1).getValues().flat().map(String);const ix=ids.indexOf(String(d.username));
+    if(ix>=0){sh.getRange(ix+2,1,1,4).setValues([[d.username,d.password,d.role,d.display||d.username]]);found=true;}}
+  if(!found)sh.appendRow([d.username,d.password,d.role,d.display||d.username]);
+  return{status:"ok"};
+}
+function deleteUser(d){
+  const sh=getUsersSheet();const last=sh.getLastRow();if(last<2)return{status:"ok"};
+  const ids=sh.getRange(2,1,last-1,1).getValues().flat().map(String);const ix=ids.indexOf(String(d.username));
+  if(ix>=0)sh.deleteRow(ix+2);
   return{status:"ok"};
 }

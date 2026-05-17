@@ -6,6 +6,10 @@
 <title>Sales Command Centre</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
 <style>
 :root{
   --blue:#00539B;--blue-dk:#003A6B;--blue-md:#1A6FBB;--blue-lt:#E6F0FA;--blue-xlt:#F0F6FC;
@@ -409,12 +413,46 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 .pen-title{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:7px;}
 .pen-target-ok{color:var(--green);font-weight:700;}
 .pen-target-bad{color:var(--red);font-weight:700;}
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--blue-dk);position:fixed;inset:0;z-index:1000;}
+.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:360px;max-width:94vw;box-shadow:0 12px 48px rgba(0,0,0,.3);text-align:center;}
+.login-logo{margin-bottom:8px;}.login-logo img{width:180px;height:auto;}
+.login-subtitle{font-family:var(--font-h);font-size:11px;font-weight:700;color:var(--gray-400);margin-bottom:24px;letter-spacing:2px;text-transform:uppercase;}
+.lf{text-align:left;margin-bottom:12px;}.lf label{display:block;font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--gray-500);margin-bottom:4px;}
+.lf input{width:100%;background:var(--gray-100);border:1.5px solid var(--gray-200);color:var(--gray-900);border-radius:6px;padding:10px 12px;font-family:var(--font-b);font-size:14px;outline:none;transition:border-color .15s;}
+.lf input:focus{border-color:var(--blue);background:#fff;}
+.login-btn{width:100%;padding:12px;background:var(--blue-dk);color:#fff;border:none;border-radius:7px;font-family:var(--font-h);font-size:15px;font-weight:800;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.15s;}
+.login-btn:hover{background:var(--blue);}.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-err{margin-top:10px;padding:8px 12px;background:var(--red-bg);color:var(--red);border-radius:6px;font-size:12px;display:none;border:1px solid var(--red-bd);}
+#app-screen{display:none;flex-direction:column;min-height:100vh;}
+/* HEADER USER */
+.hdr-user{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px 4px 5px;margin-left:8px;}
+.hdr-avatar{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;}
+.hdr-uname{font-size:12px;font-weight:600;line-height:1.2;}.hdr-urole{font-size:9px;opacity:.6;text-transform:uppercase;font-weight:700;}
+.logout-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.15s;margin-left:4px;}
+.logout-btn:hover{background:rgba(255,255,255,.22);}
 </style>
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><img src="android-chrome-512x512.png" alt="Garud Tata Motors" onerror="this.style.display='none'"></div>
+    <p class="login-subtitle">Sales Command Centre</p>
+    <div class="lf"><label>Username</label><input type="text" id="lu" placeholder="Username" autocomplete="username"></div>
+    <div class="lf"><label>Password</label><input type="password" id="lp" placeholder="Password" autocomplete="current-password"></div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="lerr">Incorrect username or password.</div>
+  </div>
+</div>
+<!-- APP SCREEN -->
+<div id="app-screen">
 <header>
   <div class="hlogo"><div class="hcircle">TM</div><div><div class="htitle">Sales Command Centre</div><div class="hsub">Lead Tracking · Follow-up Compliance · Bookings · Stock</div></div></div>
-  <div class="hright"><span id="hdate"></span><span id="hclock" style="margin-left:6px;">--:--:--</span></div>
+  <div class="hright"><span id="hdate"></span><span id="hclock" style="margin-left:6px;">--:--:--</span>
+    <div class="hdr-user"><div class="hdr-avatar" id="hdr-avatar">U</div><div><div class="hdr-uname" id="hdr-uname">User</div><div class="hdr-urole" id="hdr-urole">—</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
 </header>
 <div id="setup-banner">⚙ &nbsp;<strong>Setup required:</strong>&nbsp;<a onclick="showTab('setup')">Go to Setup</a> to connect to Google Sheet.</div>
 <div class="loc-bar">
@@ -965,6 +1003,7 @@ function updateStock(d){
 }</pre></div>
 </div>
 </main>
+</div><!-- #app-screen -->
 
 <!-- CONVERT ON-ORDER TO IN-STOCK MODAL -->
 <div class="modal-overlay" id="convert-modal">
@@ -1678,21 +1717,63 @@ async function uploadStockBatch(){
   }catch(e){setMsg(document.getElementById('upload-status'),'err','✗ '+e.message);}
 }
 
+// ─── AUTH ───
+let currentUser=null;
+const ROLE_TABS={
+  masteradmin:['dashboard','leads','new-lead','followup','bookings','stock','setup'],
+  manager:    ['dashboard','leads','new-lead','followup','bookings','stock'],
+  salesperson:['dashboard','leads','new-lead','followup','bookings']
+};
+const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',salesperson:'SALESPERSON'};
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value;
+  const lerr=document.getElementById('lerr');
+  const btn=document.querySelector('.login-btn');
+  lerr.style.display='none';btn.textContent='Signing in…';btn.disabled=true;
+  try{
+    const r=await api({action:'getUsers'});
+    const found=(r.users||[]).find(x=>x.username.toLowerCase()===u&&x.password===p);
+    if(!found){lerr.textContent='Incorrect username or password.';lerr.style.display='block';return;}
+    currentUser={username:found.username,role:found.role,display:found.display||found.username};
+    sessionStorage.setItem('scc_sess',JSON.stringify(currentUser));
+    showApp();
+  }catch(e){lerr.textContent='Could not connect: '+e.message;lerr.style.display='block';}
+  finally{btn.textContent='SIGN IN';btn.disabled=false;}
+}
+function doLogout(){sessionStorage.removeItem('scc_sess');currentUser=null;showLogin();}
+function showLogin(){document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
+function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='flex';
+  document.getElementById('hdr-uname').textContent=currentUser.display;
+  document.getElementById('hdr-urole').textContent=ROLE_LABEL[currentUser.role]||currentUser.role.toUpperCase();
+  document.getElementById('hdr-avatar').textContent=currentUser.display[0].toUpperCase();
+  applyRoleTabs();loadAll();
+}
+function applyRoleTabs(){
+  const allowed=ROLE_TABS[currentUser.role]||[];
+  const keys=['dashboard','leads','new-lead','followup','bookings','stock','setup'];
+  document.querySelectorAll('nav .tab').forEach((tab,i)=>{tab.style.display=allowed.includes(keys[i])?'':'none';});
+}
+
 // ═══ INIT ═══
 window.onload=async function(){
   setNextFU(1,'nl-nextfu');document.getElementById('nl-interest').value='Warm';
   document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');
   document.getElementById('nl-created').value=fmtDT(new Date());
-  // Load script URL from config.json first (works for all devices), fallback to localStorage
+  // Load script URL from config.json, fallback to localStorage
   try{
     const cfg=await fetch('config.json?_='+Date.now()).then(r=>r.json());
-    if(cfg.scriptUrl&&cfg.scriptUrl.trim()){
-      SCRIPT_URL=cfg.scriptUrl.trim();
-      localStorage.setItem('scc_url',SCRIPT_URL);
-    }
+    if(cfg.scriptUrl&&cfg.scriptUrl.trim()){SCRIPT_URL=cfg.scriptUrl.trim();localStorage.setItem('scc_url',SCRIPT_URL);}
   }catch(e){}
   const saved=localStorage.getItem('scc_url');
-  if(saved){SCRIPT_URL=saved;document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';loadAll();}
+  if(saved){SCRIPT_URL=saved;document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';}
+  // Check existing session
+  const sess=sessionStorage.getItem('scc_sess');
+  if(sess){try{currentUser=JSON.parse(sess);showApp();}catch(e){showLogin();}}
+  else{showLogin();}
+  document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 };
 </script>
 </body>
