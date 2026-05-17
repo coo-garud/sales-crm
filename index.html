@@ -1679,12 +1679,20 @@ async function uploadStockBatch(){
 }
 
 // ═══ INIT ═══
-window.onload=function(){
+window.onload=async function(){
   setNextFU(1,'nl-nextfu');document.getElementById('nl-interest').value='Warm';
   document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');
   document.getElementById('nl-created').value=fmtDT(new Date());
+  // Load script URL from config.json first (works for all devices), fallback to localStorage
+  try{
+    const cfg=await fetch('config.json?_='+Date.now()).then(r=>r.json());
+    if(cfg.scriptUrl&&cfg.scriptUrl.trim()){
+      SCRIPT_URL=cfg.scriptUrl.trim();
+      localStorage.setItem('scc_url',SCRIPT_URL);
+    }
+  }catch(e){}
   const saved=localStorage.getItem('scc_url');
-  if(saved){document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';loadAll();}
+  if(saved){SCRIPT_URL=saved;document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';loadAll();}
 };
 </script>
 </body>
