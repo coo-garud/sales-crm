@@ -1079,7 +1079,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
           </select>
         </div>
         <div class="field" id="um-team-wrap" style="display:none;"><label>Team Leader <span class="req">*</span></label>
-          <select id="um-team"><option value="">Select Team Leader…</option></select>
+          <select id="um-team" onchange="autoFillBranch()"><option value="">Select Team Leader…</option></select>
         </div>
         <div class="field"><label>Display Name</label><input type="text" id="um-display" placeholder="Full name shown in app"></div>
         <div style="display:flex;gap:8px;margin-top:10px;">
@@ -1772,6 +1772,8 @@ async function renderUsersTable(){
   const wrap=document.getElementById('um-table-wrap');if(!wrap)return;
   try{
     const r=await api({action:'getUsers'});const users=r.users||[];
+    allUsers=users;
+    toggleRoleFields();
     if(!users.length){wrap.innerHTML='<div class="empty-st" style="padding:20px;"><div class="ico">👤</div><p>No users found.</p></div>';return;}
     const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',team_leader:'#6A1B9A',salesperson:'#1565C0'};
     const tlMap=Object.fromEntries(users.filter(u=>u.role==='team_leader').map(u=>[u.username,u.display||u.username]));
@@ -1790,6 +1792,7 @@ async function saveUserUI(){
   const st=document.getElementById('um-status');
   if(!uname||!pass){st.textContent='Username and password are required.';st.style.color='var(--red)';return;}
   if((role==='branch_head'||role==='team_leader')&&!branch){st.textContent='Please select a branch for this role.';st.style.color='var(--red)';return;}
+  if(role==='salesperson'&&!branch){st.textContent='Please select a branch for this salesperson.';st.style.color='var(--red)';return;}
   if(role==='salesperson'&&!team){st.textContent='Please assign a Team Leader for this salesperson.';st.style.color='var(--red)';return;}
   st.textContent='Saving…';st.style.color='var(--amber)';
   try{
@@ -1820,19 +1823,26 @@ function clearUserForm(){
   document.getElementById('um-role').value='salesperson';
   document.getElementById('um-branch').value='';
   document.getElementById('um-team').value='';
-  document.getElementById('um-branch-wrap').style.display='none';
-  document.getElementById('um-team-wrap').style.display='none';
   document.getElementById('um-edit-mode').value='0';
   document.getElementById('um-status').textContent='';
+  toggleRoleFields();
 }
 function toggleRoleFields(){
   const r=document.getElementById('um-role').value;
-  document.getElementById('um-branch-wrap').style.display=(r==='branch_head'||r==='team_leader')?'':'none';
+  document.getElementById('um-branch-wrap').style.display=(r==='branch_head'||r==='team_leader'||r==='salesperson')?'':'none';
   const tw=document.getElementById('um-team-wrap');tw.style.display=r==='salesperson'?'':'none';
   if(r==='salesperson'){
     const tls=allUsers.filter(u=>u.role==='team_leader');
+    const cur=document.getElementById('um-team').value;
     document.getElementById('um-team').innerHTML='<option value="">Select Team Leader…</option>'+tls.map(u=>`<option value="${u.username}">${u.display||u.username}${u.branch?' ('+u.branch+')':''}</option>`).join('');
+    if(cur)document.getElementById('um-team').value=cur;
   }
+}
+function autoFillBranch(){
+  const tlUsername=document.getElementById('um-team').value;
+  if(!tlUsername)return;
+  const tl=allUsers.find(u=>u.username===tlUsername);
+  if(tl&&tl.branch)document.getElementById('um-branch').value=tl.branch;
 }
 function exportLeadsCSV(){if(!allLeads.length)return;const cols=['Lead ID','Created DT','Location','Source','Customer Name','Phone','Alt Phone','Model Interest','Variant','Budget','Finance/Cash','Salesperson','Status','Interest Level','First Contact DT','Last Contact DT','Next Followup DT','Followup Count','Lost Reason','VoC Notes','Customer Area','Customer City','Customer Expected Delivery'];const csv=[cols.join(','),...allLeads.map(l=>cols.map(c=>JSON.stringify(l[c]||'')).join(','))].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();}
 
