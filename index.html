@@ -648,7 +648,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="side-col">
       <!-- TARGETS + LOCATION BREAKDOWN -->
       <div class="target-card">
-        <div class="tc-hd">🎯 Monthly Targets &amp; Bookings <div style="display:flex;gap:5px;"><button onclick="toggleTargetForm()">✏ Location</button><button id="btn-sp-tgt" onclick="toggleSpTargetForm()" style="display:none;">👥 SP Targets</button></div></div>
+        <div class="tc-hd">🎯 Monthly Targets &amp; Bookings <div style="display:flex;gap:5px;"><button id="btn-loc-tgt" onclick="toggleTargetForm()" style="display:none;">✏ Location</button><button id="btn-sp-tgt" onclick="toggleSpTargetForm()" style="display:none;">👥 SP Targets</button></div></div>
         <div class="tc-body" id="tc-body"></div>
         <div class="target-form" id="target-form">
           <div style="font-size:9.5px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;">Monthly Targets</div>
@@ -1300,7 +1300,7 @@ function saveSpTargets(){
   localStorage.setItem('scc_sp_targets',JSON.stringify(saved));
   document.getElementById('sp-target-form').classList.remove('open');renderDashboard();alert('SP targets saved!');
 }
-function renderSpTargetCard(mBks){
+function renderSpTargetCard(mBks,editable){
   const spTgts=getSpTargets();
   let sps;
   if(currentUser&&currentUser.role==='team_leader'){
@@ -1326,7 +1326,8 @@ function renderSpTargetCard(mBks){
       </div>
     </div>`;
   });
-  document.getElementById('sp-tc-body').innerHTML=html||'<div style="padding:10px;font-size:12px;color:var(--gray-400);">No SP targets set. Use 👥 SP Targets button.</div>';
+  const emptyMsg=editable?'No SP targets set. Use 👥 SP Targets button.':'No SP targets set yet.';
+  document.getElementById('sp-tc-body').innerHTML=html||`<div style="padding:10px;font-size:12px;color:var(--gray-400);">${emptyMsg}</div>`;
 }
 function renderMyTargets(mBks){
   // For salesperson: find their target and actual from current month's bookings
@@ -1438,11 +1439,15 @@ function renderDashboard(){
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
   const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
   renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
-  const isSP=currentUser&&currentUser.role==='salesperson';
-  const isTL=currentUser&&currentUser.role==='team_leader';
-  const isAdm=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head'||currentUser.role==='team_leader');
-  const btnSP=document.getElementById('btn-sp-tgt');if(btnSP)btnSP.style.display=isAdm?'inline-flex':'none';
-  if(isAdm){renderSpTargetCard(allMonthBks);}
+  const role=currentUser&&currentUser.role;
+  const isSP=role==='salesperson';
+  const isTL=role==='team_leader';
+  const canEditLocTgt=role==='masteradmin';
+  const canEditSpTgt=role==='masteradmin'||role==='manager'||role==='branch_head';
+  const canViewSpTgt=canEditSpTgt||role==='team_leader';
+  const btnLoc=document.getElementById('btn-loc-tgt');if(btnLoc)btnLoc.style.display=canEditLocTgt?'inline-flex':'none';
+  const btnSP=document.getElementById('btn-sp-tgt');if(btnSP)btnSP.style.display=canEditSpTgt?'inline-flex':'none';
+  if(canViewSpTgt){renderSpTargetCard(allMonthBks,canEditSpTgt);}
   if(isSP){renderMyTargets(allMonthBks);}
   if(isTL){renderMyTargets(allMonthBks);}
 }
