@@ -1323,6 +1323,86 @@ function updateStock(d){
   </div>
 </div>
 
+<!-- EDIT LEAD MODAL -->
+<div class="modal-overlay" id="edit-lead-modal">
+  <div class="modal-box" style="width:520px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-hd" style="background:linear-gradient(135deg,#0D47A1,#1565C0);">✏ Edit Lead <button onclick="closeEditLead()">✕</button></div>
+    <div class="modal-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <input type="hidden" id="el-ri">
+      <input type="hidden" id="el-lid">
+      <div class="field" style="grid-column:1/3;"><label>Customer Name <span class="req">*</span></label><input type="text" id="el-name"></div>
+      <div class="field"><label>Phone <span class="req">*</span></label><input type="text" id="el-phone"></div>
+      <div class="field"><label>Alt Phone</label><input type="text" id="el-altphone"></div>
+      <div class="field"><label>Source</label>
+        <select id="el-source"><option value="">Select…</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option></select></div>
+      <div class="field"><label>Location</label>
+        <select id="el-loc"><option value="">Select…</option><option>Palam</option><option>Najafgarh</option><option>Narela</option></select></div>
+      <div class="field"><label>Model Interest</label><input type="text" id="el-model" placeholder="e.g. Tata Punch"></div>
+      <div class="field"><label>Variant</label><input type="text" id="el-variant" placeholder="e.g. Accomplished+"></div>
+      <div class="field"><label>Color Pref</label><input type="text" id="el-color"></div>
+      <div class="field"><label>Budget</label><input type="number" id="el-budget" placeholder="e.g. 850000"></div>
+      <div class="field"><label>Finance / Cash</label>
+        <select id="el-finance"><option value="">Select…</option><option>Finance</option><option>Cash</option><option>Undecided</option></select></div>
+      <div class="field"><label>Salesperson</label>
+        <select id="el-sp"><option value="">Select…</option></select></div>
+      <div class="field"><label>Interest Level</label>
+        <select id="el-interest"><option value="Warm">Warm</option><option value="Hot">Hot</option><option value="Cold">Cold</option></select></div>
+      <div class="field"><label>Status</label>
+        <select id="el-status"><option value="Active">Active</option><option value="Booked">Booked</option><option value="Lost">Lost</option></select></div>
+      <div class="field"><label>Customer Area</label><input type="text" id="el-area"></div>
+      <div class="field"><label>Customer City</label><input type="text" id="el-city"></div>
+      <div class="field" style="grid-column:1/3;"><label>Expected Delivery</label><input type="text" id="el-del" placeholder="Date or ASAP"></div>
+      <div class="field" style="grid-column:1/3;"><label>VoC Notes</label><input type="text" id="el-voc" placeholder="Customer preference notes…"></div>
+      <div style="grid-column:1/3;display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="submitEditLead()">Save Changes →</button>
+        <button class="btn btn-secondary" onclick="closeEditLead()">Cancel</button>
+      </div>
+      <span class="smsg" id="el-status-msg" style="grid-column:1/3;margin-top:4px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ALLOCATE STOCK MODAL -->
+<div class="modal-overlay" id="alloc-modal">
+  <div class="modal-box">
+    <div class="modal-hd" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">🔗 Allocate Vehicle <button onclick="document.getElementById('alloc-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="alloc-ri">
+      <div class="field" style="margin-bottom:10px;"><label>Customer Name <span class="req">*</span></label><input type="text" id="alloc-cname" placeholder="Customer name"></div>
+      <div class="field" style="margin-bottom:14px;"><label>Booking ID (optional)</label><input type="text" id="alloc-bkid" placeholder="e.g. BK-20260518123456"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-success" style="flex:1;" onclick="confirmAllocStk()">Allocate →</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('alloc-modal').classList.remove('open')">Cancel</button>
+      </div>
+      <span class="smsg" id="alloc-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- MOVE STOCK MODAL -->
+<div class="modal-overlay" id="move-modal">
+  <div class="modal-box">
+    <div class="modal-hd">📍 Update Vehicle Location <button onclick="document.getElementById('move-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="move-ri">
+      <div class="field" style="margin-bottom:14px;"><label>New Location <span class="req">*</span></label>
+        <select id="move-loc">
+          <option value="">Select location…</option>
+          <option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option>
+          <option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option>
+          <option>Narela Stockyard</option><option>Narela Showroom</option>
+          <option>In Transit</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="confirmMoveStk()">Update →</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('move-modal').classList.remove('open')">Cancel</button>
+      </div>
+      <span class="smsg" id="move-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
 <!-- WHATSAPP PICKER (fixed bottom-right) -->
 <div class="wa-picker" id="wa-picker">
   <div class="wa-picker-hd">💬 WhatsApp — Choose Template</div>
@@ -1654,6 +1734,7 @@ function renderLeads(leads){
         <button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬 WhatsApp</button>
         <button class="btn btn-success btn-xs" onclick="prefillBooking('${le}')">🚗 Book</button>
         <button class="btn btn-danger btn-xs" onclick="prefillFULost('${le}')">❌ Mark Lost</button>
+        <button class="btn btn-ghost btn-xs" onclick="openEditLead('${le}')">✏ Edit</button>
         <span style="font-size:10px;color:var(--gray-400);margin-left:auto;">ID: ${l['Lead ID']||'—'}</span>
         <span class="expand-arrow" style="cursor:pointer;" onclick="togLC(${i})">▾</span>
       </div>
@@ -1662,6 +1743,67 @@ function renderLeads(leads){
   }).join('');
 }
 function togLC(i){const d=document.getElementById('lce-'+i);const a=document.getElementById('arr-'+i);d.classList.toggle('open');a?.classList.toggle('open');}
+
+// ═══ EDIT LEAD ═══
+function openEditLead(enc){
+  const l=JSON.parse(decodeURIComponent(enc));
+  document.getElementById('el-ri').value=l.rowIndex||'';
+  document.getElementById('el-lid').value=l['Lead ID']||'';
+  document.getElementById('el-name').value=l['Customer Name']||'';
+  document.getElementById('el-phone').value=l['Phone']||'';
+  document.getElementById('el-altphone').value=l['Alt Phone']||'';
+  document.getElementById('el-source').value=l['Source']||'';
+  document.getElementById('el-loc').value=l['Location']||'';
+  document.getElementById('el-model').value=l['Model Interest']||'';
+  document.getElementById('el-variant').value=l['Variant']||'';
+  document.getElementById('el-color').value=l['Color Pref']||'';
+  document.getElementById('el-budget').value=l['Budget']||'';
+  document.getElementById('el-finance').value=l['Finance/Cash']||'';
+  document.getElementById('el-interest').value=l['Interest Level']||'Warm';
+  document.getElementById('el-status').value=l['Status']||'Active';
+  document.getElementById('el-area').value=l['Customer Area']||'';
+  document.getElementById('el-city').value=l['Customer City']||'';
+  document.getElementById('el-del').value=l['Customer Expected Delivery']||'';
+  document.getElementById('el-voc').value=l['VoC Notes']||'';
+  const spSel=document.getElementById('el-sp');
+  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='team_leader'||u.role==='manager');
+  spSel.innerHTML='<option value="">Select…</option>'+sps.map(u=>`<option value="${u.display||u.username}">${u.display||u.username}</option>`).join('');
+  spSel.value=l['Salesperson']||'';
+  setMsg(document.getElementById('el-status-msg'),'','');
+  document.getElementById('edit-lead-modal').classList.add('open');
+}
+function closeEditLead(){document.getElementById('edit-lead-modal').classList.remove('open');}
+async function submitEditLead(){
+  const ri=document.getElementById('el-ri').value;
+  const lid=document.getElementById('el-lid').value;
+  const name=document.getElementById('el-name').value.trim();
+  const phone=document.getElementById('el-phone').value.trim();
+  if(!name||!phone){setMsg(document.getElementById('el-status-msg'),'err','✗ Name and Phone are required');return;}
+  const d={rowIndex:ri,'Lead ID':lid,'Customer Name':name,'Phone':phone,
+    'Alt Phone':document.getElementById('el-altphone').value,
+    'Source':document.getElementById('el-source').value,
+    'Location':document.getElementById('el-loc').value,
+    'Model Interest':document.getElementById('el-model').value,
+    'Variant':document.getElementById('el-variant').value,
+    'Color Pref':document.getElementById('el-color').value,
+    'Budget':document.getElementById('el-budget').value,
+    'Finance/Cash':document.getElementById('el-finance').value,
+    'Salesperson':document.getElementById('el-sp').value,
+    'Interest Level':document.getElementById('el-interest').value,
+    'Status':document.getElementById('el-status').value,
+    'Customer Area':document.getElementById('el-area').value,
+    'Customer City':document.getElementById('el-city').value,
+    'Customer Expected Delivery':document.getElementById('el-del').value,
+    'VoC Notes':document.getElementById('el-voc').value};
+  const st=document.getElementById('el-status-msg');setMsg(st,'ld','⟳ Saving…');
+  try{
+    await api({action:'updateLead',data:JSON.stringify(d)});
+    const idx=allLeads.findIndex(l=>l['Lead ID']===lid);
+    if(idx>=0)Object.assign(allLeads[idx],d);
+    setMsg(st,'ok','✓ Lead updated');
+    setTimeout(()=>{closeEditLead();renderLeads(filterLeadsData());renderDashboard();},700);
+  }catch(e){setMsg(st,'err','✗ '+e.message);}
+}
 
 // ═══ WHATSAPP ═══
 function openWAPicker(enc){waLead=JSON.parse(decodeURIComponent(enc));document.getElementById('wa-picker').classList.add('open');}
@@ -1704,7 +1846,7 @@ function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-model','nl-varian
 
 // ═══ FOLLOW-UP ═══
 function checkTDFields(){const m=document.getElementById('fu-method').value;document.getElementById('td-fields').style.display=m==='Test Drive Conducted'?'block':'none';}
-function fuSearch(){const q=document.getElementById('fu-search').value.trim().toLowerCase();if(!q)return;const m=spFilt(allLeads).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).filter(l=>l['Status']!=='Lost').slice(0,10);const res=document.getElementById('fu-results');const list=document.getElementById('fu-list');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No active leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="fuSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</span><span class="pill ${srcCls(l['Source']||'')}" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span></div>`;}).join('');}
+function fuSearch(){const q=document.getElementById('fu-search').value.trim().toLowerCase();if(!q)return;const m=spFilt(locFilt(allLeads)).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).filter(l=>l['Status']!=='Lost').slice(0,10);const res=document.getElementById('fu-results');const list=document.getElementById('fu-list');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No active leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="fuSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</span><span class="pill ${srcCls(l['Source']||'')}" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span></div>`;}).join('');}
 function fuSelLead(l){fuSelectedLead=l;document.getElementById('fu-lead-id').value=l['Lead ID'];document.getElementById('fu-sel-text').textContent=`${l['Customer Name']} (${l['Phone']}) — ${l['Model Interest']||'—'}`;document.getElementById('fu-lead-info').style.display='block';document.getElementById('fu-results').style.display='none';const b=calcBucket(l);const bT={red:'🚨 Needs action',amber:'⚠ FU overdue',hot:'🔥 Hot',warm:'🔵 Warm',cold:'❄ Cold',green:'✅ Booked'}[b]||b;document.getElementById('fu-lead-card').innerHTML=`<span>📍 ${l['Location']||'—'}</span><span>📢 ${l['Source']||'—'}</span><span>🚗 ${l['Model Interest']||'—'}</span><span>🔁 ${l['Followup Count']||0} FUs</span><span>📊 ${bT}</span><span style="color:${isVocThin(l)?'var(--red)':'var(--gray-500)'};">VoC: ${isVocThin(l)?'⚠ THIN':'OK'} — "${(l['VoC Notes']||'None').substring(0,60)}"</span>`;if(l['Interest Level'])selFUInt(l['Interest Level'],null);}
 var fuSelectedLead=null;
 function fuClearSel(){fuSelectedLead=null;document.getElementById('fu-lead-id').value='';document.getElementById('fu-lead-info').style.display='none';document.getElementById('fu-search').value='';document.getElementById('fu-results').style.display='none';}
@@ -1730,7 +1872,7 @@ function togExc(v){bkExc=v;document.getElementById('t-exc-y').classList.toggle('
 function togIns(v){bkIns=v;document.getElementById('t-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ins-n').classList.toggle('on',v==='no');}
 function togStk(v){bkStk=v;document.getElementById('t-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-stk-n').classList.toggle('on',v==='no');document.getElementById('bk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-edel-r').style.display=v==='no'?'block':'none';}
 function toggleNewBkForm(){const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open'))document.getElementById('bk-dt').value=fmtDT(new Date());}
-function bkLeadSearch(){const q=document.getElementById('bk-ls').value.trim().toLowerCase();if(!q)return;const m=allLeads.filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).slice(0,8);const res=document.getElementById('bk-lr');const list=document.getElementById('bk-ll');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="bkSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Location']||''}</span></div>`;}).join('');}
+function bkLeadSearch(){const q=document.getElementById('bk-ls').value.trim().toLowerCase();if(!q)return;const m=spFilt(locFilt(allLeads)).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).slice(0,8);const res=document.getElementById('bk-lr');const list=document.getElementById('bk-ll');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="bkSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Location']||''}</span></div>`;}).join('');}
 function bkSelLead(l){document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-lr').style.display='none';document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';}
 function bkClearLead(){document.getElementById('bk-lead-id').value='';document.getElementById('bk-sel').style.display='none';document.getElementById('bk-ls').value='';document.getElementById('bk-lr').style.display='none';}
 async function submitBooking(){
@@ -1830,8 +1972,23 @@ function renderStock(){
     </div>`;
   }).join('');
 }
-async function allocStk(ri){const c=prompt('Customer Name (for allocation):');if(!c)return;const bk=prompt('Booking ID (optional):');try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,Status:'Allocated','Allocated To':c,'Booking ID':bk||''})});await loadAll();}catch(e){alert('Error: '+e.message);}}
-async function moveStk(ri){const loc=prompt('New location (e.g. Palam Showroom, Najafgarh Stockyard):');if(!loc)return;try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,'Current Location':loc})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+function allocStk(ri){document.getElementById('alloc-ri').value=ri;document.getElementById('alloc-cname').value='';document.getElementById('alloc-bkid').value='';setMsg(document.getElementById('alloc-status'),'','');document.getElementById('alloc-modal').classList.add('open');}
+async function confirmAllocStk(){
+  const ri=document.getElementById('alloc-ri').value;
+  const c=document.getElementById('alloc-cname').value.trim();
+  const bk=document.getElementById('alloc-bkid').value.trim();
+  if(!c){setMsg(document.getElementById('alloc-status'),'err','✗ Customer name required');return;}
+  const st=document.getElementById('alloc-status');setMsg(st,'ld','⟳ Saving…');
+  try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,Status:'Allocated','Allocated To':c,'Booking ID':bk||''})});setMsg(st,'ok','✓ Allocated');setTimeout(()=>{document.getElementById('alloc-modal').classList.remove('open');loadAll();},600);}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
+function moveStk(ri){document.getElementById('move-ri').value=ri;document.getElementById('move-loc').value='';setMsg(document.getElementById('move-status'),'','');document.getElementById('move-modal').classList.add('open');}
+async function confirmMoveStk(){
+  const ri=document.getElementById('move-ri').value;
+  const loc=document.getElementById('move-loc').value;
+  if(!loc){setMsg(document.getElementById('move-status'),'err','✗ Select a location');return;}
+  const st=document.getElementById('move-status');setMsg(st,'ld','⟳ Saving…');
+  try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,'Current Location':loc})});setMsg(st,'ok','✓ Location updated');setTimeout(()=>{document.getElementById('move-modal').classList.remove('open');loadAll();},600);}catch(e){setMsg(st,'err','✗ '+e.message);}
+}
 async function markStkSold(ri){if(!confirm('Mark as Delivered?'))return;try{await api({action:'updateStock',data:JSON.stringify({rowIndex:ri,Status:'Sold'})});await loadAll();}catch(e){alert('Error: '+e.message);}}
 function renderDVS(){
   const MODELS=['Tata Punch','Tata Nexon','Tata Harrier','Tata Safari','Tata Curvv','Tata Altroz','Tata Tiago','Tata Tigor','Tata Sierra'];

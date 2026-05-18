@@ -22,7 +22,7 @@ function handleReq(e){
       case "getAll":res=getAll();break;case "addLead":res=addLead(JSON.parse(p.data));break;
       case "addFollowUp":res=addFollowUp(JSON.parse(p.data));break;case "addBooking":res=addBooking(JSON.parse(p.data));break;
       case "updateBooking":res=updateBooking(JSON.parse(p.data));break;case "addStock":res=addStock(JSON.parse(p.data));break;case "bulkAddStock":res=bulkAddStock(JSON.parse(p.data));break;
-      case "updateStock":res=updateStock(JSON.parse(p.data));break;
+      case "updateStock":res=updateStock(JSON.parse(p.data));break;case "updateLead":res=updateLead(JSON.parse(p.data));break;
       case "getUsers":res=getUsers();break;
       case "saveUser":res=saveUser(JSON.parse(p.data));break;
       case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
@@ -45,6 +45,12 @@ function sheetToArr(sh,headers){
   });
 }
 function getAll(){return{status:"ok",leads:sheetToArr(getOrCreate("Leads",LH),LH),followups:sheetToArr(getOrCreate("FollowUps",FH),FH),bookings:sheetToArr(getOrCreate("Bookings",BH),BH),testdrives:sheetToArr(getOrCreate("TestDrives",TH),TH),stock:sheetToArr(getOrCreate("Stock",SH),SH)};}
+function updateLead(d){
+  const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  const editable=["Customer Name","Phone","Alt Phone","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes"];
+  editable.forEach(col=>{const ci=LH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
+  return{status:"ok"};
+}
 function addLead(d){
   const sh=getOrCreate("Leads",LH);const tz=Session.getScriptTimeZone();
   d["Lead ID"]="LEAD-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");d["Status"]=d["Status"]||"Active";d["Interest Level"]=d["Interest Level"]||"Warm";d["Followup Count"]="0";
