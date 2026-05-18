@@ -724,7 +724,47 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="form-card">
       <div class="fch" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">📤 Bulk Upload Leads — Excel / CSV</div>
       <div class="fb">
-        <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Upload an Excel or CSV file with columns: <code style="background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:3px;font-size:11px;">Customer Name, Phone, Alt Phone, Source, Location, Model Interest, Variant, Color Pref, Budget, Finance/Cash, Salesperson, Customer Area, Customer City, Customer Expected Delivery</code></p>
+        <div style="border:1px solid #C8E6C9;border-radius:7px;background:#F1F8E9;margin-bottom:14px;">
+          <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.guide-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'" style="display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;user-select:none;">
+            <span style="font-weight:700;font-size:12px;color:#1B5E20;">📖 How to prepare your file — Click to expand guide</span>
+            <span class="guide-arrow" style="font-size:11px;color:#388E3C;">▼</span>
+          </div>
+          <div style="display:none;padding:0 13px 13px;">
+            <p style="font-size:12px;color:#1B5E20;font-weight:700;margin:0 0 8px;">Step 1 — File format</p>
+            <p style="font-size:12px;color:var(--gray-700);margin:0 0 10px;">Use Excel (.xlsx / .xls) or CSV. First sheet is used. Header row is auto-detected — it can be row 1 or anywhere in the first 5 rows. Maximum 500 rows per upload.</p>
+            <p style="font-size:12px;color:#1B5E20;font-weight:700;margin:0 0 8px;">Step 2 — Column names (flexible)</p>
+            <p style="font-size:12px;color:var(--gray-600);margin:0 0 6px;">Column names are matched automatically — they don't need to be exact. The system searches for keywords inside your column headers. Columns in <strong>bold</strong> are required (at least one must be present).</p>
+            <div style="overflow-x:auto;margin-bottom:10px;">
+              <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                <thead><tr style="background:#C8E6C9;"><th style="padding:5px 8px;text-align:left;border:1px solid #A5D6A7;">Column</th><th style="padding:5px 8px;text-align:left;border:1px solid #A5D6A7;">Accepted Header Keywords</th><th style="padding:5px 8px;text-align:left;border:1px solid #A5D6A7;">Accepted Values / Notes</th></tr></thead>
+                <tbody>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;font-weight:700;">Customer Name ★</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">customer name, name</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Full name, e.g. Rahul Sharma</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;font-weight:700;">Phone ★</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">phone</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">10-digit mobile number. At least one of Name or Phone is required per row.</td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Alt Phone</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">alt phone, alternate</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Optional second number</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Source</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">source, lead source</td><td style="padding:5px 8px;border:1px solid #E8F5E9;"><strong>Walk-in · Tele-in · CarDekho · Spinny · Meta · Reference</strong></td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Location</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">location, showroom</td><td style="padding:5px 8px;border:1px solid #E8F5E9;"><strong>Palam · Najafgarh · Narela</strong> — must match exactly</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Model Interest</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">model interest, model</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">e.g. Tata Punch, Tata Nexon, Tata Harrier</td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Variant</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">variant</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">e.g. Pure, Adventure, Accomplished+</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Color Pref</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">color pref, color, colour</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">e.g. Daytona Grey, Pristine White, Arizona Blue</td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Budget</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">budget</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Number only, e.g. 850000</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Finance/Cash</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">finance, cash, payment mode</td><td style="padding:5px 8px;border:1px solid #E8F5E9;"><strong>Finance · Cash · Cash + Finance</strong></td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Salesperson</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">salesperson, sales person, sp</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Must match a salesperson's display name in the system exactly</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Customer Area</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">area, locality, customer area</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Locality / neighbourhood name</td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Customer City</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">city, customer city</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">City name</td></tr>
+                  <tr style="background:#F9FBF9;"><td style="padding:5px 8px;border:1px solid #E8F5E9;">Expected Delivery</td><td style="padding:5px 8px;border:1px solid #E8F5E9;font-family:monospace;">expected delivery, delivery date, customer expected</td><td style="padding:5px 8px;border:1px solid #E8F5E9;">Date (YYYY-MM-DD) or text like ASAP</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:12px;color:#1B5E20;font-weight:700;margin:0 0 6px;">Step 3 — Tips</p>
+            <ul style="font-size:12px;color:var(--gray-700);margin:0;padding-left:18px;line-height:1.8;">
+              <li>★ At least one of <strong>Customer Name</strong> or <strong>Phone</strong> must be filled — rows missing both are skipped.</li>
+              <li>Extra or unknown columns in your file are ignored — no need to delete them.</li>
+              <li>The file can have rows above the header (e.g. report title rows) — auto-detected in first 5 rows.</li>
+              <li>Review the preview table carefully before clicking <strong>Upload All Leads</strong>. If columns look wrong, check your header spelling.</li>
+              <li>Duplicate phone numbers are NOT automatically skipped for leads — check before uploading.</li>
+            </ul>
+          </div>
+        </div>
         <div class="upload-zone" id="bulk-lead-zone" onclick="document.getElementById('bulk-lead-file').click()">
           <div class="uz-ico">📋</div>
           <div class="uz-title">Click to choose file or drag & drop</div>
@@ -998,7 +1038,43 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   <div class="form-card" id="upload-stock-form" style="display:none;margin-bottom:12px;">
     <div class="fch fch-stock">📤 Upload Stock from Excel / CSV <span class="role-pill">MANAGER</span></div>
     <div class="fb">
-      <div class="info-note" style="margin-bottom:12px;">💡 Upload the Tata Motors stock report Excel. Columns detected automatically: <strong>Chassis No, Model, Product Line, VC#, Color, Location, Physical Status, Allotted/Unallotted.</strong></div>
+      <div style="border:1px solid #BBDEFB;border-radius:7px;background:#E3F2FD;margin-bottom:14px;">
+        <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.guide-arrow').textContent=this.nextElementSibling.style.display==='none'?'▼':'▲'" style="display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;user-select:none;">
+          <span style="font-weight:700;font-size:12px;color:#0D47A1;">📖 How to prepare your file — Click to expand guide</span>
+          <span class="guide-arrow" style="font-size:11px;color:#1565C0;">▼</span>
+        </div>
+        <div style="display:none;padding:0 13px 13px;">
+          <p style="font-size:12px;color:#0D47A1;font-weight:700;margin:0 0 8px;">Step 1 — File format</p>
+          <p style="font-size:12px;color:var(--gray-700);margin:0 0 10px;">Use the <strong>Tata Motors DMS stock report</strong> exported as Excel (.xlsx / .xls) or CSV. The system reads the first sheet. Header row is auto-detected by finding the row that contains the word "Chassis" — this can be anywhere in the first 5 rows.</p>
+          <p style="font-size:12px;color:#0D47A1;font-weight:700;margin:0 0 8px;">Step 2 — Detected columns</p>
+          <p style="font-size:12px;color:var(--gray-600);margin:0 0 6px;"><strong>Chassis No is required</strong> — rows without a chassis number are skipped. All other columns are optional and matched automatically.</p>
+          <div style="overflow-x:auto;margin-bottom:10px;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+              <thead><tr style="background:#BBDEFB;"><th style="padding:5px 8px;text-align:left;border:1px solid #90CAF9;">Your Column Header</th><th style="padding:5px 8px;text-align:left;border:1px solid #90CAF9;">Mapped To</th><th style="padding:5px 8px;text-align:left;border:1px solid #90CAF9;">Notes</th></tr></thead>
+              <tbody>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;font-weight:700;">Chassis No / Chassis ★</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Chassis No</td><td style="padding:5px 8px;border:1px solid #E3F2FD;"><strong>Required.</strong> Duplicate chassis already in system are skipped automatically.</td></tr>
+                <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Model</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Model</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Auto-normalised: Punch → Tata Punch, Nexon → Tata Nexon, Harrier → Tata Harrier, Safari → Tata Safari, Curvv → Tata Curvv, Altroz → Tata Altroz, Tiago → Tata Tiago, Tigor → Tata Tigor</td></tr>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Product Line / Product_Line</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Variant</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">e.g. Pure, Adventure, Accomplished+, Creative+</td></tr>
+                <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Chassis Color / Color / Colour</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Color</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Auto-normalised from DMS codes: daytona_grey → Daytona Grey, pristin_whte → Pristine White, bengal_rogue → Bengal Rouge, arizona_blue → Arizona Blue, ocn_blue → Ocean Blue, etc.</td></tr>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Current Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;"><strong>Bijwasan / Palam</strong> → Common Stockyard &nbsp;|&nbsp; <strong>Najafgarh / Nafaj</strong> → Najafgarh Stockyard &nbsp;|&nbsp; <strong>Dabri / Dabari</strong> → Palam Stockyard &nbsp;|&nbsp; <strong>Narela</strong> → Narela Stockyard</td></tr>
+                <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Allotted/Unallotted</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Status</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">"Allotted" → <strong>Allocated</strong>. "Unallotted" or blank → <strong>Available</strong>.</td></tr>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Physical Status</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Status override</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">"Transit" → Available (vehicle in transit treated as available)</td></tr>
+                <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Product/VC · VC#</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Notes (VC: …)</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Stored in Notes field for reference</td></tr>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Engine No / Engine_No</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Notes (Eng: …)</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Stored in Notes field for reference</td></tr>
+                <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Manufacturing Date / Mfg Date</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Notes (Mfg: …)</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Stored in Notes field for reference</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:12px;color:#0D47A1;font-weight:700;margin:0 0 6px;">Step 3 — Tips</p>
+          <ul style="font-size:12px;color:var(--gray-700);margin:0;padding-left:18px;line-height:1.8;">
+            <li>★ Chassis No is the only required column. All other columns improve data quality but are optional.</li>
+            <li>You can upload the raw Tata DMS Excel export directly — no need to reformat it first.</li>
+            <li>Vehicles with a chassis number already in your Stock tracker are shown as <strong style="color:var(--amber);">Skip</strong> in the preview and will not be re-added.</li>
+            <li>The preview table shows all detected rows. Review before confirming — duplicates are greyed out.</li>
+            <li>If Model or Color shows as blank after upload, check that the column header in your file contains the keywords listed above.</li>
+          </ul>
+        </div>
+      </div>
       <div class="upload-zone" id="upload-zone" ondragover="uzDragOver(event)" ondragleave="uzDragLeave()" ondrop="uzDrop(event)" onclick="document.getElementById('stk-file').click()">
         <div class="uz-ico">📊</div>
         <div class="uz-title">Click to browse or drag &amp; drop your Excel / CSV file</div>
