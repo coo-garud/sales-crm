@@ -6,7 +6,7 @@ const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status 
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
 const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
-const UH=["Username","Password","Role","Display Name"];
+const UH=["Username","Password","Role","Display Name","Branch"];
 const DEFAULT_USERS=[
   ["masteradmin","Admin@123","masteradmin","Master Admin"],
   ["manager",    "Manager@123","manager",  "Manager"],
@@ -117,20 +117,24 @@ function getUsersSheet(){
     sh=ss.insertSheet("Users");
     const r=sh.getRange(1,1,1,UH.length);r.setValues([UH]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);
     DEFAULT_USERS.forEach(row=>sh.appendRow(row));
+  } else if(sh.getLastColumn()<UH.length){
+    for(let i=sh.getLastColumn();i<UH.length;i++){sh.getRange(1,i+1).setValue(UH[i]);}
   }
   return sh;
 }
 function getUsers(){
   const sh=getUsersSheet();const last=sh.getLastRow();if(last<2)return{status:"ok",users:[]};
-  const rows=sh.getRange(2,1,last-1,UH.length).getValues();
-  const users=rows.filter(r=>r[0]).map(r=>({username:String(r[0]),password:String(r[1]),role:String(r[2]),display:String(r[3]||r[0])}));
+  const cols=Math.max(sh.getLastColumn(),4);
+  const rows=sh.getRange(2,1,last-1,cols).getValues();
+  const users=rows.filter(r=>r[0]).map(r=>({username:String(r[0]),password:String(r[1]),role:String(r[2]),display:String(r[3]||r[0]),branch:String(r[4]||'')}));
   return{status:"ok",users};
 }
 function saveUser(d){
   const sh=getUsersSheet();const last=sh.getLastRow();let found=false;
+  const row=[d.username,d.password,d.role,d.display||d.username,d.branch||''];
   if(last>=2){const ids=sh.getRange(2,1,last-1,1).getValues().flat().map(String);const ix=ids.indexOf(String(d.username));
-    if(ix>=0){sh.getRange(ix+2,1,1,4).setValues([[d.username,d.password,d.role,d.display||d.username]]);found=true;}}
-  if(!found)sh.appendRow([d.username,d.password,d.role,d.display||d.username]);
+    if(ix>=0){sh.getRange(ix+2,1,1,5).setValues([row]);found=true;}}
+  if(!found)sh.appendRow(row);
   return{status:"ok"};
 }
 function deleteUser(d){

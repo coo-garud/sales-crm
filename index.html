@@ -431,6 +431,98 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 .hdr-uname{font-size:12px;font-weight:600;line-height:1.2;}.hdr-urole{font-size:9px;opacity:.6;text-transform:uppercase;font-weight:700;}
 .logout-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.15s;margin-left:4px;}
 .logout-btn:hover{background:rgba(255,255,255,.22);}
+
+/* ─── MOBILE ─── */
+@media(max-width:640px){
+  /* Header */
+  header{padding:0 10px;height:48px;}
+  .htitle{font-size:15px;}.hsub{display:none;}
+  #hclock{display:none;}
+  .hdr-uname,.hdr-urole{display:none;}
+  .hdr-user{padding:4px 6px;margin-left:4px;}
+  .logout-btn{padding:5px 8px;font-size:10px;}
+  .hcircle{width:28px;height:28px;font-size:10px;}
+
+  /* Loc bar — scrollable */
+  .loc-bar{top:48px;padding:5px 10px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .loc-bar::-webkit-scrollbar{display:none;}
+  .loc-btn{font-size:11px;padding:3px 10px;}
+
+  /* Nav — scrollable tabs */
+  nav{top:80px;padding:0 6px;}
+  .tab{padding:9px 8px;font-size:11px;}
+
+  /* Main */
+  main{padding:10px 10px;}
+
+  /* Section header */
+  .sh-title{font-size:17px;}
+  .sh-acts{gap:5px;}
+  .sh-acts .btn{font-size:11px;padding:5px 9px;}
+
+  /* Stat rows */
+  .srow{grid-template-columns:repeat(2,1fr);}
+  .del-srow{grid-template-columns:repeat(2,1fr);}
+  .sc{padding:8px 10px;}.sc-val{font-size:22px;}.sc-lbl{font-size:9px;}
+
+  /* Dashboard grid already 1-col at 1100px */
+
+  /* Lead cards */
+  .lc-head{flex-wrap:wrap;gap:6px;}
+  .lc-meta{margin-left:0;width:100%;justify-content:flex-start;}
+  .lc-pills{flex-wrap:wrap;}
+
+  /* Filter bar */
+  .filter-bar{padding:6px 8px;gap:5px;}
+  .filter-bar select,.filter-bar input{font-size:11px;}
+
+  /* Bookings */
+  .bk-head{gap:6px;}
+  .bk-foot{flex-direction:column;align-items:flex-start;}
+
+  /* Form cards */
+  .fb{padding:12px 12px;}
+  .fch{padding:9px 12px;font-size:13px;}
+  .form-card{margin-bottom:10px;}
+
+  /* User management — stack vertically */
+  #tab-setup .form-card:first-of-type,
+  #tab-setup > div[style*="grid"]{grid-template-columns:1fr !important;}
+
+  /* Modals */
+  .modal-box{width:96vw;max-width:96vw;margin:0 auto;}
+  .modal-body{padding:12px;}
+
+  /* Login */
+  .login-box{padding:28px 20px;}
+
+  /* Form grid — already 1-col at 700px but reinforce */
+  .fg{grid-template-columns:1fr;}
+  .full{grid-column:1;}
+
+  /* Buttons in action bars */
+  .lc-actions{gap:4px;padding:6px 10px;}
+  .lc-actions .btn{font-size:11px;padding:5px 8px;}
+
+  /* WhatsApp picker */
+  .wa-picker{right:10px;bottom:10px;min-width:240px;}
+
+  /* Two-col already 1-col at 900px */
+
+  /* Section header acts */
+  .sh{flex-direction:column;align-items:flex-start;}
+  .sh .last-ref{font-size:10px;}
+
+  /* Leaderboard */
+  .sl-stats{display:none;}
+
+  /* Next deliveries */
+  .nd-date{min-width:65px;font-size:12px;}
+
+  /* Prevent horizontal scroll on body */
+  body{overflow-x:hidden;}
+  #app-screen{overflow-x:hidden;}
+}
 </style>
 </head>
 <body>
@@ -454,7 +546,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <button class="logout-btn" onclick="doLogout()">Sign out</button>
   </div>
 </header>
-<div id="setup-banner">⚙ &nbsp;<strong>Setup required:</strong>&nbsp;<a onclick="showTab('setup')">Go to Setup</a> to connect to Google Sheet.</div>
+<div id="setup-banner" style="display:none;"></div>
 <div class="loc-bar">
   <span class="loc-label">Location:</span>
   <button class="loc-btn active" onclick="setLoc('ALL')">📍 All</button>
@@ -469,7 +561,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   <div class="tab" onclick="showTab('followup')">📞 Log Follow-up</div>
   <div class="tab" onclick="showTab('bookings')">🚗 Bookings</div>
   <div class="tab" onclick="showTab('stock')">📦 Stock</div>
-  <div class="tab" onclick="showTab('setup')">⚙ Setup</div>
+  <div class="tab" onclick="showTab('setup')">👥 Users</div>
 </nav>
 <main>
 <!-- ═══════ COMMAND CENTRE ═══════ -->
@@ -501,8 +593,16 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="sc cr" onclick="filterLeadsNav('red')"><div class="sc-lbl">🚨 Action Now</div><div class="sc-num" id="s-red">—</div><div class="sc-sub">Uncontacted / Overdue</div></div>
     <div class="sc ca" onclick="filterLeadsNav('amber')"><div class="sc-lbl">⚠ Follow-up Due</div><div class="sc-num" id="s-amber">—</div><div class="sc-sub">Due today</div></div>
     <div class="sc ch" onclick="filterLeadsNav('hot')"><div class="sc-lbl">🔥 Hot Pipeline</div><div class="sc-num" id="s-hot">—</div><div class="sc-sub">High intent</div></div>
-    <div class="sc cg" onclick="showTab('bookings')"><div class="sc-lbl">🚗 Bookings (Month)</div><div class="sc-num" id="s-booked">—</div><div class="sc-sub" id="s-tdc">— test drives</div></div>
+    <div class="sc cg" onclick="showTab('bookings')"><div class="sc-lbl">🚗 Bookings (Month)</div><div class="sc-num" id="s-booked">—</div><div class="sc-sub" id="s-bk-vs-tgt" style="font-weight:700;color:var(--blue-dk);margin-bottom:2px;"></div><div class="sc-sub" id="s-tdc">— test drives</div></div>
     <div class="sc cb"><div class="sc-lbl">📈 Compliance</div><div class="sc-num" id="s-comp">—</div><div class="sc-sub">Leads on time</div></div>
+  </div>
+  <!-- MY TARGET CARD (salesperson only) -->
+  <div id="my-tgt-card" style="display:none;background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:11px 14px;box-shadow:var(--shadow-xs);margin-bottom:11px;">
+    <div style="font-family:var(--font-h);font-size:14px;font-weight:700;color:var(--blue-dk);margin-bottom:9px;">🎯 My Monthly Target</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><div style="font-size:10px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Bookings</div><div style="font-family:var(--font-h);font-size:22px;font-weight:800;color:var(--blue-dk);" id="my-tgt-bk">—</div><div class="prog-wrap" style="margin-top:5px;"><div class="prog-bar prog-a" id="my-tgt-bk-bar" style="width:0%;"></div></div></div>
+      <div><div style="font-size:10px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Deliveries</div><div style="font-family:var(--font-h);font-size:22px;font-weight:800;color:var(--blue-dk);" id="my-tgt-del">—</div><div class="prog-wrap" style="margin-top:5px;"><div class="prog-bar prog-a" id="my-tgt-del-bar" style="width:0%;"></div></div></div>
+    </div>
   </div>
   <!-- DELIVERY STATS ROW -->
   <div class="del-srow">
@@ -540,7 +640,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       </div>
       <!-- WAIT TIME ALERTS -->
       <div class="dash-sec">
-        <div class="dash-sec-hd">⏳ Long-Waiting Customers (On Order) <span class="cnt-r" id="cnt-wait">0</span></div>
+        <div class="dash-sec-hd">⏳ Long-Waiting Customers (VNA) <span class="cnt-r" id="cnt-wait">0</span></div>
         <div class="alert-body" id="dash-wait-list"><div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">✅</div><p style="font-size:12px;">No customers waiting beyond threshold.</p></div></div>
       </div>
     </div>
@@ -548,7 +648,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="side-col">
       <!-- TARGETS + LOCATION BREAKDOWN -->
       <div class="target-card">
-        <div class="tc-hd">🎯 Monthly Targets &amp; Bookings <button onclick="toggleTargetForm()">✏ Set</button></div>
+        <div class="tc-hd">🎯 Monthly Targets &amp; Bookings <div style="display:flex;gap:5px;"><button onclick="toggleTargetForm()">✏ Location</button><button id="btn-sp-tgt" onclick="toggleSpTargetForm()" style="display:none;">👥 SP Targets</button></div></div>
         <div class="tc-body" id="tc-body"></div>
         <div class="target-form" id="target-form">
           <div style="font-size:9.5px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;">Monthly Targets</div>
@@ -561,6 +661,17 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
           <div class="tfi"><label>Wait Alert (days)</label><input type="number" id="tgt-wait" placeholder="e.g. 30" min="1"></div>
           <button class="btn btn-primary btn-sm" style="margin-top:4px;" onclick="saveTargets()">Save Targets</button>
         </div>
+        <!-- Per-SP targets form — admin/manager only -->
+        <div class="target-form" id="sp-target-form" style="border-top:2px solid var(--blue);">
+          <div style="font-size:9.5px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px;">Per-Salesperson Monthly Targets</div>
+          <div id="sp-tgt-rows" style="margin-bottom:8px;"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveSpTargets()">Save SP Targets</button>
+        </div>
+      </div>
+      <!-- Per-SP target progress (below target card, admin/manager view) -->
+      <div class="target-card" id="sp-tgt-card" style="display:none;">
+        <div class="tc-hd">👥 Salesperson Targets — This Month</div>
+        <div class="tc-body" id="sp-tc-body"></div>
       </div>
       <!-- NEXT 10 PLANNED DELIVERIES -->
       <div class="card-wrap" style="overflow:hidden;">
@@ -603,7 +714,31 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 <div id="tab-leads" class="section">
   <div class="sh">
     <div><div class="sh-title">All Leads</div><div class="sh-sub">⚠ Thin VoC = 1+ follow-up with &lt;30 char notes · 💬 WhatsApp on every lead</div></div>
-    <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="showTab('new-lead')">➕ New Lead</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div>
+    <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="showTab('new-lead')">➕ New Lead</button><button class="btn btn-ghost btn-sm" onclick="toggleBulkLeadUpload()">📤 Bulk Upload</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div>
+  </div>
+  <!-- BULK LEAD UPLOAD ZONE -->
+  <div id="bulk-lead-form" style="display:none;margin-bottom:12px;">
+    <div class="form-card">
+      <div class="fch" style="background:linear-gradient(135deg,#1B5E20,#2E7D32);">📤 Bulk Upload Leads — Excel / CSV</div>
+      <div class="fb">
+        <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Upload an Excel or CSV file with columns: <code style="background:var(--blue-lt);color:var(--blue-dk);padding:1px 5px;border-radius:3px;font-size:11px;">Customer Name, Phone, Alt Phone, Source, Location, Model Interest, Variant, Color Pref, Budget, Finance/Cash, Salesperson, Customer Area, Customer City, Customer Expected Delivery</code></p>
+        <div class="upload-zone" id="bulk-lead-zone" onclick="document.getElementById('bulk-lead-file').click()">
+          <div class="uz-ico">📋</div>
+          <div class="uz-title">Click to choose file or drag & drop</div>
+          <div class="uz-sub">Excel (.xlsx, .xls) or CSV — max 500 rows</div>
+          <input type="file" id="bulk-lead-file" accept=".xlsx,.xls,.csv" style="display:none;" onchange="parseBulkLeads(this.files[0])">
+        </div>
+        <div id="bulk-lead-preview" style="display:none;margin-top:10px;">
+          <div style="overflow-x:auto;max-height:260px;"><table class="preview-tbl" id="bulk-lead-tbl"><thead id="bulk-lead-thead"></thead><tbody id="bulk-lead-tbody"></tbody></table></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+            <span class="smsg" id="bulk-lead-status"></span>
+            <button class="btn btn-success btn-sm" id="bulk-lead-confirm" onclick="submitBulkLeads()" style="margin-left:auto;">Upload All Leads →</button>
+            <button class="btn btn-secondary btn-sm" onclick="cancelBulkLeads()">Cancel</button>
+          </div>
+        </div>
+        <span class="smsg" id="bulk-lead-file-status" style="margin-top:8px;display:block;"></span>
+      </div>
+    </div>
   </div>
   <div class="filter-bar">
     <input type="text" class="fi" id="fl-search" placeholder="Name / Phone / Model…" style="width:170px;" oninput="applyFilters()">
@@ -612,10 +747,20 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <select class="fi" id="fl-sp" onchange="applyFilters()"><option value="">All Salespeople</option></select>
     <select class="fi" id="fl-model" onchange="applyFilters()"><option value="">All Models</option></select>
     <select class="fi" id="fl-voc" onchange="applyFilters()"><option value="">All VoC</option><option value="thin">⚠ Thin VoC only</option></select>
+    <select class="fi" id="fl-sort" onchange="applyFilters()" title="Sort order">
+      <option value="priority">Sort: Priority</option>
+      <option value="newest">Created: Newest ↓</option>
+      <option value="oldest">Created: Oldest ↑</option>
+      <option value="lastcontact">Last Contact ↓</option>
+      <option value="nextfu">Next Follow-up ↑</option>
+    </select>
+    <span style="font-size:10px;color:var(--gray-500);font-weight:600;white-space:nowrap;">Created:</span>
+    <input type="date" class="fi" id="fl-date-from" onchange="applyFilters()" title="From date">
+    <input type="date" class="fi" id="fl-date-to" onchange="applyFilters()" title="To date">
     <button class="btn-ghost btn btn-sm" onclick="clearFilters()">Clear</button>
     <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="leads-count"></span>
   </div>
-  <div class="leads-list" id="leads-list"><div class="empty-st"><div class="ico">📋</div><p>Connect Google Sheet to load leads.<br><button class="btn btn-primary btn-sm" onclick="showTab('setup')" style="margin-top:10px;">Go to Setup →</button></p></div></div>
+  <div class="leads-list" id="leads-list"><div class="empty-st"><div class="ico">📋</div><p>No leads yet. Click <strong>+ New Lead</strong> to add one.</p></div></div>
 </div>
 <!-- ═══════ NEW LEAD ═══════ -->
 <div id="tab-new-lead" class="section">
@@ -633,7 +778,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <input type="hidden" id="nl-loc"><span class="err" id="err-loc" style="display:none;font-size:10px;color:var(--red);">Select a location</span></div>
           <div class="fg">
             <div class="field"><label>Lead Created <span class="auto-lbl">AUTO</span></label><input type="text" id="nl-created" class="locked" readonly></div>
-            <div class="field"><label>Salesperson <span class="req">*</span></label><input type="text" id="nl-sp" placeholder="Assigned salesperson"><span class="err">Required</span></div>
+            <div class="field"><label>Salesperson <span class="req">*</span></label><select id="nl-sp"><option value="">Select…</option></select><span class="err">Required</span></div>
             <div class="field"><label>Customer Name <span class="req">*</span></label><input type="text" id="nl-name" placeholder="Full name"><span class="err">Required</span></div>
             <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="nl-phone" placeholder="10-digit mobile"><span class="err">Required</span></div>
             <div class="field"><label>Alternate Phone</label><input type="tel" id="nl-altphone" placeholder="Optional"></div>
@@ -751,7 +896,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 </div>
 <!-- ═══════ BOOKINGS ═══════ -->
 <div id="tab-bookings" class="section">
-  <div class="sh"><div><div class="sh-title">Bookings Tracker</div><div class="sh-sub">In Stock · On Order · Source · Exchange · Insurance · Discount · Wait Time</div></div>
+  <div class="sh"><div><div class="sh-title">Bookings Tracker</div><div class="sh-sub">In Stock · VNA · Source · Exchange · Insurance · Discount · Wait Time</div></div>
     <div class="sh-acts"><button class="btn btn-primary btn-sm" onclick="toggleNewBkForm()">+ New Booking</button><button class="ref-btn" onclick="loadAll()">↻ Refresh</button></div></div>
   <!-- BOOKING FORM -->
   <div class="form-card new-bk-form" id="new-bk-form">
@@ -776,7 +921,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field"><label>Booking Amount (₹) <span class="req">*</span></label><input type="number" id="bk-amount" placeholder="e.g. 11000"><span class="err">Required</span></div>
         <div class="field"><label>Payment Mode</label><select id="bk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
         <div class="field"><label>Discount Offered (₹)</label><input type="number" id="bk-discount" placeholder="e.g. 25000"></div>
-        <div class="field"><label>Salesperson <span class="req">*</span></label><input type="text" id="bk-sp" placeholder="Name"><span class="err">Required</span></div>
+        <div class="field"><label>Salesperson <span class="req">*</span></label><select id="bk-sp"><option value="">Select…</option></select><span class="err">Required</span></div>
         <div class="field"><label>Booking Date <span class="auto-lbl">AUTO</span></label><input type="text" id="bk-dt" class="locked" readonly></div>
         <div class="field full"><label>Customer's Expected Delivery</label>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
@@ -798,7 +943,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       <div class="divlbl"><span>Vehicle Availability</span></div>
       <div class="fg">
         <div class="field full"><label>Vehicle In Stock?</label>
-          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-stk-y" onclick="togStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-stk-n" onclick="togStk('no')" style="flex:1;"><span class="tl">🔄 No — On Order</span><div class="tsw"></div></div></div></div>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-stk-y" onclick="togStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-stk-n" onclick="togStk('no')" style="flex:1;"><span class="tl">🔄 No — VNA</span><div class="tsw"></div></div></div></div>
         <div class="field" id="bk-ref-r" style="display:none;"><label>Chassis / Stock Ref No.</label><input type="text" id="bk-stock-ref" placeholder="Chassis No."></div>
         <div class="field" id="bk-syard-r" style="display:none;"><label>Stockyard</label><select id="bk-stockyard"><option>Common Stockyard</option><option>Palam Stockyard</option><option>Najafgarh Stockyard</option><option>Narela Stockyard</option></select></div>
         <div class="field" id="bk-edel-r" style="display:none;"><label>Expected Arrival (Dealer)</label><input type="date" id="bk-expected-del"><span class="hint">When vehicle arrives at dealership</span></div>
@@ -807,14 +952,24 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     </div>
     <div class="ffoot"><button class="btn btn-success" onclick="submitBooking()">Confirm Booking →</button><button class="btn btn-secondary" onclick="toggleNewBkForm()">Cancel</button><span class="smsg" id="bk-status"></span></div>
   </div>
-  <div class="bk-tabs"><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 On Order</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div></div>
+  <div class="bk-tabs"><div class="btab" onclick="showBkTab('all')">📋 All</div><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div></div>
   <div class="filter-bar" style="margin-bottom:10px;">
     <select class="fi" id="bk-floc" onchange="renderBookings()"><option value="">All Locations</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select>
     <select class="fi" id="bk-fmodel" onchange="renderBookings()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
+    <select class="fi" id="bk-sort" onchange="renderBookings()" title="Sort order">
+      <option value="newest">Booking: Newest ↓</option>
+      <option value="oldest">Booking: Oldest ↑</option>
+      <option value="waiting">Waiting: Longest ↑</option>
+    </select>
+    <span style="font-size:10px;color:var(--gray-500);font-weight:600;white-space:nowrap;">Booking Date:</span>
+    <input type="date" class="fi" id="bk-date-from" onchange="renderBookings()" title="From date">
+    <input type="date" class="fi" id="bk-date-to" onchange="renderBookings()" title="To date">
+    <button class="btn-ghost btn btn-sm" onclick="clearBkFilters()">Clear</button>
     <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="bk-count"></span>
   </div>
+  <div id="bk-al" style="display:none;"><div class="leads-list" id="bk-al-list"><div class="empty-st"><div class="ico">📋</div><p>No bookings yet.</p></div></div></div>
   <div id="bk-is"><div class="leads-list" id="bk-il"><div class="empty-st"><div class="ico">📦</div><p>No in-stock bookings.</p></div></div></div>
-  <div id="bk-oo" style="display:none;"><div class="leads-list" id="bk-ol"><div class="empty-st"><div class="ico">🔄</div><p>No orders pending.</p></div></div></div>
+  <div id="bk-oo" style="display:none;"><div class="leads-list" id="bk-ol"><div class="empty-st"><div class="ico">🔄</div><p>No VNA bookings.</p></div></div></div>
   <div id="bk-dv" style="display:none;"><div class="leads-list" id="bk-dl"><div class="empty-st"><div class="ico">🚗</div><p>No deliveries yet.</p></div></div></div>
 </div>
 <!-- ═══════ STOCK ═══════ -->
@@ -873,6 +1028,14 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <select class="fi" id="stk-floc" onchange="renderStock()"><option value="">All Locations</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select>
     <select class="fi" id="stk-fm" onchange="renderStock()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
     <select class="fi" id="stk-fs" onchange="renderStock()"><option value="">All Status</option><option value="Available">Available</option><option value="Allocated">Allocated</option><option value="Sold">Delivered</option></select>
+    <select class="fi" id="stk-sort" onchange="renderStock()" title="Sort order">
+      <option value="newest">Added: Newest ↓</option>
+      <option value="oldest">Added: Oldest ↑</option>
+    </select>
+    <span style="font-size:10px;color:var(--gray-500);font-weight:600;white-space:nowrap;">Added Date:</span>
+    <input type="date" class="fi" id="stk-date-from" onchange="renderStock()" title="From date">
+    <input type="date" class="fi" id="stk-date-to" onchange="renderStock()" title="To date">
+    <button class="btn-ghost btn btn-sm" onclick="clearStkFilters()">Clear</button>
     <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="stk-count"></span>
   </div>
   <div class="leads-list" id="stock-list"><div class="empty-st"><div class="ico">📦</div><p>No stock records yet.</p></div></div>
@@ -887,18 +1050,52 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 </div>
 <!-- ═══════ SETUP ═══════ -->
 <div id="tab-setup" class="section">
-  <div class="sh"><div class="sh-title">Setup — Connect to Google Sheet</div></div>
-  <div class="form-card" style="margin-bottom:12px;">
-    <div class="fch fch-blue">⚙ Paste Your Apps Script Web App URL</div>
-    <div class="fb"><div class="ci"><input type="text" id="script-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec"><button class="btn btn-primary" onclick="saveURL()">Save &amp; Connect</button></div><div id="conn-status" style="font-size:12px;font-weight:600;margin-top:8px;"></div></div>
+  <div class="sh"><div class="sh-title">User Management</div></div>
+  <div style="display:grid;grid-template-columns:320px 1fr;gap:14px;align-items:start;">
+    <div class="form-card">
+      <div class="fch fch-blue">👤 Add / Edit User</div>
+      <div class="fb">
+        <input type="hidden" id="um-edit-mode" value="0">
+        <div class="field"><label>Username <span class="req">*</span></label><input type="text" id="um-uname" placeholder="e.g. john.doe" autocomplete="off"></div>
+        <div class="field"><label>Password <span class="req">*</span></label><input type="text" id="um-pass" placeholder="Password" autocomplete="off"></div>
+        <div class="field"><label>Role <span class="req">*</span></label>
+          <select id="um-role" onchange="toggleBranchField()">
+            <option value="salesperson">Salesperson</option>
+            <option value="manager">Manager</option>
+            <option value="branch_head">Branch Head</option>
+            <option value="masteradmin">Master Admin</option>
+          </select>
+        </div>
+        <div class="field" id="um-branch-wrap" style="display:none;"><label>Branch <span class="req">*</span></label>
+          <select id="um-branch">
+            <option value="">Select Branch…</option>
+            <option value="Palam">Palam</option>
+            <option value="Najafgarh">Najafgarh</option>
+            <option value="Narela">Narela</option>
+          </select>
+        </div>
+        <div class="field"><label>Display Name</label><input type="text" id="um-display" placeholder="Full name shown in app"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-success" style="flex:1;" onclick="saveUserUI()">Save User</button>
+          <button class="btn btn-secondary" onclick="clearUserForm()">Clear</button>
+        </div>
+        <span class="smsg" id="um-status" style="margin-top:8px;display:block;"></span>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="fch fch-blue">👥 All Users</div>
+      <div id="um-table-wrap" style="overflow-x:auto;">
+        <div class="empty-st" style="padding:20px;"><div class="ico">👤</div><p>Loading users…</p></div>
+      </div>
+    </div>
   </div>
-  <div class="steps" style="margin-bottom:12px;">
+  <div class="steps" style="display:none;margin-bottom:12px;">
     <div class="step"><div class="step-n">1</div><div class="step-t"><strong>Open Google Sheet</strong> → <code>Extensions → Apps Script</code></div></div>
     <div class="step"><div class="step-n">2</div><div class="step-t"><strong>Delete all existing code</strong> and paste the full script below. Creates 5 sheets automatically: <code>Leads</code>, <code>FollowUps</code>, <code>Bookings</code>, <code>TestDrives</code>, <code>Stock</code></div></div>
     <div class="step"><div class="step-n">3</div><div class="step-t"><code>Deploy → New Deployment</code> → Type: <code>Web App</code> → Execute as: <code>Me</code> → Access: <code>Anyone</code> → Deploy → Authorize</div></div>
     <div class="step"><div class="step-n">4</div><div class="step-t">Copy the Web App URL → paste above → Save &amp; Connect</div></div>
   </div>
-  <div class="code-block"><button class="copy-btn" onclick="copyScript()">Copy All</button><pre id="script-code">// Sales Command Centre — Apps Script v3
+  <div class="code-block" style="display:none;"><button class="copy-btn" onclick="copyScript()">Copy All</button><pre id="script-code">// Sales Command Centre — Apps Script v3
 // Auto-creates 5 sheets: Leads, FollowUps, Bookings, TestDrives, Stock
 
 const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
@@ -1077,6 +1274,65 @@ function setMsg(el,t,msg){el.className='smsg '+t;el.textContent=msg;if(t==='ok')
 function getTargets(){return JSON.parse(localStorage.getItem('scc_targets')||'{}');}
 function saveTargets(){const t={palam:+document.getElementById('tgt-palam').value||0,naj:+document.getElementById('tgt-naj').value||0,nar:+document.getElementById('tgt-nar').value||0,td:+document.getElementById('tgt-td').value||0,fin:+document.getElementById('tgt-fin').value||75,ins:+document.getElementById('tgt-ins').value||91,wait:+document.getElementById('tgt-wait').value||30};localStorage.setItem('scc_targets',JSON.stringify(t));document.getElementById('target-form').classList.remove('open');renderDashboard();alert('Targets saved!');}
 function toggleTargetForm(){const f=document.getElementById('target-form');f.classList.toggle('open');if(f.classList.contains('open')){const t=getTargets();['palam','naj','nar','td','fin','ins','wait'].forEach(k=>{const el=document.getElementById('tgt-'+k);if(el&&(t[k]||t[k]===0))el.value=t[k];});}}
+// ─── SP TARGETS ───
+function getSpTargets(){return JSON.parse(localStorage.getItem('scc_sp_targets')||'{}');}
+function toggleSpTargetForm(){
+  const f=document.getElementById('sp-target-form');f.classList.toggle('open');
+  if(f.classList.contains('open')){
+    const saved=getSpTargets();
+    const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager');
+    document.getElementById('sp-tgt-rows').innerHTML=sps.length?sps.map(u=>{
+      const k=u.username;const sv=saved[k]||{};
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><span style="font-size:12px;font-weight:600;min-width:110px;color:var(--gray-700);">${u.display||u.username}</span><input type="number" id="sptgt-bk-${k}" placeholder="Bkgs" min="0" style="width:62px;background:#fff;border:1.5px solid var(--gray-200);border-radius:5px;padding:4px 7px;font-size:12px;outline:none;" value="${sv.bookings||''}"><span style="font-size:10px;color:var(--gray-400);">bkgs</span><input type="number" id="sptgt-del-${k}" placeholder="Del" min="0" style="width:62px;background:#fff;border:1.5px solid var(--gray-200);border-radius:5px;padding:4px 7px;font-size:12px;outline:none;" value="${sv.deliveries||''}"><span style="font-size:10px;color:var(--gray-400);">del</span></div>`;
+    }).join(''):'<p style="font-size:12px;color:var(--gray-400);">No salesperson users found. Add them in Users tab first.</p>';
+  }
+}
+function saveSpTargets(){
+  const saved={};const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager');
+  sps.forEach(u=>{const k=u.username;const bk=+document.getElementById('sptgt-bk-'+k)?.value||0;const del=+document.getElementById('sptgt-del-'+k)?.value||0;saved[k]={bookings:bk,deliveries:del};});
+  localStorage.setItem('scc_sp_targets',JSON.stringify(saved));
+  document.getElementById('sp-target-form').classList.remove('open');renderDashboard();alert('SP targets saved!');
+}
+function renderSpTargetCard(mBks){
+  const spTgts=getSpTargets();
+  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager');
+  if(!sps.length){document.getElementById('sp-tgt-card').style.display='none';return;}
+  const card=document.getElementById('sp-tgt-card');card.style.display='block';
+  let html='';
+  sps.forEach(u=>{
+    const t=spTgts[u.username]||{};const bkTgt=t.bookings||0;const delTgt=t.deliveries||0;
+    const name=u.display||u.username;
+    const bkAct=mBks.filter(b=>(b['Salesperson']||'').toLowerCase()===(name).toLowerCase()).length;
+    const delAct=mBks.filter(b=>b['Status']==='Delivered'&&(b['Salesperson']||'').toLowerCase()===name.toLowerCase()).length;
+    const bkP=bkTgt?Math.round(bkAct/bkTgt*100):null;const delP=delTgt?Math.round(delAct/delTgt*100):null;
+    html+=`<div class="tc-row" style="flex-direction:column;align-items:stretch;gap:5px;padding-bottom:8px;border-bottom:1px solid var(--gray-100);margin-bottom:6px;">
+      <div style="font-weight:700;font-size:12px;">${name}</div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;"><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">Bookings</div><div style="display:flex;align-items:center;gap:7px;"><div class="prog-wrap" style="flex:1;"><div class="prog-bar ${bkP!==null&&bkP>=100?'prog-g':bkP!==null&&bkP>=70?'prog-a':'prog-r'}" style="width:${Math.min(100,bkP||0)}%;"></div></div><span style="font-size:12px;font-weight:700;color:${!bkTgt?'var(--gray-400)':bkP>=100?'var(--green)':bkP>=70?'var(--amber)':'var(--red)'};">${bkAct}/${bkTgt||'—'}</span></div></div>
+        <div style="flex:1;"><div style="font-size:10px;color:var(--gray-400);margin-bottom:2px;">Deliveries</div><div style="display:flex;align-items:center;gap:7px;"><div class="prog-wrap" style="flex:1;"><div class="prog-bar ${delP!==null&&delP>=100?'prog-g':delP!==null&&delP>=70?'prog-a':'prog-r'}" style="width:${Math.min(100,delP||0)}%;"></div></div><span style="font-size:12px;font-weight:700;color:${!delTgt?'var(--gray-400)':delP>=100?'var(--green)':delP>=70?'var(--amber)':'var(--red)'};">${delAct}/${delTgt||'—'}</span></div></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('sp-tc-body').innerHTML=html||'<div style="padding:10px;font-size:12px;color:var(--gray-400);">No SP targets set. Use 👥 SP Targets button.</div>';
+}
+function renderMyTargets(mBks){
+  // For salesperson: find their target and actual from current month's bookings
+  const spTgts=getSpTargets();const t=spTgts[currentUser.username]||{};
+  const name=currentUser.display;
+  const bkTgt=t.bookings||0;const delTgt=t.deliveries||0;
+  const bkAct=mBks.filter(b=>(b['Salesperson']||'').toLowerCase()===name.toLowerCase()).length;
+  const delAct=mBks.filter(b=>b['Status']==='Delivered'&&(b['Salesperson']||'').toLowerCase()===name.toLowerCase()).length;
+  const el=document.getElementById('my-tgt-card');if(!el)return;
+  if(!bkTgt&&!delTgt){el.style.display='none';return;}
+  el.style.display='block';
+  const bkP=bkTgt?Math.round(bkAct/bkTgt*100):0;const delP=delTgt?Math.round(delAct/delTgt*100):0;
+  document.getElementById('my-tgt-bk').textContent=`${bkAct}/${bkTgt}`;
+  document.getElementById('my-tgt-del').textContent=`${delAct}/${delTgt}`;
+  document.getElementById('my-tgt-bk-bar').style.width=Math.min(100,bkP)+'%';
+  document.getElementById('my-tgt-del-bar').style.width=Math.min(100,delP)+'%';
+  document.getElementById('my-tgt-bk-bar').className='prog-bar '+(bkP>=100?'prog-g':bkP>=70?'prog-a':'prog-r');
+  document.getElementById('my-tgt-del-bar').className='prog-bar '+(delP>=100?'prog-g':delP>=70?'prog-a':'prog-r');
+}
 
 // ═══ CLOCK ═══
 function tick(){const n=new Date();document.getElementById('hclock').textContent=n.toLocaleTimeString('en-IN',{hour12:false});document.getElementById('hdate').textContent=n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const nl=document.getElementById('nl-created');if(nl)nl.value=fmtDT(n);const bd=document.getElementById('bk-dt');if(bd)bd.value=fmtDT(n);}
@@ -1086,8 +1342,8 @@ setInterval(tick,1000);tick();
 async function api(params){if(!SCRIPT_URL)throw new Error('Not configured. Go to Setup tab.');const url=new URL(SCRIPT_URL);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));const res=await fetch(url.toString(),{redirect:'follow'});const json=await res.json();if(json.status==='error')throw new Error(json.msg);return json;}
 async function loadAll(){
   const btn=document.getElementById('ref-btn');if(btn)btn.textContent='↻ Loading…';
-  try{const d=await api({action:'getAll'});allLeads=d.leads||[];allFU=d.followups||[];allBK=d.bookings||[];allTD=d.testdrives||[];allStock=d.stock||[];populateFilters();renderDashboard();renderLeads(filterLeadsData());renderBookings();renderStock();renderDVS();document.getElementById('last-ref').textContent='Updated '+new Date().toLocaleTimeString('en-IN');document.getElementById('setup-banner').style.display='none';}
-  catch(e){if(!SCRIPT_URL)document.getElementById('setup-banner').style.display='flex';}
+  try{const d=await api({action:'getAll'});allLeads=d.leads||[];allFU=d.followups||[];allBK=d.bookings||[];allTD=d.testdrives||[];allStock=d.stock||[];populateFilters();renderDashboard();renderLeads(filterLeadsData());renderBookings();renderStock();renderDVS();document.getElementById('last-ref').textContent='Updated '+new Date().toLocaleTimeString('en-IN');}
+  catch(e){console.error('loadAll error',e);}
   if(btn)btn.textContent='↻ Refresh';
 }
 
@@ -1102,9 +1358,10 @@ function calcBucket(l){
 }
 function isVocThin(l){return (parseInt(l['Followup Count'])||0)>=1&&(l['VoC Notes']||'').trim().length<30;}
 function locFilt(arr,f='Location'){if(currentLoc==='ALL')return arr;return arr.filter(x=>(x[f]||'').includes(currentLoc));}
+function spFilt(arr,f='Salesperson'){if(!currentUser||currentUser.role!=='salesperson')return arr;const n=currentUser.display.toLowerCase();const u=currentUser.username.toLowerCase();return arr.filter(x=>{const v=(x[f]||'').toLowerCase();return v===n||v===u;});}
 
 // ═══ NAV ═══
-function showTab(t){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');const m={dashboard:0,leads:1,'new-lead':2,followup:3,bookings:4,stock:5,setup:6};document.querySelectorAll('.tab')[m[t]]?.classList.add('active');if(t==='dashboard')renderDashboard();if(t==='leads')renderLeads(filterLeadsData());if(t==='bookings')renderBookings();if(t==='stock'){renderStock();renderDVS();}}
+function showTab(t){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');const m={dashboard:0,leads:1,'new-lead':2,followup:3,bookings:4,stock:5,setup:6};document.querySelectorAll('.tab')[m[t]]?.classList.add('active');if(t==='dashboard')renderDashboard();if(t==='leads')renderLeads(filterLeadsData());if(t==='bookings')renderBookings();if(t==='stock'){renderStock();renderDVS();}if(t==='setup')renderUsersTable();}
 function setLoc(loc){currentLoc=loc;document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('active'));const m={ALL:0,Palam:1,Najafgarh:2,Narela:3};document.querySelectorAll('.loc-btn')[m[loc]].classList.add('active');document.getElementById('dash-sub').textContent=(loc==='ALL'?'All Locations':loc)+' · Live Data';renderDashboard();renderLeads(filterLeadsData());renderBookings();}
 function filterLeadsNav(b){
   if(b==='thin'){showTab('leads');setTimeout(()=>{document.getElementById('fl-voc').value='thin';applyFilters();},50);return;}
@@ -1128,7 +1385,7 @@ function renderMB(leads,bks){
 
 // ═══ DASHBOARD ═══
 function renderDashboard(){
-  const leads=locFilt(allLeads);const bks=locFilt(allBK);const tds=locFilt(allTD);
+  const leads=spFilt(locFilt(allLeads));const bks=spFilt(locFilt(allBK));const tds=spFilt(locFilt(allTD));
   const active=leads.filter(l=>l['Status']!=='Lost'&&l['Status']!=='Delivered');
   const ms=monthStart();const today=new Date();today.setHours(0,0,0,0);
   const mBks=bks.filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
@@ -1139,7 +1396,14 @@ function renderDashboard(){
   const reds=bkts.filter(x=>x.b==='red');const ambs=bkts.filter(x=>x.b==='amber');const hots=bkts.filter(x=>x.b==='hot');
   document.getElementById('s-total').textContent=active.length;document.getElementById('s-today').textContent=todayLeads.length+' today';
   document.getElementById('s-red').textContent=reds.length;document.getElementById('s-amber').textContent=ambs.length;
-  document.getElementById('s-hot').textContent=hots.length;document.getElementById('s-booked').textContent=mBks.length;document.getElementById('s-tdc').textContent=mTDs.length+' test drives';
+  const t=getTargets();const totalTgt=currentLoc==='ALL'?(t.palam||0)+(t.naj||0)+(t.nar||0):currentLoc==='Palam'?(t.palam||0):currentLoc==='Najafgarh'?(t.naj||0):(t.nar||0);
+  const mInS=mBks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered').length;
+  const mVNA=mBks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered').length;
+  document.getElementById('s-hot').textContent=hots.length;
+  document.getElementById('s-booked').textContent=totalTgt?`${mBks.length}/${totalTgt}`:mBks.length;
+  const bkPct=totalTgt?Math.round(mBks.length/totalTgt*100):null;
+  document.getElementById('s-bk-vs-tgt').textContent=bkPct!==null?`${bkPct}% of target · ${mInS} in-stk · ${mVNA} VNA`:`${mInS} in-stk · ${mVNA} VNA`;
+  document.getElementById('s-tdc').textContent=mTDs.length+' test drives';
   const onT=active.filter(l=>calcBucket(l)!=='red');const comp=active.length?Math.round(onT.length/active.length*100):100;
   document.getElementById('s-comp').textContent=comp+'%';
   const cb=document.getElementById('comp-big');const cbar=document.getElementById('comp-bar');const cc=comp>=80?'cs-g':comp>=60?'cs-a':'cs-r';
@@ -1148,7 +1412,11 @@ function renderDashboard(){
   const fbEl=document.getElementById('fu-badge');fbEl.textContent=ambs.length;fbEl.style.display=ambs.length>0?'inline-block':'none';
   document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
-  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(mBks);renderSPTable(active,mTDs);renderMB(allLeads,allBK);
+  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(mBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(allBK);
+  const isSP=currentUser&&currentUser.role==='salesperson';const isAdm=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head');
+  const btnSP=document.getElementById('btn-sp-tgt');if(btnSP)btnSP.style.display=isAdm?'inline-flex':'none';
+  if(isAdm){renderSpTargetCard(spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=monthStart();}));}
+  if(isSP){renderMyTargets(spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=monthStart();}));}
 }
 function renderDashSec(id,leads,type){
   const el=document.getElementById(id);const shown=leads.slice(0,8);const now=new Date();
@@ -1206,7 +1474,7 @@ function renderTargetCard(mBks){
   locs.forEach(l=>{
     const ins=mBks.filter(b=>b['Location']===l.name&&b['In Stock']==='Yes').length;const ood=mBks.filter(b=>b['Location']===l.name&&b['In Stock']==='No').length;const tot=ins+ood;tB+=tot;tT+=l.tgt;
     const p=l.tgt?Math.round(tot/l.tgt*100):0;const pc=p>=100?'prog-g':p>=70?'prog-a':'prog-r';
-    html+=`<div class="tc-row"><span class="tc-name">${l.n}</span><span class="tc-nums">${ins} in-stk · ${ood} order</span><div class="tc-prog"><div class="prog-wrap"><div class="prog-bar ${pc}" style="width:${Math.min(100,p)}%;"></div></div></div><span class="tc-pct" style="color:${p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)'};">${tot}/${l.tgt||'—'}</span></div>`;
+    html+=`<div class="tc-row"><span class="tc-name">${l.n}</span><span class="tc-nums">${ins} in-stk · ${ood} VNA</span><div class="tc-prog"><div class="prog-wrap"><div class="prog-bar ${pc}" style="width:${Math.min(100,p)}%;"></div></div></div><span class="tc-pct" style="color:${p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)'};">${tot}/${l.tgt||'—'}</span></div>`;
   });
   const tp=tT?Math.round(tB/tT*100):0;html+=`<div style="border-top:1px solid var(--gray-200);margin-top:4px;padding-top:6px;display:flex;justify-content:space-between;font-size:12px;"><span style="font-weight:700;">Total</span><span>${tB}/${tT||'—'} (${tp}%)</span></div>`;
   document.getElementById('tc-body').innerHTML=html;
@@ -1228,12 +1496,24 @@ function filterLeadsData(){
   const q=(document.getElementById('fl-search')||{}).value?.toLowerCase()||'';
   const st=(document.getElementById('fl-status')||{}).value||'';const src=(document.getElementById('fl-src')||{}).value||'';
   const sp=(document.getElementById('fl-sp')||{}).value||'';const model=(document.getElementById('fl-model')||{}).value||'';const vf=(document.getElementById('fl-voc')||{}).value||'';
-  let leads=locFilt(allLeads);
-  leads=leads.filter(l=>{if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}if(src&&l['Source']!==src)return false;if(sp&&l['Salesperson']!==sp)return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}return true;});
-  const pri={red:6,amber:5,hot:4,warm:3,cold:2,green:1,lost:0};leads.sort((a,b)=>(pri[calcBucket(b)]||0)-(pri[calcBucket(a)]||0));return leads;
+  const sortBy=(document.getElementById('fl-sort')||{}).value||'priority';
+  const dateFrom=document.getElementById('fl-date-from')?.value||'';const dateTo=document.getElementById('fl-date-to')?.value||'';
+  let leads=spFilt(locFilt(allLeads));
+  leads=leads.filter(l=>{
+    if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}
+    if(src&&l['Source']!==src)return false;if(sp&&l['Salesperson']!==sp)return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}
+    if(dateFrom||dateTo){const d=parseD(l['Created DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;}
+    return true;
+  });
+  if(sortBy==='newest')leads.sort((a,b)=>(parseD(b['Created DT'])||0)-(parseD(a['Created DT'])||0));
+  else if(sortBy==='oldest')leads.sort((a,b)=>(parseD(a['Created DT'])||0)-(parseD(b['Created DT'])||0));
+  else if(sortBy==='lastcontact')leads.sort((a,b)=>(parseD(b['Last Contact DT'])||0)-(parseD(a['Last Contact DT'])||0));
+  else if(sortBy==='nextfu')leads.sort((a,b)=>{const da=parseD(a['Next Followup DT']);const db=parseD(b['Next Followup DT']);if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return da-db;});
+  else{const pri={red:6,amber:5,hot:4,warm:3,cold:2,green:1,lost:0};leads.sort((a,b)=>(pri[calcBucket(b)]||0)-(pri[calcBucket(a)]||0));}
+  return leads;
 }
 function applyFilters(){renderLeads(filterLeadsData());}
-function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});applyFilters();}
+function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc','fl-sort','fl-date-from','fl-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'&&id==='fl-sort'?'priority':'';});applyFilters();}
 function populateFilters(){const sps=[...new Set(allLeads.map(l=>l['Salesperson']).filter(Boolean))].sort();const mods=[...new Set(allLeads.map(l=>l['Model Interest']).filter(Boolean))].sort();const sp=document.getElementById('fl-sp');if(sp)sp.innerHTML='<option value="">All Salespeople</option>'+sps.map(s=>`<option>${s}</option>`).join('');const ml=document.getElementById('fl-model');if(ml)ml.innerHTML='<option value="">All Models</option>'+mods.map(m=>`<option>${m}</option>`).join('');}
 function renderLeads(leads){
   const list=document.getElementById('leads-list');if(!list)return;document.getElementById('leads-count').textContent=leads.length+' lead'+(leads.length!==1?'s':'');
@@ -1312,11 +1592,11 @@ async function submitNewLead(){
   const st=document.getElementById('nl-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addLead',data:JSON.stringify(d)});setMsg(st,'ok','✓ Lead saved! '+r.leadId);clearNLForm();allLeads.push({...d,'Lead ID':r.leadId,'Followup Count':'0'});renderDashboard();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function clearNLForm(){['nl-name','nl-sp','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());}
+function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());populateSPDropdowns();}
 
 // ═══ FOLLOW-UP ═══
 function checkTDFields(){const m=document.getElementById('fu-method').value;document.getElementById('td-fields').style.display=m==='Test Drive Conducted'?'block':'none';}
-function fuSearch(){const q=document.getElementById('fu-search').value.trim().toLowerCase();if(!q)return;const m=allLeads.filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).filter(l=>l['Status']!=='Lost').slice(0,10);const res=document.getElementById('fu-results');const list=document.getElementById('fu-list');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No active leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="fuSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</span><span class="pill ${srcCls(l['Source']||'')}" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span></div>`;}).join('');}
+function fuSearch(){const q=document.getElementById('fu-search').value.trim().toLowerCase();if(!q)return;const m=spFilt(allLeads).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).filter(l=>l['Status']!=='Lost').slice(0,10);const res=document.getElementById('fu-results');const list=document.getElementById('fu-list');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No active leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="fuSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</span><span class="pill ${srcCls(l['Source']||'')}" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span></div>`;}).join('');}
 function fuSelLead(l){fuSelectedLead=l;document.getElementById('fu-lead-id').value=l['Lead ID'];document.getElementById('fu-sel-text').textContent=`${l['Customer Name']} (${l['Phone']}) — ${l['Model Interest']||'—'}`;document.getElementById('fu-lead-info').style.display='block';document.getElementById('fu-results').style.display='none';const b=calcBucket(l);const bT={red:'🚨 Needs action',amber:'⚠ FU overdue',hot:'🔥 Hot',warm:'🔵 Warm',cold:'❄ Cold',green:'✅ Booked'}[b]||b;document.getElementById('fu-lead-card').innerHTML=`<span>📍 ${l['Location']||'—'}</span><span>📢 ${l['Source']||'—'}</span><span>🚗 ${l['Model Interest']||'—'}</span><span>🔁 ${l['Followup Count']||0} FUs</span><span>📊 ${bT}</span><span style="color:${isVocThin(l)?'var(--red)':'var(--gray-500)'};">VoC: ${isVocThin(l)?'⚠ THIN':'OK'} — "${(l['VoC Notes']||'None').substring(0,60)}"</span>`;if(l['Interest Level'])selFUInt(l['Interest Level'],null);}
 var fuSelectedLead=null;
 function fuClearSel(){fuSelectedLead=null;document.getElementById('fu-lead-id').value='';document.getElementById('fu-lead-info').style.display='none';document.getElementById('fu-search').value='';document.getElementById('fu-results').style.display='none';}
@@ -1337,7 +1617,7 @@ function prefillFULost(enc){const l=JSON.parse(decodeURIComponent(enc));showTab(
 function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());},150);}
 
 // ═══ BOOKINGS ═══
-function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={instock:0,onorder:1,delivered:2};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';}
+function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={all:0,instock:1,onorder:2,delivered:3};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-al').style.display=t==='all'?'block':'none';document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';}
 function togExc(v){bkExc=v;document.getElementById('t-exc-y').classList.toggle('on',v==='yes');document.getElementById('t-exc-n').classList.toggle('on',v==='no');['exc-make-r','exc-model-r','exc-year-r','exc-val-r'].forEach(id=>document.getElementById(id).style.display=v==='yes'?'block':'none');}
 function togIns(v){bkIns=v;document.getElementById('t-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ins-n').classList.toggle('on',v==='no');}
 function togStk(v){bkStk=v;document.getElementById('t-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-stk-n').classList.toggle('on',v==='no');document.getElementById('bk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-edel-r').style.display=v==='no'?'block':'none';}
@@ -1354,39 +1634,50 @@ async function submitBooking(){
   const st=document.getElementById('bk-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addBooking',data:JSON.stringify(d)});setMsg(st,'ok','✅ Booking confirmed! '+r.bookingId);toggleNewBkForm();clearBkForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-sp','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));}
+function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));populateSPDropdowns();}
 function renderBookings(){
-  let bks=locFilt(allBK);const lf=document.getElementById('bk-floc')?.value||'';const mf=document.getElementById('bk-fmodel')?.value||'';
+  let bks=spFilt(locFilt(allBK));const lf=document.getElementById('bk-floc')?.value||'';const mf=document.getElementById('bk-fmodel')?.value||'';
+  const sortBy=document.getElementById('bk-sort')?.value||'newest';
+  const dateFrom=document.getElementById('bk-date-from')?.value||'';const dateTo=document.getElementById('bk-date-to')?.value||'';
   if(lf)bks=bks.filter(b=>b['Location']===lf);if(mf)bks=bks.filter(b=>b['Model']===mf);
+  if(dateFrom||dateTo)bks=bks.filter(b=>{const d=parseD(b['Booking DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;return true;});
+  if(sortBy==='oldest')bks.sort((a,b)=>(parseD(a['Booking DT'])||0)-(parseD(b['Booking DT'])||0));
+  else if(sortBy==='waiting')bks.sort((a,b)=>(parseD(a['Booking DT'])||0)-(parseD(b['Booking DT'])||0));
+  else bks.sort((a,b)=>(parseD(b['Booking DT'])||0)-(parseD(a['Booking DT'])||0));
   const ins=bks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered');const ood=bks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered');const del=bks.filter(b=>b['Status']==='Delivered');
-  document.getElementById('bk-count').textContent=`${ins.length} in-stock · ${ood.length} on order · ${del.length} delivered`;
-  renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');
+  document.getElementById('bk-count').textContent=`${ins.length} in-stock · ${ood.length} VNA · ${del.length} delivered`;
+  const allSorted=[...bks].sort((a,b)=>(parseD(b['Booking DT'])||0)-(parseD(a['Booking DT'])||0));
+  renderBkList('bk-al-list',allSorted,'all');renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');
+}
+function clearBkFilters(){['bk-floc','bk-fmodel','bk-date-from','bk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-sort').value='newest';renderBookings();}
+function _bkCard(b,type){
+  const now=new Date();const thr=getTargets().wait||30;
+  const ri=b['rowIndex']||'';const bkId=b['Booking ID']||'';const cname=(b['Customer Name']||'').replace(/'/g,'');const pd=b['Planned Delivery']||'';const pdLbl=pd?'Update':'Set';
+  const btnConvert=type==='ord'?('<button class="tbl-btn" style="background:var(--green-bg);color:var(--green);border-color:var(--green-bd);" onclick="openConvertModal(\'' +ri+ '\',\'' +bkId+ '\')">✅ Vehicle Arrived — Mark In Stock</button>'):'';
+  const btnPlan=type!=='del'?('<button class="tbl-btn" onclick="openPlannedModal(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\',\'' +pd+ '\')">📅 '+pdLbl+' Planned Delivery</button>'):'';
+  const btnDeliv=type!=='del'?('<button class="tbl-btn" onclick="markDeliv(\'' +ri+ '\',\'' +bkId+ '\')">🚗 Mark Delivered</button>'):('<span class="pill pill-booked">✅ Delivered '+b['Actual Delivery']+' </span>');
+  const bkFootBtns=btnConvert+btnPlan+btnDeliv;
+  const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
+  let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
+  const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
+  return `<div class="${cls}">
+    <div class="bk-head"><span class="bk-name">${b['Customer Name']||'—'}</span><span style="font-size:11.5px;color:var(--gray-500);">${b['Phone']||''}</span>${locTagHtml(b['Location'])}<span class="bk-id">${b['Booking ID']||'—'}</span>${wBadge}</div>
+    <div class="bk-body"><span>🚗 <strong>${b['Model']||'—'}</strong> ${b['Variant']||''} ${b['Color']?'· '+b['Color']:''}</span><span>💰 ₹${(+b['Booking Amount']||0).toLocaleString('en-IN')}</span><span>💳 ${b['Payment Mode']||'—'}</span>${b['Lead Source']?`<span>📢 ${b['Lead Source']}</span>`:''}<span>👤 ${b['Salesperson']||'—'}</span>${b['Stock Ref']?`<span>🔢 ${b['Stock Ref']}</span>`:''}</div>
+    ${tags?`<div class="bk-tags">${tags}</div>`:''}
+    ${type==='ord'&&b['Expected Arrival']?`<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:4px;">📅 Dealer ETA: ${b['Expected Arrival']}</div>`:''}
+    ${b['Planned Delivery']?'<div style="font-size:11px;font-weight:700;color:var(--blue-dk);background:var(--blue-lt);border:1px solid #BAD3EF;border-radius:4px;padding:3px 9px;display:inline-block;margin-bottom:4px;">🗓 Planned Delivery: <strong>'+b['Planned Delivery']+'</strong></div>':''}
+    <div class="bk-foot"><span style="font-size:11px;color:var(--gray-400);">Booked: ${b['Booking DT']||'—'}</span>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">${bkFootBtns}</div></div>
+  </div>`;
 }
 function renderBkList(id,bks,type){
-  const el=document.getElementById(id);if(!bks.length){el.innerHTML=`<div class="empty-st"><div class="ico">${type==='stk'?'📦':type==='ord'?'🔄':'🚗'}</div><p>No ${type==='stk'?'in-stock bookings':type==='ord'?'orders pending':'deliveries'}.</p></div>`;return;}
-  const now=new Date();const thr=getTargets().wait||30;
-  el.innerHTML=bks.map(b=>{
-    const ri=b['rowIndex']||'';const bkId=b['Booking ID']||'';const cname=(b['Customer Name']||'').replace(/'/g,'');const pd=b['Planned Delivery']||'';const pdLbl=pd?'Update':'Set';
-    const btnConvert=type==='ord'?('<button class="tbl-btn" style="background:var(--green-bg);color:var(--green);border-color:var(--green-bd);" onclick="openConvertModal(\'' +ri+ '\',\'' +bkId+ '\')">✅ Vehicle Arrived — Mark In Stock</button>'):'';
-    const btnPlan=type!=='del'?('<button class="tbl-btn" onclick="openPlannedModal(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\',\'' +pd+ '\')">📅 '+pdLbl+' Planned Delivery</button>'):'';
-    const btnDeliv=type!=='del'?('<button class="tbl-btn" onclick="markDeliv(\'' +ri+ '\',\'' +bkId+ '\')">🚗 Mark Delivered</button>'):('<span class="pill pill-booked">✅ Delivered '+b['Actual Delivery']+' </span>');
-    const bkFootBtns=btnConvert+btnPlan+btnDeliv;
-    const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
-    let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
-    const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
-    return `<div class="${cls}">
-      <div class="bk-head"><span class="bk-name">${b['Customer Name']||'—'}</span><span style="font-size:11.5px;color:var(--gray-500);">${b['Phone']||''}</span>${locTagHtml(b['Location'])}<span class="bk-id">${b['Booking ID']||'—'}</span>${wBadge}</div>
-      <div class="bk-body"><span>🚗 <strong>${b['Model']||'—'}</strong> ${b['Variant']||''} ${b['Color']?'· '+b['Color']:''}</span><span>💰 ₹${(+b['Booking Amount']||0).toLocaleString('en-IN')}</span><span>💳 ${b['Payment Mode']||'—'}</span>${b['Lead Source']?`<span>📢 ${b['Lead Source']}</span>`:''}<span>👤 ${b['Salesperson']||'—'}</span>${b['Stock Ref']?`<span>🔢 ${b['Stock Ref']}</span>`:''}</div>
-      ${tags?`<div class="bk-tags">${tags}</div>`:''}
-      ${type==='ord'&&b['Expected Arrival']?`<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:4px;">📅 Dealer ETA: ${b['Expected Arrival']}</div>`:''}
-      ${b['Planned Delivery']?'<div style="font-size:11px;font-weight:700;color:var(--blue-dk);background:var(--blue-lt);border:1px solid #BAD3EF;border-radius:4px;padding:3px 9px;display:inline-block;margin-bottom:4px;">🗓 Planned Delivery: <strong>'+b['Planned Delivery']+'</strong></div>':''}
-      <div class="bk-foot"><span style="font-size:11px;color:var(--gray-400);">Booked: ${b['Booking DT']||'—'}</span>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${bkFootBtns}</div></div>
-    </div>`;
-  }).join('');
+  const el=document.getElementById(id);if(!bks.length){el.innerHTML=`<div class="empty-st"><div class="ico">${type==='stk'?'📦':type==='ord'?'🔄':'🚗'}</div><p>No ${type==='stk'?'in-stock bookings':type==='ord'?'VNA bookings':type==='all'?'bookings yet':'deliveries'}.</p></div>`;return;}
+  if(type==='all'){el.innerHTML=bks.map(b=>{const t=b['Status']==='Delivered'?'del':b['In Stock']==='Yes'?'stk':'ord';return _bkCard(b,t);}).join('');return;}
+  el.innerHTML=bks.map(b=>_bkCard(b,type)).join('');
 }
 async function markDeliv(ri,bkId){if(!confirm('Mark '+bkId+' as Delivered?'))return;try{await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,Status:'Delivered','Actual Delivery':new Date().toISOString().split('T')[0]})});await loadAll();}catch(e){alert('Error: '+e.message);}}
 
+function clearStkFilters(){['stk-floc','stk-fm','stk-fs','stk-date-from','stk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('stk-sort').value='newest';renderStock();}
 // ═══ STOCK ═══
 function toggleAddStock(){const f=document.getElementById('add-stock-form');f.style.display=f.style.display==='none'?'block':'none';}
 async function submitAddStock(){
@@ -1399,7 +1690,12 @@ async function submitAddStock(){
 }
 function renderStock(){
   const fl=document.getElementById('stk-floc')?.value||'';const fm=document.getElementById('stk-fm')?.value||'';const fs=document.getElementById('stk-fs')?.value||'';
+  const sortBy=document.getElementById('stk-sort')?.value||'newest';
+  const dateFrom=document.getElementById('stk-date-from')?.value||'';const dateTo=document.getElementById('stk-date-to')?.value||'';
   let stk=allStock;if(fl)stk=stk.filter(s=>s['Current Location']===fl);if(fm)stk=stk.filter(s=>s['Model']===fm);if(fs)stk=stk.filter(s=>s['Status']===fs);
+  if(dateFrom||dateTo)stk=stk.filter(s=>{const d=parseD(s['Added Date']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;return true;});
+  if(sortBy==='oldest')stk.sort((a,b)=>(parseD(a['Added Date'])||0)-(parseD(b['Added Date'])||0));
+  else stk.sort((a,b)=>(parseD(b['Added Date'])||0)-(parseD(a['Added Date'])||0));
   const av=allStock.filter(s=>s['Status']==='Available').length;const al=allStock.filter(s=>s['Status']==='Allocated').length;const so=allStock.filter(s=>s['Status']==='Sold').length;
   document.getElementById('scp-av').textContent=av;document.getElementById('scp-al').textContent=al;document.getElementById('scp-so').textContent=so;document.getElementById('scp-tot').textContent=allStock.filter(s=>s['Status']!=='Sold').length;
   document.getElementById('stk-count').textContent=stk.length+' vehicles';
@@ -1443,9 +1739,62 @@ function renderDVS(){
   document.getElementById('dvs-tbody').innerHTML=rows.length?rows.join(''):'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--gray-400);">Add leads and stock data to see analysis.</td></tr>';
 }
 
-// ═══ SETUP ═══
-function saveURL(){const url=document.getElementById('script-url').value.trim();if(!url)return;SCRIPT_URL=url;localStorage.setItem('scc_url',url);const cs=document.getElementById('conn-status');cs.textContent='Testing…';cs.style.color='var(--amber)';api({action:'ping'}).then(()=>{cs.textContent='✓ Connected!';cs.style.color='var(--green)';document.getElementById('setup-banner').style.display='none';}).catch(()=>{cs.textContent='✓ URL saved. Try refreshing Dashboard.';cs.style.color='var(--blue)';document.getElementById('setup-banner').style.display='none';});}
-function copyScript(){navigator.clipboard.writeText(document.getElementById('script-code').textContent).then(()=>{const b=document.querySelector('.copy-btn');b.textContent='✓ Copied!';setTimeout(()=>b.textContent='Copy All',2000);});}
+// ═══ USER MANAGEMENT ═══
+async function renderUsersTable(){
+  const wrap=document.getElementById('um-table-wrap');if(!wrap)return;
+  try{
+    const r=await api({action:'getUsers'});const users=r.users||[];
+    if(!users.length){wrap.innerHTML='<div class="empty-st" style="padding:20px;"><div class="ico">👤</div><p>No users found.</p></div>';return;}
+    const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',salesperson:'#1565C0'};
+    wrap.innerHTML='<table class="preview-tbl" style="width:100%;border-collapse:collapse;"><thead><tr><th>Username</th><th>Display Name</th><th>Role</th><th>Branch</th><th>Actions</th></tr></thead><tbody>'+
+      users.map(u=>`<tr><td><strong>${u.username}</strong></td><td>${u.display||u.username}</td><td><span style="background:${roleColor[u.role]||'#455A64'};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">${u.role}</span></td><td style="font-size:12px;">${u.branch||'—'}</td><td style="white-space:nowrap;"><button class="btn btn-sm btn-primary" style="margin-right:4px;" onclick='editUserUI(${JSON.stringify(u)})'>Edit</button><button class="btn btn-sm btn-danger" onclick="deleteUserUI('${u.username}')">Delete</button></td></tr>`).join('')+
+    '</tbody></table>';
+  }catch(e){wrap.innerHTML='<p style="color:var(--red);padding:10px;">'+e.message+'</p>';}
+}
+async function saveUserUI(){
+  const uname=document.getElementById('um-uname').value.trim();
+  const pass=document.getElementById('um-pass').value.trim();
+  const role=document.getElementById('um-role').value;
+  const display=document.getElementById('um-display').value.trim();
+  const branch=document.getElementById('um-branch').value;
+  const st=document.getElementById('um-status');
+  if(!uname||!pass){st.textContent='Username and password are required.';st.style.color='var(--red)';return;}
+  if(role==='branch_head'&&!branch){st.textContent='Please select a branch for Branch Head.';st.style.color='var(--red)';return;}
+  st.textContent='Saving…';st.style.color='var(--amber)';
+  try{
+    await api({action:'saveUser',data:JSON.stringify({username:uname,password:pass,role,display:display||uname,branch})});
+    st.textContent='✓ User saved!';st.style.color='var(--green)';
+    clearUserForm();renderUsersTable();
+  }catch(e){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
+}
+async function deleteUserUI(uname){
+  if(!confirm('Delete user "'+uname+'"? This cannot be undone.'))return;
+  try{await api({action:'deleteUser',data:JSON.stringify({username:uname})});renderUsersTable();}
+  catch(e){alert('Error: '+e.message);}
+}
+function editUserUI(u){
+  document.getElementById('um-uname').value=u.username;
+  document.getElementById('um-pass').value=u.password;
+  document.getElementById('um-role').value=u.role;
+  document.getElementById('um-branch').value=u.branch||'';
+  document.getElementById('um-display').value=u.display||'';
+  document.getElementById('um-edit-mode').value='1';
+  document.getElementById('um-status').textContent='';
+  toggleBranchField();
+  document.getElementById('um-uname').focus();
+}
+function clearUserForm(){
+  ['um-uname','um-pass','um-display'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('um-role').value='salesperson';
+  document.getElementById('um-branch').value='';
+  document.getElementById('um-branch-wrap').style.display='none';
+  document.getElementById('um-edit-mode').value='0';
+  document.getElementById('um-status').textContent='';
+}
+function toggleBranchField(){
+  const r=document.getElementById('um-role').value;
+  document.getElementById('um-branch-wrap').style.display=r==='branch_head'?'':'none';
+}
 function exportLeadsCSV(){if(!allLeads.length)return;const cols=['Lead ID','Created DT','Location','Source','Customer Name','Phone','Alt Phone','Model Interest','Variant','Budget','Finance/Cash','Salesperson','Status','Interest Level','First Contact DT','Last Contact DT','Next Followup DT','Followup Count','Lost Reason','VoC Notes','Customer Area','Customer City','Customer Expected Delivery'];const csv=[cols.join(','),...allLeads.map(l=>cols.map(c=>JSON.stringify(l[c]||'')).join(','))].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();}
 
 
@@ -1718,13 +2067,14 @@ async function uploadStockBatch(){
 }
 
 // ─── AUTH ───
-let currentUser=null;
+let currentUser=null;let allUsers=[];
 const ROLE_TABS={
-  masteradmin:['dashboard','leads','new-lead','followup','bookings','stock','setup'],
-  manager:    ['dashboard','leads','new-lead','followup','bookings','stock'],
-  salesperson:['dashboard','leads','new-lead','followup','bookings']
+  masteradmin: ['dashboard','leads','new-lead','followup','bookings','stock','setup'],
+  manager:     ['dashboard','leads','new-lead','followup','bookings','stock'],
+  branch_head: ['dashboard','leads','new-lead','followup','bookings','stock'],
+  salesperson: ['dashboard','leads','new-lead','followup','bookings']
 };
-const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',salesperson:'SALESPERSON'};
+const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',salesperson:'SALESPERSON'};
 async function doLogin(){
   const u=document.getElementById('lu').value.trim().toLowerCase();
   const p=document.getElementById('lp').value;
@@ -1733,9 +2083,10 @@ async function doLogin(){
   lerr.style.display='none';btn.textContent='Signing in…';btn.disabled=true;
   try{
     const r=await api({action:'getUsers'});
-    const found=(r.users||[]).find(x=>x.username.toLowerCase()===u&&x.password===p);
+    allUsers=r.users||[];
+    const found=allUsers.find(x=>x.username.toLowerCase()===u&&x.password===p);
     if(!found){lerr.textContent='Incorrect username or password.';lerr.style.display='block';return;}
-    currentUser={username:found.username,role:found.role,display:found.display||found.username};
+    currentUser={username:found.username,role:found.role,display:found.display||found.username,branch:found.branch||''};
     sessionStorage.setItem('scc_sess',JSON.stringify(currentUser));
     showApp();
   }catch(e){lerr.textContent='Could not connect: '+e.message;lerr.style.display='block';}
@@ -1749,13 +2100,108 @@ function showApp(){
   document.getElementById('hdr-uname').textContent=currentUser.display;
   document.getElementById('hdr-urole').textContent=ROLE_LABEL[currentUser.role]||currentUser.role.toUpperCase();
   document.getElementById('hdr-avatar').textContent=currentUser.display[0].toUpperCase();
-  applyRoleTabs();loadAll();
+  applyRoleTabs();
+  if(currentUser.role==='branch_head'&&currentUser.branch){
+    currentLoc=currentUser.branch;
+    document.querySelector('.loc-bar').style.display='none';
+  } else {
+    currentLoc='ALL';
+    document.querySelector('.loc-bar').style.display='';
+  }
+  if(allUsers.length>0){populateSPDropdowns();}
+  else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
+  loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
+}
+function populateSPDropdowns(){
+  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager').map(u=>u.display||u.username);
+  const opts='<option value="">Select…</option>'+sps.map(s=>`<option value="${s}">${s}</option>`).join('');
+  const nlSp=document.getElementById('nl-sp');const bkSp=document.getElementById('bk-sp');
+  if(nlSp)nlSp.innerHTML=opts;if(bkSp)bkSp.innerHTML=opts;
+  if(currentUser.role==='salesperson'){
+    const val=currentUser.display;
+    if(nlSp){nlSp.value=val;nlSp.disabled=true;}
+    if(bkSp){bkSp.value=val;bkSp.disabled=true;}
+  }
 }
 function applyRoleTabs(){
   const allowed=ROLE_TABS[currentUser.role]||[];
   const keys=['dashboard','leads','new-lead','followup','bookings','stock','setup'];
   document.querySelectorAll('nav .tab').forEach((tab,i)=>{tab.style.display=allowed.includes(keys[i])?'':'none';});
+  const spFilterEl=document.getElementById('fl-sp');if(spFilterEl)spFilterEl.closest('.filter-bar')&&(spFilterEl.style.display=currentUser.role==='salesperson'?'none':'');
 }
+
+// ═══ BULK LEAD UPLOAD ═══
+let parsedLeadRows=[];
+function toggleBulkLeadUpload(){const f=document.getElementById('bulk-lead-form');f.style.display=f.style.display==='none'?'block':'none';}
+function cancelBulkLeads(){parsedLeadRows=[];document.getElementById('bulk-lead-form').style.display='none';document.getElementById('bulk-lead-file').value='';document.getElementById('bulk-lead-preview').style.display='none';document.getElementById('bulk-lead-file-status').textContent='';}
+function parseBulkLeads(file){
+  if(!file)return;const st=document.getElementById('bulk-lead-file-status');setMsg(st,'ld','⟳ Reading file…');
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let data;
+    try{const wb=XLSX.read(e.target.result,{type:'binary'});const ws=wb.Sheets[wb.SheetNames[0]];data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});}
+    catch(err){setMsg(st,'err','✗ Could not read file: '+err.message);return;}
+    if(!data||data.length<2){setMsg(st,'err','✗ File is empty or has no data rows');return;}
+    // Auto-detect header row
+    let hdrIdx=0;
+    for(let i=0;i<Math.min(5,data.length);i++){if(data[i].some(c=>String(c).toLowerCase().includes('name')||String(c).toLowerCase().includes('phone'))){hdrIdx=i;break;}}
+    const headers=data[hdrIdx].map(h=>String(h).trim().toLowerCase());
+    const ci=(names)=>{for(const n of names){const idx=headers.findIndex(h=>h.includes(n));if(idx>=0)return idx;}return -1;};
+    const colName=ci(['customer name','name']);const colPhone=ci(['phone']);const colAlt=ci(['alt phone','alternate']);
+    const colSrc=ci(['source','lead source']);const colLoc=ci(['location','showroom']);
+    const colModel=ci(['model interest','model']);const colVariant=ci(['variant']);
+    const colColor=ci(['color pref','color','colour']);const colBudget=ci(['budget']);
+    const colFin=ci(['finance','cash','payment mode']);const colSP=ci(['salesperson','sales person','sp']);
+    const colArea=ci(['area','locality','customer area']);const colCity=ci(['city','customer city']);
+    const colDel=ci(['expected delivery','delivery date','customer expected']);
+    const rows=data.slice(hdrIdx+1).filter(r=>r.some(c=>c!==''));
+    parsedLeadRows=rows.map(r=>({
+      'Customer Name':colName>=0?String(r[colName]||'').trim():'',
+      'Phone':colPhone>=0?String(r[colPhone]||'').trim():'',
+      'Alt Phone':colAlt>=0?String(r[colAlt]||'').trim():'',
+      'Source':colSrc>=0?String(r[colSrc]||'').trim():'',
+      'Location':colLoc>=0?String(r[colLoc]||'').trim():'',
+      'Model Interest':colModel>=0?String(r[colModel]||'').trim():'',
+      'Variant':colVariant>=0?String(r[colVariant]||'').trim():'',
+      'Color Pref':colColor>=0?String(r[colColor]||'').trim():'',
+      'Budget':colBudget>=0?String(r[colBudget]||'').trim():'',
+      'Finance/Cash':colFin>=0?String(r[colFin]||'').trim():'',
+      'Salesperson':colSP>=0?String(r[colSP]||'').trim():'',
+      'Customer Area':colArea>=0?String(r[colArea]||'').trim():'',
+      'Customer City':colCity>=0?String(r[colCity]||'').trim():'',
+      'Customer Expected Delivery':colDel>=0?String(r[colDel]||'').trim():'',
+    })).filter(r=>r['Customer Name']||r['Phone']);
+    if(!parsedLeadRows.length){setMsg(st,'err','✗ No valid rows found (need at least Customer Name or Phone)');return;}
+    // Render preview
+    document.getElementById('bulk-lead-thead').innerHTML='<tr><th>#</th><th>Customer Name</th><th>Phone</th><th>Source</th><th>Location</th><th>Model</th><th>Salesperson</th></tr>';
+    document.getElementById('bulk-lead-tbody').innerHTML=parsedLeadRows.map((r,i)=>`<tr><td>${i+1}</td><td style="font-weight:700;">${r['Customer Name']||'—'}</td><td>${r['Phone']||'—'}</td><td>${r['Source']||'—'}</td><td>${r['Location']||'—'}</td><td>${r['Model Interest']||'—'}</td><td>${r['Salesperson']||'—'}</td></tr>`).join('');
+    document.getElementById('bulk-lead-preview').style.display='block';
+    setMsg(st,'ok',`✓ ${parsedLeadRows.length} rows ready. Review and click Upload.`);
+  };
+  reader.readAsBinaryString(file);
+}
+async function submitBulkLeads(){
+  if(!parsedLeadRows.length)return;
+  const btn=document.getElementById('bulk-lead-confirm');btn.disabled=true;btn.textContent='Uploading…';
+  const st=document.getElementById('bulk-lead-status');let ok=0,fail=0;
+  for(const row of parsedLeadRows){
+    try{await api({action:'addLead',data:JSON.stringify(row)});ok++;}
+    catch(e){fail++;console.warn('Lead upload error:',e.message);}
+    setMsg(st,'ld',`⟳ ${ok+fail}/${parsedLeadRows.length} processed…`);
+  }
+  setMsg(st,'ok',`✅ ${ok} leads uploaded${fail?' · '+fail+' failed':''}.`);
+  btn.disabled=false;btn.textContent='Upload All Leads →';
+  parsedLeadRows=[];document.getElementById('bulk-lead-file').value='';
+  setTimeout(()=>{cancelBulkLeads();loadAll();},1800);
+}
+// Drag-and-drop for bulk lead zone
+document.addEventListener('DOMContentLoaded',()=>{
+  const zone=document.getElementById('bulk-lead-zone');
+  if(!zone)return;
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)parseBulkLeads(f);});
+});
 
 // ═══ INIT ═══
 window.onload=async function(){
@@ -1768,7 +2214,7 @@ window.onload=async function(){
     if(cfg.scriptUrl&&cfg.scriptUrl.trim()){SCRIPT_URL=cfg.scriptUrl.trim();localStorage.setItem('scc_url',SCRIPT_URL);}
   }catch(e){}
   const saved=localStorage.getItem('scc_url');
-  if(saved){SCRIPT_URL=saved;document.getElementById('script-url').value=saved;document.getElementById('setup-banner').style.display='none';}
+  if(saved){SCRIPT_URL=saved;}
   // Check existing session
   const sess=sessionStorage.getItem('scc_sess');
   if(sess){try{currentUser=JSON.parse(sess);showApp();}catch(e){showLogin();}}
