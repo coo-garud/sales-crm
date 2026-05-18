@@ -1381,7 +1381,6 @@ function getTeamMembers(){
 function spFilt(arr,f='Salesperson'){
   if(!currentUser)return arr;
   if(currentUser.role==='salesperson'){const n=currentUser.display.toLowerCase();const u=currentUser.username.toLowerCase();return arr.filter(x=>{const v=(x[f]||'').toLowerCase();return v===n||v===u;});}
-  if(currentUser.role==='team_leader'){const members=getTeamMembers();return arr.filter(x=>members.includes((x[f]||'').toLowerCase()));}
   return arr;
 }
 
@@ -2171,17 +2170,11 @@ function showApp(){
   loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
 }
 function populateSPDropdowns(){
-  let sps;
-  if(currentUser.role==='team_leader'){
-    const members=getTeamMembers();
-    sps=allUsers.filter(u=>(u.role==='salesperson'||u.role==='team_leader')&&members.includes((u.display||u.username).toLowerCase())).map(u=>u.display||u.username);
-  }else{
-    sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
-  }
+  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
   const opts='<option value="">Select…</option>'+sps.map(s=>`<option value="${s}">${s}</option>`).join('');
   const nlSp=document.getElementById('nl-sp');const bkSp=document.getElementById('bk-sp');
   if(nlSp)nlSp.innerHTML=opts;if(bkSp)bkSp.innerHTML=opts;
-  if(currentUser.role==='salesperson'||currentUser.role==='team_leader'){
+  if(currentUser.role==='salesperson'){
     const val=currentUser.display;
     if(nlSp){nlSp.value=val;nlSp.disabled=true;}
     if(bkSp){bkSp.value=val;bkSp.disabled=true;}
