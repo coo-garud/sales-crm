@@ -1062,8 +1062,9 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field"><label>Username <span class="req">*</span></label><input type="text" id="um-uname" placeholder="e.g. john.doe" autocomplete="off"></div>
         <div class="field"><label>Password <span class="req">*</span></label><input type="text" id="um-pass" placeholder="Password" autocomplete="off"></div>
         <div class="field"><label>Role <span class="req">*</span></label>
-          <select id="um-role" onchange="toggleBranchField()">
+          <select id="um-role" onchange="toggleRoleFields()">
             <option value="salesperson">Salesperson</option>
+            <option value="team_leader">Team Leader</option>
             <option value="manager">Manager</option>
             <option value="branch_head">Branch Head</option>
             <option value="masteradmin">Master Admin</option>
@@ -1076,6 +1077,9 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <option value="Najafgarh">Najafgarh</option>
             <option value="Narela">Narela</option>
           </select>
+        </div>
+        <div class="field" id="um-team-wrap" style="display:none;"><label>Team Leader <span class="req">*</span></label>
+          <select id="um-team"><option value="">Select Team Leader…</option></select>
         </div>
         <div class="field"><label>Display Name</label><input type="text" id="um-display" placeholder="Full name shown in app"></div>
         <div style="display:flex;gap:8px;margin-top:10px;">
@@ -1298,7 +1302,13 @@ function saveSpTargets(){
 }
 function renderSpTargetCard(mBks){
   const spTgts=getSpTargets();
-  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager');
+  let sps;
+  if(currentUser&&currentUser.role==='team_leader'){
+    const members=getTeamMembers();
+    sps=allUsers.filter(u=>(u.role==='salesperson'||u.role==='team_leader')&&members.includes((u.display||u.username).toLowerCase()));
+  }else{
+    sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader');
+  }
   if(!sps.length){document.getElementById('sp-tgt-card').style.display='none';return;}
   const card=document.getElementById('sp-tgt-card');card.style.display='block';
   let html='';
@@ -1361,7 +1371,18 @@ function calcBucket(l){
 }
 function isVocThin(l){return (parseInt(l['Followup Count'])||0)>=1&&(l['VoC Notes']||'').trim().length<30;}
 function locFilt(arr,f='Location'){if(currentLoc==='ALL')return arr;return arr.filter(x=>(x[f]||'').includes(currentLoc));}
-function spFilt(arr,f='Salesperson'){if(!currentUser||currentUser.role!=='salesperson')return arr;const n=currentUser.display.toLowerCase();const u=currentUser.username.toLowerCase();return arr.filter(x=>{const v=(x[f]||'').toLowerCase();return v===n||v===u;});}
+function getTeamMembers(){
+  // Returns display names of salespersons whose team == currentUser.username, plus the TL themselves
+  const members=allUsers.filter(u=>u.team===currentUser.username).map(u=>(u.display||u.username).toLowerCase());
+  members.push(currentUser.display.toLowerCase());
+  return members;
+}
+function spFilt(arr,f='Salesperson'){
+  if(!currentUser)return arr;
+  if(currentUser.role==='salesperson'){const n=currentUser.display.toLowerCase();const u=currentUser.username.toLowerCase();return arr.filter(x=>{const v=(x[f]||'').toLowerCase();return v===n||v===u;});}
+  if(currentUser.role==='team_leader'){const members=getTeamMembers();return arr.filter(x=>members.includes((x[f]||'').toLowerCase()));}
+  return arr;
+}
 
 // ═══ NAV ═══
 function showTab(t){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');const m={dashboard:0,leads:1,'new-lead':2,followup:3,bookings:4,stock:5,setup:6};document.querySelectorAll('.tab')[m[t]]?.classList.add('active');if(t==='dashboard')renderDashboard();if(t==='leads')renderLeads(filterLeadsData());if(t==='bookings')renderBookings();if(t==='stock'){renderStock();renderDVS();}if(t==='setup')renderUsersTable();}
@@ -1417,10 +1438,13 @@ function renderDashboard(){
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
   const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
   renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
-  const isSP=currentUser&&currentUser.role==='salesperson';const isAdm=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head');
+  const isSP=currentUser&&currentUser.role==='salesperson';
+  const isTL=currentUser&&currentUser.role==='team_leader';
+  const isAdm=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head'||currentUser.role==='team_leader');
   const btnSP=document.getElementById('btn-sp-tgt');if(btnSP)btnSP.style.display=isAdm?'inline-flex':'none';
   if(isAdm){renderSpTargetCard(allMonthBks);}
   if(isSP){renderMyTargets(allMonthBks);}
+  if(isTL){renderMyTargets(allMonthBks);}
 }
 function renderDashSec(id,leads,type){
   const el=document.getElementById(id);const shown=leads.slice(0,8);const now=new Date();
@@ -1749,9 +1773,10 @@ async function renderUsersTable(){
   try{
     const r=await api({action:'getUsers'});const users=r.users||[];
     if(!users.length){wrap.innerHTML='<div class="empty-st" style="padding:20px;"><div class="ico">👤</div><p>No users found.</p></div>';return;}
-    const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',salesperson:'#1565C0'};
-    wrap.innerHTML='<table class="preview-tbl" style="width:100%;border-collapse:collapse;"><thead><tr><th>Username</th><th>Display Name</th><th>Role</th><th>Branch</th><th>Actions</th></tr></thead><tbody>'+
-      users.map(u=>`<tr><td><strong>${u.username}</strong></td><td>${u.display||u.username}</td><td><span style="background:${roleColor[u.role]||'#455A64'};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">${u.role}</span></td><td style="font-size:12px;">${u.branch||'—'}</td><td style="white-space:nowrap;"><button class="btn btn-sm btn-primary" style="margin-right:4px;" onclick='editUserUI(${JSON.stringify(u)})'>Edit</button><button class="btn btn-sm btn-danger" onclick="deleteUserUI('${u.username}')">Delete</button></td></tr>`).join('')+
+    const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',team_leader:'#6A1B9A',salesperson:'#1565C0'};
+    const tlMap=Object.fromEntries(users.filter(u=>u.role==='team_leader').map(u=>[u.username,u.display||u.username]));
+    wrap.innerHTML='<table class="preview-tbl" style="width:100%;border-collapse:collapse;"><thead><tr><th>Username</th><th>Display Name</th><th>Role</th><th>Branch</th><th>Team</th><th>Actions</th></tr></thead><tbody>'+
+      users.map(u=>`<tr><td><strong>${u.username}</strong></td><td>${u.display||u.username}</td><td><span style="background:${roleColor[u.role]||'#455A64'};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;">${ROLE_LABEL[u.role]||u.role}</span></td><td style="font-size:12px;">${u.branch||'—'}</td><td style="font-size:12px;">${u.team?tlMap[u.team]||u.team:'—'}</td><td style="white-space:nowrap;"><button class="btn btn-sm btn-primary" style="margin-right:4px;" onclick='editUserUI(${JSON.stringify(u)})'>Edit</button><button class="btn btn-sm btn-danger" onclick="deleteUserUI('${u.username}')">Delete</button></td></tr>`).join('')+
     '</tbody></table>';
   }catch(e){wrap.innerHTML='<p style="color:var(--red);padding:10px;">'+e.message+'</p>';}
 }
@@ -1761,12 +1786,14 @@ async function saveUserUI(){
   const role=document.getElementById('um-role').value;
   const display=document.getElementById('um-display').value.trim();
   const branch=document.getElementById('um-branch').value;
+  const team=document.getElementById('um-team').value;
   const st=document.getElementById('um-status');
   if(!uname||!pass){st.textContent='Username and password are required.';st.style.color='var(--red)';return;}
-  if(role==='branch_head'&&!branch){st.textContent='Please select a branch for Branch Head.';st.style.color='var(--red)';return;}
+  if((role==='branch_head'||role==='team_leader')&&!branch){st.textContent='Please select a branch for this role.';st.style.color='var(--red)';return;}
+  if(role==='salesperson'&&!team){st.textContent='Please assign a Team Leader for this salesperson.';st.style.color='var(--red)';return;}
   st.textContent='Saving…';st.style.color='var(--amber)';
   try{
-    await api({action:'saveUser',data:JSON.stringify({username:uname,password:pass,role,display:display||uname,branch})});
+    await api({action:'saveUser',data:JSON.stringify({username:uname,password:pass,role,display:display||uname,branch,team})});
     st.textContent='✓ User saved!';st.style.color='var(--green)';
     clearUserForm();renderUsersTable();
   }catch(e){st.textContent='Error: '+e.message;st.style.color='var(--red)';}
@@ -1784,20 +1811,28 @@ function editUserUI(u){
   document.getElementById('um-display').value=u.display||'';
   document.getElementById('um-edit-mode').value='1';
   document.getElementById('um-status').textContent='';
-  toggleBranchField();
+  toggleRoleFields();
+  document.getElementById('um-team').value=u.team||'';
   document.getElementById('um-uname').focus();
 }
 function clearUserForm(){
   ['um-uname','um-pass','um-display'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('um-role').value='salesperson';
   document.getElementById('um-branch').value='';
+  document.getElementById('um-team').value='';
   document.getElementById('um-branch-wrap').style.display='none';
+  document.getElementById('um-team-wrap').style.display='none';
   document.getElementById('um-edit-mode').value='0';
   document.getElementById('um-status').textContent='';
 }
-function toggleBranchField(){
+function toggleRoleFields(){
   const r=document.getElementById('um-role').value;
-  document.getElementById('um-branch-wrap').style.display=r==='branch_head'?'':'none';
+  document.getElementById('um-branch-wrap').style.display=(r==='branch_head'||r==='team_leader')?'':'none';
+  const tw=document.getElementById('um-team-wrap');tw.style.display=r==='salesperson'?'':'none';
+  if(r==='salesperson'){
+    const tls=allUsers.filter(u=>u.role==='team_leader');
+    document.getElementById('um-team').innerHTML='<option value="">Select Team Leader…</option>'+tls.map(u=>`<option value="${u.username}">${u.display||u.username}${u.branch?' ('+u.branch+')':''}</option>`).join('');
+  }
 }
 function exportLeadsCSV(){if(!allLeads.length)return;const cols=['Lead ID','Created DT','Location','Source','Customer Name','Phone','Alt Phone','Model Interest','Variant','Budget','Finance/Cash','Salesperson','Status','Interest Level','First Contact DT','Last Contact DT','Next Followup DT','Followup Count','Lost Reason','VoC Notes','Customer Area','Customer City','Customer Expected Delivery'];const csv=[cols.join(','),...allLeads.map(l=>cols.map(c=>JSON.stringify(l[c]||'')).join(','))].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();}
 
@@ -2076,9 +2111,10 @@ const ROLE_TABS={
   masteradmin: ['dashboard','leads','new-lead','followup','bookings','stock','setup'],
   manager:     ['dashboard','leads','new-lead','followup','bookings','stock'],
   branch_head: ['dashboard','leads','new-lead','followup','bookings','stock'],
+  team_leader: ['dashboard','leads','new-lead','followup','bookings','stock'],
   salesperson: ['dashboard','leads','new-lead','followup','bookings']
 };
-const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',salesperson:'SALESPERSON'};
+const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',team_leader:'TEAM LEADER',salesperson:'SALESPERSON'};
 async function doLogin(){
   const u=document.getElementById('lu').value.trim().toLowerCase();
   const p=document.getElementById('lp').value;
@@ -2090,7 +2126,7 @@ async function doLogin(){
     allUsers=r.users||[];
     const found=allUsers.find(x=>x.username.toLowerCase()===u&&x.password===p);
     if(!found){lerr.textContent='Incorrect username or password.';lerr.style.display='block';return;}
-    currentUser={username:found.username,role:found.role,display:found.display||found.username,branch:found.branch||''};
+    currentUser={username:found.username,role:found.role,display:found.display||found.username,branch:found.branch||'',team:found.team||''};
     sessionStorage.setItem('scc_sess',JSON.stringify(currentUser));
     showApp();
   }catch(e){lerr.textContent='Could not connect: '+e.message;lerr.style.display='block';}
@@ -2105,10 +2141,11 @@ function showApp(){
   document.getElementById('hdr-urole').textContent=ROLE_LABEL[currentUser.role]||currentUser.role.toUpperCase();
   document.getElementById('hdr-avatar').textContent=currentUser.display[0].toUpperCase();
   applyRoleTabs();
-  if(currentUser.role==='branch_head'&&currentUser.branch){
+  if((currentUser.role==='branch_head'||currentUser.role==='team_leader')&&currentUser.branch){
     currentLoc=currentUser.branch;
     document.querySelector('.loc-bar').style.display='none';
-    document.getElementById('dash-sub').textContent=currentUser.branch+' · Live Data';
+    const sub=currentUser.role==='team_leader'?currentUser.display+' Team · '+currentUser.branch:currentUser.branch+' · Live Data';
+    document.getElementById('dash-sub').textContent=sub;
   } else {
     currentLoc='ALL';
     document.querySelector('.loc-bar').style.display='';
@@ -2119,11 +2156,17 @@ function showApp(){
   loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
 }
 function populateSPDropdowns(){
-  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager').map(u=>u.display||u.username);
+  let sps;
+  if(currentUser.role==='team_leader'){
+    const members=getTeamMembers();
+    sps=allUsers.filter(u=>(u.role==='salesperson'||u.role==='team_leader')&&members.includes((u.display||u.username).toLowerCase())).map(u=>u.display||u.username);
+  }else{
+    sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
+  }
   const opts='<option value="">Select…</option>'+sps.map(s=>`<option value="${s}">${s}</option>`).join('');
   const nlSp=document.getElementById('nl-sp');const bkSp=document.getElementById('bk-sp');
   if(nlSp)nlSp.innerHTML=opts;if(bkSp)bkSp.innerHTML=opts;
-  if(currentUser.role==='salesperson'){
+  if(currentUser.role==='salesperson'||currentUser.role==='team_leader'){
     const val=currentUser.display;
     if(nlSp){nlSp.value=val;nlSp.disabled=true;}
     if(bkSp){bkSp.value=val;bkSp.disabled=true;}
@@ -2133,7 +2176,7 @@ function applyRoleTabs(){
   const allowed=ROLE_TABS[currentUser.role]||[];
   const keys=['dashboard','leads','new-lead','followup','bookings','stock','setup'];
   document.querySelectorAll('nav .tab').forEach((tab,i)=>{tab.style.display=allowed.includes(keys[i])?'':'none';});
-  const spFilterEl=document.getElementById('fl-sp');if(spFilterEl)spFilterEl.closest('.filter-bar')&&(spFilterEl.style.display=currentUser.role==='salesperson'?'none':'');
+  const spFilterEl=document.getElementById('fl-sp');if(spFilterEl)spFilterEl.closest('.filter-bar')&&(spFilterEl.style.display=(currentUser.role==='salesperson'||currentUser.role==='team_leader')?'none':'');
 }
 
 // ═══ BULK LEAD UPLOAD ═══
