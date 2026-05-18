@@ -685,6 +685,9 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
           <div class="fin-row"><div class="fin-lbl">Finance</div><div class="fin-bw"><div class="fin-b" id="fin-bar" style="width:0%;background:var(--teal);"></div></div><div class="fin-pct" id="fin-pct" style="color:var(--teal);">—%</div></div>
           <div class="fin-row"><div class="fin-lbl">Cash</div><div class="fin-bw"><div class="fin-b" id="cash-bar" style="width:0%;background:var(--gray-300);"></div></div><div class="fin-pct" id="cash-pct" style="color:var(--gray-500);">—%</div></div>
           <div style="font-size:11px;color:var(--gray-500);margin-top:7px;padding-top:7px;border-top:1px solid var(--gray-100);" id="fin-tgt-line">Target: —%</div>
+          <div class="fin-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gray-100);"><div class="fin-lbl">🛡 In-house Ins.</div><div class="fin-bw"><div class="fin-b" id="ins-bar" style="width:0%;background:var(--green);"></div></div><div class="fin-pct" id="ins-pct" style="color:var(--green);">—%</div></div>
+          <div class="fin-row"><div class="fin-lbl">External Ins.</div><div class="fin-bw"><div class="fin-b" id="ext-ins-bar" style="width:0%;background:var(--gray-300);"></div></div><div class="fin-pct" id="ext-ins-pct" style="color:var(--gray-500);">—%</div></div>
+          <div style="font-size:11px;color:var(--gray-500);margin-top:7px;padding-top:7px;border-top:1px solid var(--gray-100);" id="ins-tgt-line">Insurance Target: —%</div>
         </div>
       </div>
       <!-- SALESMAN MONTHLY LEADERBOARD -->
@@ -1264,7 +1267,7 @@ let mbCol=sessionStorage.getItem('mbCol')==='1';
 // ═══ UTILS ═══
 function fmtDT(d){return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
 function fmtDate(d){return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
-function parseD(s){if(!s)return null;try{return new Date(s);}catch(e){return null;}}
+function parseD(s){if(!s)return null;if(typeof s==='string')s=s.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/,'$1T$2');const d=new Date(s);return isNaN(d.getTime())?null:d;}
 function daysBetween(a,b){return Math.floor((b-a)/86400000);}
 function hoursBetween(a,b){return(b-a)/3600000;}
 function monthStart(){const d=new Date();d.setDate(1);d.setHours(0,0,0,0);return d;}
@@ -1412,11 +1415,12 @@ function renderDashboard(){
   const fbEl=document.getElementById('fu-badge');fbEl.textContent=ambs.length;fbEl.style.display=ambs.length>0?'inline-block':'none';
   document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
-  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(mBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(allBK);
+  const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
+  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
   const isSP=currentUser&&currentUser.role==='salesperson';const isAdm=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head');
   const btnSP=document.getElementById('btn-sp-tgt');if(btnSP)btnSP.style.display=isAdm?'inline-flex':'none';
-  if(isAdm){renderSpTargetCard(spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=monthStart();}));}
-  if(isSP){renderMyTargets(spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=monthStart();}));}
+  if(isAdm){renderSpTargetCard(allMonthBks);}
+  if(isSP){renderMyTargets(allMonthBks);}
 }
 function renderDashSec(id,leads,type){
   const el=document.getElementById(id);const shown=leads.slice(0,8);const now=new Date();
@@ -2104,9 +2108,11 @@ function showApp(){
   if(currentUser.role==='branch_head'&&currentUser.branch){
     currentLoc=currentUser.branch;
     document.querySelector('.loc-bar').style.display='none';
+    document.getElementById('dash-sub').textContent=currentUser.branch+' · Live Data';
   } else {
     currentLoc='ALL';
     document.querySelector('.loc-bar').style.display='';
+    document.getElementById('dash-sub').textContent='All Locations · Live Data';
   }
   if(allUsers.length>0){populateSPDropdowns();}
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
