@@ -1542,6 +1542,7 @@ function getTeamMembers(){
   members.push(currentUser.display.toLowerCase());
   return members;
 }
+function canonicalSP(name){if(!name)return'Unassigned';const n=name.toLowerCase();const u=allUsers.find(u=>(u.display||u.username).toLowerCase()===n);return u?(u.display||u.username):name;}
 function spFilt(arr,f='Salesperson'){
   if(!currentUser)return arr;
   if(currentUser.role==='salesperson'){const n=currentUser.display.toLowerCase();const u=currentUser.username.toLowerCase();return arr.filter(x=>{const v=(x[f]||'').toLowerCase();return v===n||v===u;});}
@@ -1660,7 +1661,7 @@ function renderFinPen(bks){
 }
 function renderTDBoard(tds){
   const tgt=getTargets().td||40;document.getElementById('td-month-lbl').textContent=`${tds.length}/${tgt} this month`;
-  const map={};tds.forEach(t=>{const sp=t['Salesperson']||'Unknown';map[sp]=(map[sp]||0)+1;});
+  const map={};tds.forEach(t=>{const sp=canonicalSP(t['Salesperson']);map[sp]=(map[sp]||0)+1;});
   const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6);const maxN=sorted[0]?.[1]||1;
   document.getElementById('td-leaderboard').innerHTML=sorted.length?sorted.map(([sp,n],i)=>`<div class="td-row"><div class="td-rank r${i+1}">${i+1}</div><div class="td-sp">${sp}</div><div class="td-bm"><div class="td-bf" style="width:${Math.round(n/maxN*100)}%;"></div></div><div class="td-cnt">${n}</div><div style="font-size:10px;color:var(--gray-500);">TDs</div></div>`).join(''):`<div style="padding:14px;text-align:center;font-size:12px;color:var(--gray-400);">No test drives this month.</div>`;
 }
@@ -1676,8 +1677,8 @@ function renderTargetCard(mBks){
   document.getElementById('tc-body').innerHTML=html;
 }
 function renderSPTable(active,tds){
-  const map={};active.forEach(l=>{const sp=l['Salesperson']||'Unassigned';if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].t++;const b=calcBucket(l);if(b==='red')map[sp].ov++;else map[sp].o++;if(isVocThin(l))map[sp].v++;});
-  tds.forEach(t=>{const sp=t['Salesperson']||'Unassigned';if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].td++;});
+  const map={};active.forEach(l=>{const sp=canonicalSP(l['Salesperson']);if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].t++;const b=calcBucket(l);if(b==='red')map[sp].ov++;else map[sp].o++;if(isVocThin(l))map[sp].v++;});
+  tds.forEach(t=>{const sp=canonicalSP(t['Salesperson']);if(!map[sp])map[sp]={t:0,o:0,ov:0,v:0,td:0};map[sp].td++;});
   const rows=Object.entries(map).sort((a,b)=>b[1].t-a[1].t);
   document.getElementById('sp-tbody').innerHTML=rows.length?rows.map(([sp,d])=>{const sc=d.t?Math.round(d.o/d.t*100):100;const cl=sc>=80?'sg':sc>=60?'sa':'sr';return `<tr><td style="font-weight:600;">${sp}</td><td>${d.t}</td><td style="color:var(--green);">${d.o}</td><td style="color:${d.ov?'var(--red)':'var(--gray-400)'};">${d.ov}</td><td style="color:var(--amber);font-weight:700;">${d.td}</td><td style="color:${d.v?'var(--red)':'var(--gray-400)'};">${d.v||'—'}</td><td><span class="sc-pill ${cl}">${sc}%</span></td></tr>`;}).join(''):'<tr><td colspan="7" style="color:var(--gray-400);padding:10px;">No active leads.</td></tr>';
 }
@@ -1697,7 +1698,7 @@ function filterLeadsData(){
   let leads=spFilt(locFilt(allLeads));
   leads=leads.filter(l=>{
     if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}
-    if(src&&l['Source']!==src)return false;if(sp&&l['Salesperson']!==sp)return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}
+    if(src&&l['Source']!==src)return false;if(sp&&canonicalSP(l['Salesperson']).toLowerCase()!==sp.toLowerCase())return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}
     if(dateFrom||dateTo){const d=parseD(l['Created DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;}
     return true;
   });
@@ -1710,7 +1711,7 @@ function filterLeadsData(){
 }
 function applyFilters(){renderLeads(filterLeadsData());}
 function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc','fl-sort','fl-date-from','fl-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'&&id==='fl-sort'?'priority':'';});applyFilters();}
-function populateFilters(){const sps=[...new Set(allLeads.map(l=>l['Salesperson']).filter(Boolean))].sort();const mods=[...new Set(allLeads.map(l=>l['Model Interest']).filter(Boolean))].sort();const sp=document.getElementById('fl-sp');if(sp)sp.innerHTML='<option value="">All Salespeople</option>'+sps.map(s=>`<option>${s}</option>`).join('');const ml=document.getElementById('fl-model');if(ml)ml.innerHTML='<option value="">All Models</option>'+mods.map(m=>`<option>${m}</option>`).join('');}
+function populateFilters(){const seenSP=new Map();allLeads.map(l=>l['Salesperson']).filter(Boolean).forEach(s=>{const c=canonicalSP(s);if(!seenSP.has(c.toLowerCase()))seenSP.set(c.toLowerCase(),c);});const sps=[...seenSP.values()].sort();const mods=[...new Set(allLeads.map(l=>l['Model Interest']).filter(Boolean))].sort();const sp=document.getElementById('fl-sp');if(sp)sp.innerHTML='<option value="">All Salespeople</option>'+sps.map(s=>`<option>${s}</option>`).join('');const ml=document.getElementById('fl-model');if(ml)ml.innerHTML='<option value="">All Models</option>'+mods.map(m=>`<option>${m}</option>`).join('');}
 function renderLeads(leads){
   const list=document.getElementById('leads-list');if(!list)return;document.getElementById('leads-count').textContent=leads.length+' lead'+(leads.length!==1?'s':'');
   if(!leads.length){list.innerHTML='<div class="empty-st"><div class="ico">📋</div><p>No leads match the filter.</p></div>';return;}
@@ -2119,14 +2120,14 @@ function renderSalesLeaderboard(mBks,mTDs){
   // Build per-salesperson stats from this month's bookings
   const map={};
   mBks.forEach(b=>{
-    const sp=b['Salesperson']||'Unassigned';
+    const sp=canonicalSP(b['Salesperson']);
     if(!map[sp])map[sp]={name:sp,bk:0,fin:0,ins:0,td:0,loc:b['Location']||''};
     map[sp].bk++;
     if(b['Payment Mode']==='Finance'||b['Payment Mode']==='Cash + Finance')map[sp].fin++;
     if(b['In-house Insurance']==='Yes')map[sp].ins++;
   });
   mTDs.forEach(t=>{
-    const sp=t['Salesperson']||'Unassigned';
+    const sp=canonicalSP(t['Salesperson']);
     if(!map[sp])map[sp]={name:sp,bk:0,fin:0,ins:0,td:0,loc:t['Location']||''};
     map[sp].td++;
   });
