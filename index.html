@@ -969,7 +969,11 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field"><label>Payment Mode</label><select id="bk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
         <div class="field"><label>Discount Offered (₹)</label><input type="number" id="bk-discount" placeholder="e.g. 25000"></div>
         <div class="field"><label>Salesperson <span class="req">*</span></label><select id="bk-sp"><option value="">Select…</option></select><span class="err">Required</span></div>
-        <div class="field"><label>Booking Date <span class="auto-lbl">AUTO</span></label><input type="text" id="bk-dt" class="locked" readonly></div>
+        <div class="field">
+          <label>Booking Date <span class="auto-lbl" id="bk-dt-auto-lbl">AUTO</span><span id="bk-past-toggle" style="display:none;margin-left:10px;"><label style="text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;color:var(--amber);cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><input type="checkbox" id="bk-past-chk" onchange="togglePastBk()"> ⏰ Past booking?</label></span></label>
+          <input type="text" id="bk-dt" class="locked" readonly>
+          <input type="datetime-local" id="bk-dt-past" style="display:none;background:var(--amber-bg);border:1.5px solid var(--amber-bd);border-radius:5px;padding:7px 10px;font-family:var(--font-b);font-size:13px;outline:none;width:100%;box-sizing:border-box;">
+        </div>
         <div class="field full"><label>Customer's Expected Delivery</label>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
             <label style="text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="bk-asap" onchange="toggleAsap('bk')"> ASAP</label>
@@ -1423,7 +1427,7 @@ let SCRIPT_URL=localStorage.getItem('scc_url')||'';
 let allLeads=[],allFU=[],allBK=[],allTD=[],allStock=[];
 let currentLoc='ALL',currentBkTab='instock';
 let nlSrc='',nlLocV='',nlInt='Warm';
-let bkExc=null,bkIns=null,bkStk=null;
+let bkExc=null,bkIns=null,bkStk=null,bkPastMode=false;
 let fuInt='';
 let waLead=null;
 let mbCol=sessionStorage.getItem('mbCol')==='1';
@@ -1509,7 +1513,7 @@ function renderMyTargets(mBks){
 }
 
 // ═══ CLOCK ═══
-function tick(){const n=new Date();document.getElementById('hclock').textContent=n.toLocaleTimeString('en-IN',{hour12:false});document.getElementById('hdate').textContent=n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const nl=document.getElementById('nl-created');if(nl)nl.value=fmtDT(n);const bd=document.getElementById('bk-dt');if(bd)bd.value=fmtDT(n);}
+function tick(){const n=new Date();document.getElementById('hclock').textContent=n.toLocaleTimeString('en-IN',{hour12:false});document.getElementById('hdate').textContent=n.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const nl=document.getElementById('nl-created');if(nl)nl.value=fmtDT(n);const bd=document.getElementById('bk-dt');if(bd&&!bkPastMode)bd.value=fmtDT(n);}
 setInterval(tick,1000);tick();
 
 // ═══ API ═══
@@ -1872,10 +1876,17 @@ function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab
 
 // ═══ BOOKINGS ═══
 function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={all:0,instock:1,onorder:2,delivered:3};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-al').style.display=t==='all'?'block':'none';document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';}
+function togglePastBk(){
+  bkPastMode=document.getElementById('bk-past-chk').checked;
+  document.getElementById('bk-dt').style.display=bkPastMode?'none':'';
+  document.getElementById('bk-dt-auto-lbl').style.display=bkPastMode?'none':'';
+  document.getElementById('bk-dt-past').style.display=bkPastMode?'block':'none';
+  if(bkPastMode){const y=new Date();y.setDate(y.getDate()-1);const p=n=>String(n).padStart(2,'0');document.getElementById('bk-dt-past').value=`${y.getFullYear()}-${p(y.getMonth()+1)}-${p(y.getDate())}T10:00`;}
+}
 function togExc(v){bkExc=v;document.getElementById('t-exc-y').classList.toggle('on',v==='yes');document.getElementById('t-exc-n').classList.toggle('on',v==='no');['exc-make-r','exc-model-r','exc-year-r','exc-val-r'].forEach(id=>document.getElementById(id).style.display=v==='yes'?'block':'none');}
 function togIns(v){bkIns=v;document.getElementById('t-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ins-n').classList.toggle('on',v==='no');}
 function togStk(v){bkStk=v;document.getElementById('t-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-stk-n').classList.toggle('on',v==='no');document.getElementById('bk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-edel-r').style.display=v==='no'?'block':'none';}
-function toggleNewBkForm(){const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open'))document.getElementById('bk-dt').value=fmtDT(new Date());}
+function toggleNewBkForm(){const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open')){document.getElementById('bk-dt').value=fmtDT(new Date());resetPastBkMode();}}
 function bkLeadSearch(){const q=document.getElementById('bk-ls').value.trim().toLowerCase();if(!q)return;const m=spFilt(locFilt(allLeads)).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).slice(0,8);const res=document.getElementById('bk-lr');const list=document.getElementById('bk-ll');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;');return `<div class="lr" onclick="bkSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Location']||''}</span></div>`;}).join('');}
 function bkSelLead(l){document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-lr').style.display='none';document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';}
 function bkClearLead(){document.getElementById('bk-lead-id').value='';document.getElementById('bk-sel').style.display='none';document.getElementById('bk-ls').value='';document.getElementById('bk-lr').style.display='none';}
@@ -1884,11 +1895,12 @@ async function submitBooking(){
   reqs.forEach(f=>{const el=document.getElementById(f.id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[f.key]=el.value.trim();}});
   if(!ok){setMsg(document.getElementById('bk-status'),'err','✗ Fill required fields');return;}
   if(!bkStk){setMsg(document.getElementById('bk-status'),'err','✗ Set vehicle availability');return;}
-  d['Lead ID']=document.getElementById('bk-lead-id').value;d['Booking DT']=fmtDT(new Date());d['Variant']=document.getElementById('bk-variant').value;d['Color']=document.getElementById('bk-color').value;d['Payment Mode']=document.getElementById('bk-payment').value;d['Lead Source']=document.getElementById('bk-src').value;d['VC Number']=document.getElementById('bk-vc').value;d['Discount Amount']=document.getElementById('bk-discount').value;d['Exchange']=bkExc==='yes'?'Yes':'No';d['Old Car Make']=document.getElementById('bk-exc-make').value;d['Old Car Model']=document.getElementById('bk-exc-model').value;d['Old Car Year']=document.getElementById('bk-exc-year').value;d['Exchange Value']=document.getElementById('bk-exc-val').value;d['In-house Insurance']=bkIns==='yes'?'Yes':'No';d['In Stock']=bkStk==='yes'?'Yes':'No';d['Stock Ref']=document.getElementById('bk-stock-ref').value;d['Stockyard']=document.getElementById('bk-stockyard').value;d['Expected Arrival']=document.getElementById('bk-expected-del').value;const asap=document.getElementById('bk-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('bk-cust-del').value||'');d['Notes']=document.getElementById('bk-notes').value;d['Status']='Booked';
+  d['Lead ID']=document.getElementById('bk-lead-id').value;const _pastDT=bkPastMode&&document.getElementById('bk-dt-past').value?new Date(document.getElementById('bk-dt-past').value):null;d['Booking DT']=_pastDT&&!isNaN(_pastDT)?fmtDT(_pastDT):fmtDT(new Date());d['Variant']=document.getElementById('bk-variant').value;d['Color']=document.getElementById('bk-color').value;d['Payment Mode']=document.getElementById('bk-payment').value;d['Lead Source']=document.getElementById('bk-src').value;d['VC Number']=document.getElementById('bk-vc').value;d['Discount Amount']=document.getElementById('bk-discount').value;d['Exchange']=bkExc==='yes'?'Yes':'No';d['Old Car Make']=document.getElementById('bk-exc-make').value;d['Old Car Model']=document.getElementById('bk-exc-model').value;d['Old Car Year']=document.getElementById('bk-exc-year').value;d['Exchange Value']=document.getElementById('bk-exc-val').value;d['In-house Insurance']=bkIns==='yes'?'Yes':'No';d['In Stock']=bkStk==='yes'?'Yes':'No';d['Stock Ref']=document.getElementById('bk-stock-ref').value;d['Stockyard']=document.getElementById('bk-stockyard').value;d['Expected Arrival']=document.getElementById('bk-expected-del').value;const asap=document.getElementById('bk-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('bk-cust-del').value||'');d['Notes']=document.getElementById('bk-notes').value;d['Status']='Booked';
   const st=document.getElementById('bk-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addBooking',data:JSON.stringify(d)});setMsg(st,'ok','✅ Booking confirmed! '+r.bookingId);toggleNewBkForm();clearBkForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));populateSPDropdowns();}
+function resetPastBkMode(){bkPastMode=false;const chk=document.getElementById('bk-past-chk');if(chk)chk.checked=false;const dtA=document.getElementById('bk-dt');const dtP=document.getElementById('bk-dt-past');const lbl=document.getElementById('bk-dt-auto-lbl');if(dtA)dtA.style.display='';if(dtP)dtP.style.display='none';if(lbl)lbl.style.display='';}
+function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));resetPastBkMode();populateSPDropdowns();}
 function renderBookings(){
   let bks=spFilt(locFilt(allBK));const lf=document.getElementById('bk-floc')?.value||'';const mf=document.getElementById('bk-fmodel')?.value||'';
   const sortBy=document.getElementById('bk-sort')?.value||'newest';
@@ -2417,6 +2429,7 @@ function showApp(){
   if(allUsers.length>0){populateSPDropdowns();}
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
   loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
+  const pastToggle=document.getElementById('bk-past-toggle');if(pastToggle)pastToggle.style.display=currentUser.role==='masteradmin'?'inline-flex':'none';
 }
 function populateSPDropdowns(){
   const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
