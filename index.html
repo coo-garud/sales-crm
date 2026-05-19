@@ -2429,7 +2429,7 @@ function showApp(){
   if(allUsers.length>0){populateSPDropdowns();}
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
   loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
-  const pastToggle=document.getElementById('bk-past-toggle');if(pastToggle)pastToggle.style.display=currentUser.role==='masteradmin'?'inline-flex':'none';
+  const pastToggle=document.getElementById('bk-past-toggle');if(pastToggle){const r=currentUser.role;pastToggle.style.display=(r==='masteradmin'||r==='manager'||r==='branch_head')?'inline-flex':'none';}
 }
 function populateSPDropdowns(){
   const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
