@@ -614,7 +614,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div>
       <!-- CONVERSION FUNNEL -->
       <div class="card-wrap">
-        <div class="card-hd hd-blue">📊 Conversion Funnel — This Month <span style="font-size:11px;font-weight:400;opacity:.7;" id="fn-loc"></span></div>
+        <div class="card-hd hd-blue">📊 Conversion Funnel — Total Pipeline <span style="font-size:11px;font-weight:400;opacity:.7;" id="fn-loc"></span></div>
         <div class="card-body">
           <div class="fn-stage"><div class="fn-label">Enquiries</div><div class="fn-bar-wrap"><div class="fn-bar fnb0" id="fn0" style="width:100%"><span class="fn-num" id="fnn0">—</span></div></div><div class="fn-conv fc-hi" id="fnc0">100%</div></div>
           <div class="fn-stage"><div class="fn-label">Test Drives</div><div class="fn-bar-wrap"><div class="fn-bar fnb1" id="fn1" style="width:60%"><span class="fn-num" id="fnn1">—</span></div></div><div class="fn-conv" id="fnc1">—</div></div>
@@ -1602,7 +1602,7 @@ function renderDashboard(){
   document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
   const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
-  renderWaitAlerts(bks);renderFunnel(leads,mTDs,mBks,delivered);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
+  renderWaitAlerts(bks);renderFunnel(leads,tds,bks,bks.filter(b=>b['Status']==='Delivered'));renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
   const role=currentUser&&currentUser.role;
   const isSP=role==='salesperson';
   const isTL=role==='team_leader';
@@ -1638,8 +1638,7 @@ function renderWaitAlerts(bks){
   if(waiting.length>6)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('bookings')" style="color:var(--blue);cursor:pointer;font-weight:700;">All on-order bookings →</a></div>`;
 }
 function renderFunnel(leads,tds,bks,delivered){
-  const ms=monthStart();const mL=leads.filter(l=>{const d=parseD(l['Created DT']);return d&&d>=ms;});
-  const L=mL.length,T=tds.length,B=bks.length,D=delivered.length;
+  const L=leads.length,T=tds.length,B=bks.length,D=delivered.length;
   const pct=(a,b)=>b?Math.round(a/b*100):0;const max=Math.max(L,1);
   const setFn=(i,n,num,den)=>{document.getElementById('fn'+i).style.width=Math.max(4,L?pct(n,L):0)+'%';document.getElementById('fnn'+i).textContent=n;const c=i===0?'100%':(den?pct(n,den)+'%':'—');const ce=document.getElementById('fnc'+i);ce.textContent=c;const p=i===0?100:(den?pct(n,den):0);ce.className='fn-conv '+(p>=40?'fc-hi':p>=20?'fc-md':'fc-lo');};
   setFn(0,L,L,L);setFn(1,T,T,L);setFn(2,B,B,T||L);setFn(3,D,D,B||1);
