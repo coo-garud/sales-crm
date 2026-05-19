@@ -192,7 +192,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 .pill-cold{background:var(--gray-100);color:var(--gray-500);border-color:var(--gray-300);}
 .pill-booked{background:var(--green-bg);color:var(--green);border-color:var(--green-bd);}
 .pill-lost{background:var(--gray-100);color:var(--gray-500);border-color:var(--gray-300);}
-.pill-voc{background:#FFF3E0;color:#E65100;border-color:#FFCC80;}
+.pill-voc{background:#FFF3E0;color:#E65100;border-color:#FFCC80;}.pill-td{background:#E0F7FA;color:#00695C;border-color:#80CBC4;}
 .lc-meta{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;flex-wrap:wrap;}
 .age-ok{background:var(--green-bg);color:var(--green);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
 .age-warn{background:var(--amber-bg);color:var(--amber);border-radius:5px;padding:3px 8px;font-family:var(--font-h);font-size:12px;font-weight:700;}
@@ -1602,7 +1602,9 @@ function renderDashboard(){
   document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
   const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms;});
-  renderWaitAlerts(bks);renderFunnel(leads,tds,bks,bks.filter(b=>b['Status']==='Delivered'));renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
+  const tdDoneIds=new Set([...tds.map(t=>t['Lead ID']),...spFilt(locFilt(allFU)).filter(f=>f['Method']==='Test Drive Conducted').map(f=>f['Lead ID'])]);
+  const effectiveTDs=leads.filter(l=>tdDoneIds.has(l['Lead ID']));
+  renderWaitAlerts(bks);renderFunnel(leads,effectiveTDs,bks,bks.filter(b=>b['Status']==='Delivered'));renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderMB(spFilt(allLeads),spFilt(allBK));renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));
   const role=currentUser&&currentUser.role;
   const isSP=role==='salesperson';
   const isTL=role==='team_leader';
@@ -1625,7 +1627,7 @@ function renderDashSec(id,leads,type){
     if(type==='red'){const lc=parseD(l['Last Contact DT']);const cr=parseD(l['Created DT']);if(!lc&&cr){const hrs=Math.round(hoursBetween(cr,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">${hrs}h uncontacted</span>`;}else{const nf=parseD(l['Next Followup DT']);if(nf){const ho=Math.round(hoursBetween(nf,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">FU ${ho}h overdue</span>`;}}}
     else if(type==='amber'){const nf=parseD(l['Next Followup DT']);if(nf){const d=daysBetween(nf,now);timeTag=d>0?`<span class="ot">${d}d overdue</span>`:`<span class="dt">Due Today</span>`;}}
     const le=encodeURIComponent(JSON.stringify(l));
-    return `<div class="clr"><div class="clr-info"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span></div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
+    return `<div class="clr"><div class="clr-info"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span>${hasTDDone(l['Lead ID'])?'<span class="pill pill-td" style="font-size:9px;padding:1px 5px;margin-left:5px;">🏁 TD</span>':''}</div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
   }).join('');
   if(leads.length>8)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('leads')" style="color:var(--blue);cursor:pointer;font-weight:700;">View all ${leads.length} →</a></div>`;
 }
@@ -1688,6 +1690,8 @@ function locTagHtml(loc){if(!loc)return '';if(loc.includes('Palam'))return '<spa
 function intPill(i){if(i==='Hot')return '<span class="pill pill-hot">🔥 Hot</span>';if(i==='Cold')return '<span class="pill pill-cold">❄ Cold</span>';return '<span class="pill pill-warm">🔵 Warm</span>';}
 function stPill(s){if(s==='Booked')return '<span class="pill pill-booked">✅ Booked</span>';if(s==='Lost')return '<span class="pill pill-lost">❌ Lost</span>';return '';}
 function vocBadge(l){return isVocThin(l)?'<span class="pill pill-voc">⚠ Thin VoC</span>':'';}
+function hasTDDone(lid){return allTD.some(t=>t['Lead ID']===lid)||allFU.some(f=>f['Lead ID']===lid&&f['Method']==='Test Drive Conducted');}
+function tdBadge(l){return hasTDDone(l['Lead ID'])?'<span class="pill pill-td">🏁 TD Done</span>':'';}
 function filterLeadsData(){
   const q=(document.getElementById('fl-search')||{}).value?.toLowerCase()||'';
   const st=(document.getElementById('fl-status')||{}).value||'';const src=(document.getElementById('fl-src')||{}).value||'';
@@ -1726,7 +1730,7 @@ function renderLeads(leads){
     const le=encodeURIComponent(JSON.stringify(l));
     return `<div class="lc ${lc}" id="lc-${i}">
       <div class="lc-head" onclick="togLC(${i})"><div><div class="lc-name">${l['Customer Name']||'—'}</div><div class="lc-phone">${l['Phone']||''}${l['Alt Phone']?' · '+l['Alt Phone']:''}</div></div>
-        <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${vocBadge(l)}</div>
+        <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${tdBadge(l)}${vocBadge(l)}</div>
         <div class="lc-meta"><div style="font-size:11px;">👤 <strong>${l['Salesperson']||'—'}</strong></div>${aTxt?`<div class="${aCls}">${aTxt}</div>`:''}<span class="expand-arrow" id="arr-${i}">▾</span></div></div>
       <div class="lc-detail-row">
         <span>🚗 <strong>${l['Model Interest']||'—'}</strong>${l['Variant']?' '+l['Variant']:''}</span>
