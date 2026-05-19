@@ -75,7 +75,7 @@ function addFollowUp(d){
       if(d["Next Followup DT"])lsh.getRange(rn,li("Next Followup DT")).setValue(d["Next Followup DT"]);
       if(d["Status After"])lsh.getRange(rn,li("Status")).setValue(d["Status After"]);
       if(d["Interest After"])lsh.getRange(rn,li("Interest Level")).setValue(d["Interest After"]);
-      if(d["Notes"])lsh.getRange(rn,li("VoC Notes")).setValue(d["Notes"]);
+      if(d["Notes"]){const existing=String(lsh.getRange(rn,li("VoC Notes")).getValue()||'').trim();const newEntry='['+now+'] '+d["Notes"];lsh.getRange(rn,li("VoC Notes")).setValue(existing?(existing+' | '+newEntry):newEntry);}
       if(d["Status After"]==="Lost"&&d["Lost Reason"])lsh.getRange(rn,li("Lost Reason")).setValue(d["Lost Reason"]);
       const cnt=parseInt(lsh.getRange(rn,li("Followup Count")).getValue())||0;lsh.getRange(rn,li("Followup Count")).setValue(cnt+1);
     }

@@ -1247,7 +1247,7 @@ function addFollowUp(d){
       if(d["Next Followup DT"])lsh.getRange(rn,li("Next Followup DT")).setValue(d["Next Followup DT"]);
       if(d["Status After"])lsh.getRange(rn,li("Status")).setValue(d["Status After"]);
       if(d["Interest After"])lsh.getRange(rn,li("Interest Level")).setValue(d["Interest After"]);
-      if(d["Notes"])lsh.getRange(rn,li("VoC Notes")).setValue(d["Notes"]);
+      if(d["Notes"]){const existing=String(lsh.getRange(rn,li("VoC Notes")).getValue()||'').trim();const newEntry='['+now+'] '+d["Notes"];lsh.getRange(rn,li("VoC Notes")).setValue(existing?(existing+' | '+newEntry):newEntry);}
       if(d["Status After"]==="Lost"&&d["Lost Reason"])lsh.getRange(rn,li("Lost Reason")).setValue(d["Lost Reason"]);
       const cnt=parseInt(lsh.getRange(rn,li("Followup Count")).getValue())||0;lsh.getRange(rn,li("Followup Count")).setValue(cnt+1);
     }
@@ -1736,7 +1736,7 @@ function renderLeads(leads){
         <span>📞 Last: <strong>${lcTxt}</strong></span><span>📅 Next: ${fuTxt}</span>
         <span>🔁 ${l['Followup Count']||0} FU${(l['Followup Count']||0)!=1?'s':''}</span>
       </div>
-      ${l['VoC Notes']?`<div style="padding:5px 14px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong> ${l['VoC Notes']}</div>`:''}
+      ${l['VoC Notes']?`<div style="padding:5px 14px 8px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong>${l['VoC Notes'].split(' | ').map((e,i)=>`<div style="margin-top:3px;padding:2px 7px;border-left:2px solid var(--amber-bd);${i===0?'color:var(--gray-800);':''}">${e}</div>`).join('')}</div>`:''}
       <div class="lc-actions">
         <button class="btn btn-ghost btn-xs" onclick="prefillFU('${le}')">📞 Log Follow-up</button>
         <button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬 WhatsApp</button>
