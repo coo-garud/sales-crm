@@ -1720,9 +1720,25 @@ function renderDashSec(id,leads,type){
     if(type==='red'){const lc=parseD(l['Last Contact DT']);const cr=parseD(l['Created DT']);if(!lc&&cr){const hrs=Math.round(hoursBetween(cr,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">${hrs}h uncontacted</span>`;}else{const nf=parseD(l['Next Followup DT']);if(nf){const ho=Math.round(hoursBetween(nf,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">FU ${ho}h overdue</span>`;}}}
     else if(type==='amber'){const nf=parseD(l['Next Followup DT']);if(nf){const d=daysBetween(nf,now);timeTag=d>0?`<span class="ot">${d}d overdue</span>`:`<span class="dt">Due Today</span>`;}}
     const le=encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27');
-    return `<div class="clr"><div class="clr-info"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span>${hasTDDone(l['Lead ID'])?'<span class="pill pill-td" style="font-size:9px;padding:1px 5px;margin-left:5px;">🏁 TD</span>':''}</div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
+    return `<div class="clr"><div class="clr-info" style="cursor:pointer;" onclick="goToLead('${le}')" title="View in Leads tab"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span>${hasTDDone(l['Lead ID'])?'<span class="pill pill-td" style="font-size:9px;padding:1px 5px;margin-left:5px;">🏁 TD</span>':''}</div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
   }).join('');
   if(leads.length>8)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('leads')" style="color:var(--blue);cursor:pointer;font-weight:700;">View all ${leads.length} →</a></div>`;
+}
+function goToLead(enc){
+  const l=JSON.parse(decodeURIComponent(enc));
+  showTab('leads');
+  setTimeout(()=>{
+    document.getElementById('fl-name').value=l['Phone']||'';
+    const filtered=filterLeadsData();
+    renderLeads(filtered);
+    const card=document.getElementById('lc-0');
+    if(card){
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      const exp=document.getElementById('lce-0');
+      const arr=document.getElementById('arr-0');
+      if(exp&&!exp.classList.contains('open')){exp.classList.add('open');if(arr)arr.classList.add('open');}
+    }
+  },80);
 }
 function renderWaitAlerts(bks){
   const thr=getTargets().wait||30;const now=new Date();
