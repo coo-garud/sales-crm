@@ -97,10 +97,6 @@ function editBooking(d){
 function updateBooking(d){
   const sh=getOrCreate("Bookings",BH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
   ["Status","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Notes","Cancellation Date","Cancellation Reason"].forEach(col=>{const ci=BH.indexOf(col)+1;if(ci>0&&d[col]!==undefined&&d[col]!=="")sh.getRange(ri,ci).setValue(d[col]);});
-  if(d["Status"]==="Cancelled"){
-    const lid=String(sh.getRange(ri,BH.indexOf("Lead ID")+1).getValue()||'');
-    if(lid){const lsh=getOrCreate("Leads",LH);const lr=lsh.getLastRow();if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(lid);if(ix>=0)lsh.getRange(ix+2,LH.indexOf("Status")+1).setValue("Active");}}
-  }
   return{status:"ok"};
 }
 function bulkAddStock(d){
