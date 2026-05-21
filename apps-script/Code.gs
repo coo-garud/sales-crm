@@ -21,7 +21,7 @@ function handleReq(e){
     switch(p.action){
       case "getAll":res=getAll();break;case "addLead":res=addLead(JSON.parse(p.data));break;
       case "addFollowUp":res=addFollowUp(JSON.parse(p.data));break;case "addBooking":res=addBooking(JSON.parse(p.data));break;
-      case "updateBooking":res=updateBooking(JSON.parse(p.data));break;case "addStock":res=addStock(JSON.parse(p.data));break;case "bulkAddStock":res=bulkAddStock(JSON.parse(p.data));break;
+      case "updateBooking":res=updateBooking(JSON.parse(p.data));break;case "editBooking":res=editBooking(JSON.parse(p.data));break;case "addStock":res=addStock(JSON.parse(p.data));break;case "bulkAddStock":res=bulkAddStock(JSON.parse(p.data));break;
       case "updateStock":res=updateStock(JSON.parse(p.data));break;case "updateLead":res=updateLead(JSON.parse(p.data));break;
       case "getUsers":res=getUsers();break;
       case "saveUser":res=saveUser(JSON.parse(p.data));break;
@@ -88,6 +88,11 @@ function addBooking(d){
   sh.appendRow(BH.map(h=>d[h]||""));
   if(d["Lead ID"]){const lsh=getOrCreate("Leads",LH);const lr=lsh.getLastRow();if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(d["Lead ID"]);if(ix>=0)lsh.getRange(ix+2,LH.indexOf("Status")+1).setValue("Booked");}}
   return{status:"ok",bookingId:d["Booking ID"]};
+}
+function editBooking(d){
+  const sh=getOrCreate("Bookings",BH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  ["Customer Name","Phone","Location","Lead Source","Model","Variant","Color","Booking Amount","Payment Mode","VC Number","Discount Amount","Customer Expected Delivery","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","In Stock","Stock Ref","Stockyard","Expected Arrival","Salesperson","Notes"].forEach(col=>{const ci=BH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
+  return{status:"ok"};
 }
 function updateBooking(d){
   const sh=getOrCreate("Bookings",BH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");

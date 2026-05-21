@@ -1449,6 +1449,62 @@ function updateStock(d){
   </div>
 </div>
 
+<!-- EDIT BOOKING MODAL -->
+<div class="modal-overlay" id="edit-bk-modal">
+  <div class="modal-box" style="width:680px;">
+    <div class="modal-hd" style="background:linear-gradient(135deg,#0D47A1,#1565C0);">✏ Edit Booking <button onclick="document.getElementById('edit-bk-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body" style="max-height:80vh;overflow-y:auto;">
+      <input type="hidden" id="ebk-ri">
+      <div class="divlbl"><span>Customer &amp; Vehicle</span></div>
+      <div class="fg">
+        <div class="field"><label>Customer Name <span class="req">*</span></label><input type="text" id="ebk-name" placeholder="Full name"><span class="err">Required</span></div>
+        <div class="field"><label>Phone <span class="req">*</span></label><input type="tel" id="ebk-phone" placeholder="10-digit"><span class="err">Required</span></div>
+        <div class="field"><label>Showroom Location</label><select id="ebk-loc"><option value="">Select…</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select></div>
+        <div class="field"><label>Lead Source</label><select id="ebk-src"><option value="">Select…</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option><option>Events</option></select></div>
+        <div class="field"><label>Model <span class="req">*</span></label><select id="ebk-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Variant</label><input type="text" id="ebk-variant" placeholder="e.g. XZ+"></div>
+        <div class="field"><label>Color</label><input type="text" id="ebk-color" placeholder="e.g. White"></div>
+        <div class="field"><label>Product VC Number</label><input type="text" id="ebk-vc" placeholder="Tata Motors VC No."></div>
+        <div class="field"><label>Booking Amount (₹) <span class="req">*</span></label><input type="number" id="ebk-amount" placeholder="e.g. 11000"><span class="err">Required</span></div>
+        <div class="field"><label>Payment Mode</label><select id="ebk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
+        <div class="field"><label>Discount Offered (₹)</label><input type="number" id="ebk-discount" placeholder="e.g. 25000"></div>
+        <div class="field"><label>Salesperson</label><select id="ebk-sp"><option value="">Select…</option></select></div>
+        <div class="field full"><label>Customer's Expected Delivery</label>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <label style="text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;"><input type="checkbox" id="ebk-asap" onchange="document.getElementById('ebk-cust-del').style.display=this.checked?'none':'';"> ASAP</label>
+            <input type="date" id="ebk-cust-del" style="flex:1;min-width:150px;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:5px;padding:7px 10px;font-family:var(--font-b);font-size:13px;outline:none;">
+          </div>
+        </div>
+      </div>
+      <div class="divlbl"><span>Exchange &amp; Insurance</span></div>
+      <div class="fg">
+        <div class="field full"><label>Old Car Exchange?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-ebk-exc-y" onclick="togEExc('yes')" style="flex:1;"><span class="tl">✅ Yes — Exchange</span><div class="tsw"></div></div><div class="tog-row" id="t-ebk-exc-n" onclick="togEExc('no')" style="flex:1;"><span class="tl">❌ No Exchange</span><div class="tsw"></div></div></div></div>
+        <div class="field" id="ebk-exc-make-r" style="display:none;"><label>Old Car Make</label><input type="text" id="ebk-exc-make" placeholder="e.g. Maruti"></div>
+        <div class="field" id="ebk-exc-model-r" style="display:none;"><label>Old Car Model</label><input type="text" id="ebk-exc-model" placeholder="e.g. Swift"></div>
+        <div class="field" id="ebk-exc-year-r" style="display:none;"><label>Mfg. Year</label><input type="number" id="ebk-exc-year" placeholder="e.g. 2018"></div>
+        <div class="field" id="ebk-exc-val-r" style="display:none;"><label>Exchange Value (₹)</label><input type="number" id="ebk-exc-val" placeholder="e.g. 350000"></div>
+        <div class="field full"><label>In-house Insurance?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-ebk-ins-y" onclick="togEIns('yes')" style="flex:1;"><span class="tl">✅ Yes — In-house</span><div class="tsw"></div></div><div class="tog-row" id="t-ebk-ins-n" onclick="togEIns('no')" style="flex:1;"><span class="tl">❌ External / None</span><div class="tsw"></div></div></div></div>
+      </div>
+      <div class="divlbl"><span>Vehicle Availability</span></div>
+      <div class="fg">
+        <div class="field full"><label>Vehicle In Stock?</label>
+          <div style="display:flex;gap:8px;"><div class="tog-row" id="t-ebk-stk-y" onclick="togEStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-ebk-stk-n" onclick="togEStk('no')" style="flex:1;"><span class="tl">🔄 No — VNA</span><div class="tsw"></div></div></div></div>
+        <div class="field" id="ebk-ref-r" style="display:none;"><label>Chassis / Stock Ref No.</label><input type="text" id="ebk-stock-ref" placeholder="Chassis No."></div>
+        <div class="field" id="ebk-syard-r" style="display:none;"><label>Stockyard</label><select id="ebk-stockyard"><option>Common Stockyard</option><option>Palam Stockyard</option><option>Najafgarh Stockyard</option><option>Narela Stockyard</option></select></div>
+        <div class="field" id="ebk-edel-r" style="display:none;"><label>Expected Arrival (Dealer)</label><input type="date" id="ebk-expected-del"></div>
+      </div>
+      <div class="field" style="margin-top:4px;"><label>Notes</label><textarea id="ebk-notes" placeholder="Special requests, accessories, commitments…" style="min-height:44px;"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="submitEditBk()">Save Changes →</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('edit-bk-modal').classList.remove('open')">Cancel</button>
+      </div>
+      <span class="smsg" id="ebk-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
 <!-- WHATSAPP PICKER (fixed bottom-right) -->
 <div class="wa-picker" id="wa-picker">
   <div class="wa-picker-hd">💬 WhatsApp — Choose Template</div>
@@ -1976,7 +2032,9 @@ function _bkCard(b,type){
   const btnPlan=type!=='del'?('<button class="tbl-btn" onclick="openPlannedModal(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\',\'' +pd+ '\')">📅 '+pdLbl+' Planned Delivery</button>'):'';
   const btnDeliv=type!=='del'?('<button class="tbl-btn" onclick="markDeliv(\'' +ri+ '\',\'' +bkId+ '\')">🚗 Mark Delivered</button>'):('<span class="pill pill-booked">✅ Delivered '+b['Actual Delivery']+' </span>');
   const btnCancel=canCancel&&type!=='del'?('<button class="tbl-btn" style="background:#FFEBEE;color:#C62828;border-color:#FFCDD2;" onclick="openCancelBk(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\')">❌ Cancel</button>'):'';
-  const bkFootBtns=btnConvert+btnPlan+btnDeliv+btnCancel;
+  const bEnc=encodeURIComponent(JSON.stringify(b));
+  const btnEdit=canCancel&&b['Status']!=='Cancelled'?(`<button class="tbl-btn" onclick="openEditBk('${bEnc}')">✏ Edit</button>`):'';
+  const bkFootBtns=btnEdit+btnConvert+btnPlan+btnDeliv+btnCancel;
   const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
   let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
   const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
@@ -1996,6 +2054,85 @@ function renderBkList(id,bks,type){
   el.innerHTML=bks.map(b=>_bkCard(b,type)).join('');
 }
 async function markDeliv(ri,bkId){if(!confirm('Mark '+bkId+' as Delivered?'))return;try{await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,Status:'Delivered','Actual Delivery':new Date().toISOString().split('T')[0]})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+let ebkExc=null,ebkIns=null,ebkStk=null;
+function togEExc(v){ebkExc=v;document.getElementById('t-ebk-exc-y').classList.toggle('on',v==='yes');document.getElementById('t-ebk-exc-n').classList.toggle('on',v==='no');['ebk-exc-make-r','ebk-exc-model-r','ebk-exc-year-r','ebk-exc-val-r'].forEach(id=>document.getElementById(id).style.display=v==='yes'?'block':'none');}
+function togEIns(v){ebkIns=v;document.getElementById('t-ebk-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ebk-ins-n').classList.toggle('on',v==='no');}
+function togEStk(v){ebkStk=v;document.getElementById('t-ebk-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-ebk-stk-n').classList.toggle('on',v==='no');document.getElementById('ebk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('ebk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('ebk-edel-r').style.display=v==='no'?'block':'none';}
+function openEditBk(enc){
+  const b=JSON.parse(decodeURIComponent(enc));
+  document.getElementById('ebk-ri').value=b.rowIndex||'';
+  document.getElementById('ebk-name').value=b['Customer Name']||'';
+  document.getElementById('ebk-phone').value=b['Phone']||'';
+  document.getElementById('ebk-loc').value=b['Location']||'';
+  document.getElementById('ebk-src').value=b['Lead Source']||'';
+  document.getElementById('ebk-model').value=b['Model']||'';
+  document.getElementById('ebk-variant').value=b['Variant']||'';
+  document.getElementById('ebk-color').value=b['Color']||'';
+  document.getElementById('ebk-vc').value=b['VC Number']||'';
+  document.getElementById('ebk-amount').value=b['Booking Amount']||'';
+  document.getElementById('ebk-payment').value=b['Payment Mode']||'';
+  document.getElementById('ebk-discount').value=b['Discount Amount']||'';
+  const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager');
+  const spSel=document.getElementById('ebk-sp');
+  spSel.innerHTML='<option value="">Select…</option>'+sps.map(u=>`<option value="${u.display||u.username}">${u.display||u.username}</option>`).join('');
+  spSel.value=b['Salesperson']||'';
+  togEExc(b['Exchange']==='Yes'?'yes':'no');
+  document.getElementById('ebk-exc-make').value=b['Old Car Make']||'';
+  document.getElementById('ebk-exc-model').value=b['Old Car Model']||'';
+  document.getElementById('ebk-exc-year').value=b['Old Car Year']||'';
+  document.getElementById('ebk-exc-val').value=b['Exchange Value']||'';
+  togEIns(b['In-house Insurance']==='Yes'?'yes':'no');
+  togEStk(b['In Stock']==='Yes'?'yes':'no');
+  document.getElementById('ebk-stock-ref').value=b['Stock Ref']||'';
+  document.getElementById('ebk-stockyard').value=b['Stockyard']||'';
+  document.getElementById('ebk-expected-del').value=b['Expected Arrival']||'';
+  const asap=b['Customer Expected Delivery']==='ASAP';
+  document.getElementById('ebk-asap').checked=asap;
+  document.getElementById('ebk-cust-del').value=asap?'':(b['Customer Expected Delivery']||'');
+  document.getElementById('ebk-cust-del').style.display=asap?'none':'';
+  document.getElementById('ebk-notes').value=b['Notes']||'';
+  document.querySelectorAll('#edit-bk-modal .field').forEach(f=>f.classList.remove('invalid'));
+  setMsg(document.getElementById('ebk-status'),'','');
+  document.getElementById('edit-bk-modal').classList.add('open');
+}
+async function submitEditBk(){
+  const ri=document.getElementById('ebk-ri').value;
+  const d={rowIndex:ri};
+  let ok=true;
+  [['ebk-name','Customer Name'],['ebk-model','Model'],['ebk-amount','Booking Amount']].forEach(([id,key])=>{const el=document.getElementById(id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[key]=el.value.trim();}});
+  if(!ok)return;
+  d['Phone']=document.getElementById('ebk-phone').value;
+  d['Location']=document.getElementById('ebk-loc').value;
+  d['Lead Source']=document.getElementById('ebk-src').value;
+  d['Variant']=document.getElementById('ebk-variant').value;
+  d['Color']=document.getElementById('ebk-color').value;
+  d['VC Number']=document.getElementById('ebk-vc').value;
+  d['Payment Mode']=document.getElementById('ebk-payment').value;
+  d['Discount Amount']=document.getElementById('ebk-discount').value;
+  d['Salesperson']=document.getElementById('ebk-sp').value;
+  d['Exchange']=ebkExc==='yes'?'Yes':'No';
+  d['Old Car Make']=document.getElementById('ebk-exc-make').value;
+  d['Old Car Model']=document.getElementById('ebk-exc-model').value;
+  d['Old Car Year']=document.getElementById('ebk-exc-year').value;
+  d['Exchange Value']=document.getElementById('ebk-exc-val').value;
+  d['In-house Insurance']=ebkIns==='yes'?'Yes':'No';
+  d['In Stock']=ebkStk==='yes'?'Yes':'No';
+  d['Stock Ref']=document.getElementById('ebk-stock-ref').value;
+  d['Stockyard']=document.getElementById('ebk-stockyard').value;
+  d['Expected Arrival']=document.getElementById('ebk-expected-del').value;
+  const asap=document.getElementById('ebk-asap').checked;
+  d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('ebk-cust-del').value||'');
+  d['Notes']=document.getElementById('ebk-notes').value;
+  const st=document.getElementById('ebk-status');setMsg(st,'ld','⟳ Saving…');
+  try{
+    await api({action:'editBooking',data:JSON.stringify(d)});
+    setMsg(st,'ok','✓ Booking updated');
+    const idx=allBK.findIndex(b=>String(b.rowIndex)===String(ri));
+    if(idx>=0)Object.assign(allBK[idx],d);
+    renderBookings();
+    setTimeout(()=>document.getElementById('edit-bk-modal').classList.remove('open'),700);
+  }catch(e){setMsg(st,'err','✗ '+e.message);}
+}
 function openCancelBk(ri,bkId,cname){
   document.getElementById('cbk-ri').value=ri;
   document.getElementById('cbk-bkid-lbl').textContent=bkId;
