@@ -3,7 +3,7 @@
 
 const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
-const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes"];
+const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
 const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
 const UH=["Username","Password","Role","Display Name","Branch","Team"];
@@ -91,7 +91,11 @@ function addBooking(d){
 }
 function updateBooking(d){
   const sh=getOrCreate("Bookings",BH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
-  ["Status","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Notes"].forEach(col=>{const ci=BH.indexOf(col)+1;if(ci>0&&d[col]!==undefined&&d[col]!=="")sh.getRange(ri,ci).setValue(d[col]);});
+  ["Status","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Notes","Cancellation Date","Cancellation Reason"].forEach(col=>{const ci=BH.indexOf(col)+1;if(ci>0&&d[col]!==undefined&&d[col]!=="")sh.getRange(ri,ci).setValue(d[col]);});
+  if(d["Status"]==="Cancelled"){
+    const lid=String(sh.getRange(ri,BH.indexOf("Lead ID")+1).getValue()||'');
+    if(lid){const lsh=getOrCreate("Leads",LH);const lr=lsh.getLastRow();if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(lid);if(ix>=0)lsh.getRange(ix+2,LH.indexOf("Status")+1).setValue("Active");}}
+  }
   return{status:"ok"};
 }
 function bulkAddStock(d){

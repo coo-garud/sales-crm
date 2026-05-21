@@ -290,7 +290,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 .btab{padding:9px 16px;cursor:pointer;font-family:var(--font-h);font-size:13px;font-weight:600;color:var(--gray-400);border-bottom:3px solid transparent;transition:all .15s;}
 .btab:hover{color:var(--blue);}.btab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-xlt);}
 .bk-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:11px 14px;box-shadow:var(--shadow-xs);margin-bottom:8px;}
-.bk-stk{border-left:4px solid var(--green);}.bk-ord{border-left:4px solid var(--amber);}.bk-del{border-left:4px solid var(--blue);}
+.bk-stk{border-left:4px solid var(--green);}.bk-ord{border-left:4px solid var(--amber);}.bk-del{border-left:4px solid var(--blue);}.bk-can{border-left:4px solid #9E9E9E;opacity:.75;}
 .bk-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
 .bk-name{font-weight:700;font-size:13px;}
 .bk-id{font-family:var(--font-h);font-size:11px;color:var(--gray-400);font-weight:600;}
@@ -1011,7 +1011,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     </div>
     <div class="ffoot"><button class="btn btn-success" onclick="submitBooking()">Confirm Booking →</button><button class="btn btn-secondary" onclick="toggleNewBkForm()">Cancel</button><span class="smsg" id="bk-status"></span></div>
   </div>
-  <div class="bk-tabs"><div class="btab" onclick="showBkTab('all')">📋 All</div><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div></div>
+  <div class="bk-tabs"><div class="btab" onclick="showBkTab('all')">📋 All</div><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div><div class="btab" onclick="showBkTab('cancelled')">❌ Cancelled</div></div>
   <div class="filter-bar" style="margin-bottom:10px;">
     <select class="fi" id="bk-floc" onchange="renderBookings()"><option value="">All Locations</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select>
     <select class="fi" id="bk-fmodel" onchange="renderBookings()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
@@ -1030,6 +1030,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   <div id="bk-is"><div class="leads-list" id="bk-il"><div class="empty-st"><div class="ico">📦</div><p>No in-stock bookings.</p></div></div></div>
   <div id="bk-oo" style="display:none;"><div class="leads-list" id="bk-ol"><div class="empty-st"><div class="ico">🔄</div><p>No VNA bookings.</p></div></div></div>
   <div id="bk-dv" style="display:none;"><div class="leads-list" id="bk-dl"><div class="empty-st"><div class="ico">🚗</div><p>No deliveries yet.</p></div></div></div>
+  <div id="bk-cn" style="display:none;"><div class="leads-list" id="bk-cl"><div class="empty-st"><div class="ico">❌</div><p>No cancelled bookings.</p></div></div></div>
 </div>
 <!-- ═══════ STOCK ═══════ -->
 <div id="tab-stock" class="section">
@@ -1199,7 +1200,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 
 const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
-const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes"];
+const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
 const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
 
@@ -1415,6 +1416,35 @@ function updateStock(d){
         <button class="btn btn-secondary" onclick="document.getElementById('move-modal').classList.remove('open')">Cancel</button>
       </div>
       <span class="smsg" id="move-status" style="margin-top:8px;display:block;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL BOOKING MODAL -->
+<div class="modal-overlay" id="cancel-bk-modal">
+  <div class="modal-box">
+    <div class="modal-hd" style="background:linear-gradient(135deg,#B71C1C,#C62828);">❌ Cancel Booking <button onclick="document.getElementById('cancel-bk-modal').classList.remove('open')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="cbk-ri">
+      <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:6px;padding:10px 13px;margin-bottom:12px;font-size:12.5px;color:#C62828;font-weight:600;"><span id="cbk-bkid-lbl"></span> — <span id="cbk-cname-lbl"></span></div>
+      <div class="field" style="margin-bottom:10px;"><label>Cancellation Reason <span class="req">*</span></label>
+        <select id="cbk-reason">
+          <option value="">Select reason…</option>
+          <option>Customer Changed Mind</option>
+          <option>Finance Issue</option>
+          <option>Vehicle Unavailable</option>
+          <option>Price Issue</option>
+          <option>Switched to Competitor</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:12px;"><label>Cancellation Date</label><input type="date" id="cbk-date"></div>
+      <div style="font-size:11.5px;color:var(--gray-500);margin-bottom:12px;">The lead will be reverted to Active status so it can be followed up again.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;background:#C62828;color:#fff;border-color:#C62828;" onclick="confirmCancelBk()">Confirm Cancellation →</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('cancel-bk-modal').classList.remove('open')">Keep Booking</button>
+      </div>
+      <span class="smsg" id="cbk-status" style="margin-top:8px;display:block;"></span>
     </div>
   </div>
 </div>
@@ -1888,7 +1918,7 @@ function prefillFULost(enc){const l=JSON.parse(decodeURIComponent(enc));showTab(
 function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());},150);}
 
 // ═══ BOOKINGS ═══
-function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={all:0,instock:1,onorder:2,delivered:3};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-al').style.display=t==='all'?'block':'none';document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';}
+function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={all:0,instock:1,onorder:2,delivered:3,cancelled:4};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-al').style.display=t==='all'?'block':'none';document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';document.getElementById('bk-cn').style.display=t==='cancelled'?'block':'none';}
 function togglePastBk(){
   bkPastMode=document.getElementById('bk-past-chk').checked;
   document.getElementById('bk-dt').style.display=bkPastMode?'none':'';
@@ -1923,19 +1953,30 @@ function renderBookings(){
   if(sortBy==='oldest')bks.sort((a,b)=>(parseD(a['Booking DT'])||0)-(parseD(b['Booking DT'])||0));
   else if(sortBy==='waiting')bks.sort((a,b)=>(parseD(a['Booking DT'])||0)-(parseD(b['Booking DT'])||0));
   else bks.sort((a,b)=>(parseD(b['Booking DT'])||0)-(parseD(a['Booking DT'])||0));
-  const ins=bks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered');const ood=bks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered');const del=bks.filter(b=>b['Status']==='Delivered');
-  document.getElementById('bk-count').textContent=`${ins.length} in-stock · ${ood.length} VNA · ${del.length} delivered`;
+  const cancelled=bks.filter(b=>b['Status']==='Cancelled');
+  const ins=bks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered'&&b['Status']!=='Cancelled');const ood=bks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered'&&b['Status']!=='Cancelled');const del=bks.filter(b=>b['Status']==='Delivered');
+  document.getElementById('bk-count').textContent=`${ins.length} in-stock · ${ood.length} VNA · ${del.length} delivered`+(cancelled.length?` · ${cancelled.length} cancelled`:'');
   const allSorted=[...bks].sort((a,b)=>(parseD(b['Booking DT'])||0)-(parseD(a['Booking DT'])||0));
-  renderBkList('bk-al-list',allSorted,'all');renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');
+  renderBkList('bk-al-list',allSorted,'all');renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');renderBkList('bk-cl',cancelled,'can');
 }
 function clearBkFilters(){['bk-floc','bk-fmodel','bk-date-from','bk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-sort').value='newest';renderBookings();}
 function _bkCard(b,type){
   const now=new Date();const thr=getTargets().wait||30;
   const ri=b['rowIndex']||'';const bkId=b['Booking ID']||'';const cname=(b['Customer Name']||'').replace(/'/g,'');const pd=b['Planned Delivery']||'';const pdLbl=pd?'Update':'Set';
+  const canCancel=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head');
+  if(type==='can'){
+    const cls='bk-card bk-can';
+    return `<div class="${cls}">
+    <div class="bk-head"><span class="bk-name">${b['Customer Name']||'—'}</span><span style="font-size:11.5px;color:var(--gray-500);">${b['Phone']||''}</span>${locTagHtml(b['Location'])}<span class="bk-id">${b['Booking ID']||'—'}</span><span class="pill" style="background:#FFEBEE;color:#C62828;border:1px solid #FFCDD2;">❌ Cancelled</span></div>
+    <div class="bk-body"><span>🚗 <strong>${b['Model']||'—'}</strong> ${b['Variant']||''} ${b['Color']?'· '+b['Color']:''}</span><span>💰 ₹${(+b['Booking Amount']||0).toLocaleString('en-IN')}</span><span>👤 ${b['Salesperson']||'—'}</span></div>
+    <div class="bk-foot"><span style="font-size:11px;color:var(--gray-400);">Booked: ${b['Booking DT']||'—'}${b['Cancellation Date']?' · Cancelled: '+b['Cancellation Date']:''}</span><span style="font-size:11px;color:#C62828;">${b['Cancellation Reason']||''}</span></div>
+    </div>`;
+  }
   const btnConvert=type==='ord'?('<button class="tbl-btn" style="background:var(--green-bg);color:var(--green);border-color:var(--green-bd);" onclick="openConvertModal(\'' +ri+ '\',\'' +bkId+ '\')">✅ Vehicle Arrived — Mark In Stock</button>'):'';
   const btnPlan=type!=='del'?('<button class="tbl-btn" onclick="openPlannedModal(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\',\'' +pd+ '\')">📅 '+pdLbl+' Planned Delivery</button>'):'';
   const btnDeliv=type!=='del'?('<button class="tbl-btn" onclick="markDeliv(\'' +ri+ '\',\'' +bkId+ '\')">🚗 Mark Delivered</button>'):('<span class="pill pill-booked">✅ Delivered '+b['Actual Delivery']+' </span>');
-  const bkFootBtns=btnConvert+btnPlan+btnDeliv;
+  const btnCancel=canCancel&&type!=='del'?('<button class="tbl-btn" style="background:#FFEBEE;color:#C62828;border-color:#FFCDD2;" onclick="openCancelBk(\'' +ri+ '\',\'' +bkId+ '\',\'' +cname+ '\')">❌ Cancel</button>'):'';
+  const bkFootBtns=btnConvert+btnPlan+btnDeliv+btnCancel;
   const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
   let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
   const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
@@ -1950,11 +1991,34 @@ function _bkCard(b,type){
   </div>`;
 }
 function renderBkList(id,bks,type){
-  const el=document.getElementById(id);if(!bks.length){el.innerHTML=`<div class="empty-st"><div class="ico">${type==='stk'?'📦':type==='ord'?'🔄':'🚗'}</div><p>No ${type==='stk'?'in-stock bookings':type==='ord'?'VNA bookings':type==='all'?'bookings yet':'deliveries'}.</p></div>`;return;}
-  if(type==='all'){el.innerHTML=bks.map(b=>{const t=b['Status']==='Delivered'?'del':b['In Stock']==='Yes'?'stk':'ord';return _bkCard(b,t);}).join('');return;}
+  const el=document.getElementById(id);if(!bks.length){el.innerHTML=`<div class="empty-st"><div class="ico">${type==='stk'?'📦':type==='ord'?'🔄':type==='can'?'❌':'🚗'}</div><p>No ${type==='stk'?'in-stock bookings':type==='ord'?'VNA bookings':type==='all'?'bookings yet':type==='can'?'cancelled bookings':'deliveries'}.</p></div>`;return;}
+  if(type==='all'){el.innerHTML=bks.map(b=>{const t=b['Status']==='Cancelled'?'can':b['Status']==='Delivered'?'del':b['In Stock']==='Yes'?'stk':'ord';return _bkCard(b,t);}).join('');return;}
   el.innerHTML=bks.map(b=>_bkCard(b,type)).join('');
 }
 async function markDeliv(ri,bkId){if(!confirm('Mark '+bkId+' as Delivered?'))return;try{await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,Status:'Delivered','Actual Delivery':new Date().toISOString().split('T')[0]})});await loadAll();}catch(e){alert('Error: '+e.message);}}
+function openCancelBk(ri,bkId,cname){
+  document.getElementById('cbk-ri').value=ri;
+  document.getElementById('cbk-bkid-lbl').textContent=bkId;
+  document.getElementById('cbk-cname-lbl').textContent=cname;
+  document.getElementById('cbk-reason').value='';
+  document.getElementById('cbk-reason').closest('.field').classList.remove('invalid');
+  document.getElementById('cbk-date').value=new Date().toISOString().split('T')[0];
+  setMsg(document.getElementById('cbk-status'),'','');
+  document.getElementById('cancel-bk-modal').classList.add('open');
+}
+async function confirmCancelBk(){
+  const ri=document.getElementById('cbk-ri').value;
+  const reason=document.getElementById('cbk-reason').value;
+  const date=document.getElementById('cbk-date').value;
+  if(!reason){document.getElementById('cbk-reason').closest('.field').classList.add('invalid');return;}
+  document.getElementById('cbk-reason').closest('.field').classList.remove('invalid');
+  const st=document.getElementById('cbk-status');setMsg(st,'ld','⟳ Cancelling…');
+  try{
+    await api({action:'updateBooking',data:JSON.stringify({rowIndex:ri,Status:'Cancelled','Cancellation Date':date,'Cancellation Reason':reason})});
+    setMsg(st,'ok','✓ Booking cancelled');
+    setTimeout(()=>{document.getElementById('cancel-bk-modal').classList.remove('open');loadAll();},800);
+  }catch(e){setMsg(st,'err','✗ '+e.message);}
+}
 
 function clearStkFilters(){['stk-floc','stk-fm','stk-fs','stk-date-from','stk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('stk-sort').value='newest';renderStock();}
 // ═══ STOCK ═══
