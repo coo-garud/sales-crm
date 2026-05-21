@@ -789,13 +789,14 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   </div>
   <div class="filter-bar">
     <input type="text" class="fi" id="fl-search" placeholder="Name / Phone / Model…" style="width:170px;" oninput="applyFilters()">
-    <select class="fi" id="fl-status" onchange="applyFilters()"><option value="">All Status</option><option value="red">🚨 Action Now</option><option value="amber">⚠ FU Due</option><option value="hot">🔥 Hot</option><option value="warm">🔵 Warm</option><option value="green">✅ Booked</option><option value="lost">❌ Lost</option></select>
+    <select class="fi" id="fl-status" onchange="applyFilters()"><option value="">All Status</option><option value="red">🚨 Action Now</option><option value="amber">⚠ FU Due</option><option value="hot">🔥 Hot</option><option value="warm">🔵 Warm</option><option value="green">✅ Booked</option><option value="lost">❌ Lost</option><option value="uncontacted">📵 Never Contacted</option></select>
     <select class="fi" id="fl-src" onchange="applyFilters()"><option value="">All Sources</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option><option>Events</option></select>
     <select class="fi" id="fl-sp" onchange="applyFilters()"><option value="">All Salespeople</option></select>
     <select class="fi" id="fl-model" onchange="applyFilters()"><option value="">All Models</option></select>
     <select class="fi" id="fl-voc" onchange="applyFilters()"><option value="">All VoC</option><option value="thin">⚠ Thin VoC only</option></select>
     <select class="fi" id="fl-sort" onchange="applyFilters()" title="Sort order">
       <option value="priority">Sort: Priority</option>
+      <option value="activity">Recent Activity ↓</option>
       <option value="newest">Created: Newest ↓</option>
       <option value="oldest">Created: Oldest ↑</option>
       <option value="lastcontact">Last Contact ↓</option>
@@ -1728,7 +1729,7 @@ function goToLead(enc){
   const l=JSON.parse(decodeURIComponent(enc));
   showTab('leads');
   setTimeout(()=>{
-    document.getElementById('fl-name').value=l['Phone']||'';
+    document.getElementById('fl-search').value=l['Phone']||'';
     const filtered=filterLeadsData();
     renderLeads(filtered);
     const card=document.getElementById('lc-0');
@@ -1810,7 +1811,8 @@ function filterLeadsData(){
   let leads=spFilt(locFilt(allLeads));
   leads=leads.filter(l=>{
     if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}
-    if(src&&l['Source']!==src)return false;if(sp&&canonicalSP(l['Salesperson']).toLowerCase()!==sp.toLowerCase())return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;if(st){const b=calcBucket(l);if(b!==st)return false;}
+    if(src&&l['Source']!==src)return false;if(sp&&canonicalSP(l['Salesperson']).toLowerCase()!==sp.toLowerCase())return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;
+    if(st){if(st==='uncontacted'){if(l['Last Contact DT']||(parseInt(l['Followup Count'])||0)>0)return false;}else{const b=calcBucket(l);if(b!==st)return false;}}
     if(dateFrom||dateTo){const d=parseD(l['Created DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;}
     return true;
   });
@@ -1818,6 +1820,7 @@ function filterLeadsData(){
   else if(sortBy==='oldest')leads.sort((a,b)=>(parseD(a['Created DT'])||0)-(parseD(b['Created DT'])||0));
   else if(sortBy==='lastcontact')leads.sort((a,b)=>(parseD(b['Last Contact DT'])||0)-(parseD(a['Last Contact DT'])||0));
   else if(sortBy==='nextfu')leads.sort((a,b)=>{const da=parseD(a['Next Followup DT']);const db=parseD(b['Next Followup DT']);if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return da-db;});
+  else if(sortBy==='activity')leads.sort((a,b)=>{const la=parseD(a['Last Contact DT'])||parseD(a['Created DT'])||0;const lb=parseD(b['Last Contact DT'])||parseD(b['Created DT'])||0;return lb-la;});
   else{const pri={red:6,amber:5,hot:4,warm:3,cold:2,green:1,lost:0};leads.sort((a,b)=>(pri[calcBucket(b)]||0)-(pri[calcBucket(a)]||0));}
   return leads;
 }
@@ -1848,6 +1851,7 @@ function renderLeads(leads){
         ${l['Customer Expected Delivery']?`<span>📅 Wants: <strong>${l['Customer Expected Delivery']}</strong></span>`:''}
         <span>📞 Last: <strong>${lcTxt}</strong></span><span>📅 Next: ${fuTxt}</span>
         <span>🔁 ${l['Followup Count']||0} FU${(l['Followup Count']||0)!=1?'s':''}</span>
+        <span style="color:var(--gray-400);">📅 Added: ${l['Created DT']?fmtDate(parseD(l['Created DT'])):'—'}${l['Salesperson']?' · by <strong>'+l['Salesperson']+'</strong>':''}</span>
       </div>
       ${l['VoC Notes']?`<div style="padding:5px 14px 8px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong>${l['VoC Notes'].split(' | ').map((e,i)=>`<div style="margin-top:3px;padding:2px 7px;border-left:2px solid var(--amber-bd);${i===0?'color:var(--gray-800);':''}">${e}</div>`).join('')}</div>`:''}
       <div class="lc-actions">
