@@ -619,7 +619,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="sc cr" onclick="filterLeadsNav('red')"><div class="sc-lbl">🚨 Action Now</div><div class="sc-num" id="s-red">—</div><div class="sc-sub">Uncontacted / Overdue</div></div>
     <div class="sc ca" onclick="filterLeadsNav('amber')"><div class="sc-lbl">⚠ Follow-up Due</div><div class="sc-num" id="s-amber">—</div><div class="sc-sub">Due today</div></div>
     <div class="sc ch" onclick="filterLeadsNav('hot')"><div class="sc-lbl">🔥 Hot Pipeline</div><div class="sc-num" id="s-hot">—</div><div class="sc-sub">High intent</div></div>
-    <div class="sc cg" onclick="showTab('bookings')"><div class="sc-lbl">🚗 Bookings (Month)</div><div class="sc-num" id="s-booked">—</div><div class="sc-sub" id="s-bk-vs-tgt" style="font-weight:700;color:var(--blue-dk);margin-bottom:2px;"></div><div class="sc-sub" id="s-tdc">— test drives</div></div>
+    <div class="sc cg" onclick="showTab('bookings')"><div class="sc-lbl" id="s-bk-lbl">🚗 Bookings (Month)</div><div class="sc-num" id="s-booked">—</div><div class="sc-sub" id="s-bk-vs-tgt" style="font-weight:700;color:var(--blue-dk);margin-bottom:2px;"></div><div class="sc-sub" id="s-tdc">— test drives</div></div>
     <div class="sc cb"><div class="sc-lbl">📈 Compliance</div><div class="sc-num" id="s-comp">—</div><div class="sc-sub">Leads on time</div></div>
   </div>
   <!-- MY TARGET CARD (salesperson only) -->
@@ -633,14 +633,14 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   <!-- DELIVERY STATS ROW -->
   <div class="del-srow">
     <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">🚗 Delivered Today</div><div class="del-sc-num" id="sd-today">—</div><div class="del-sc-sub" id="sd-today-names">—</div></div>
-    <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">📅 Delivered — Selected Month</div><div class="del-sc-num" id="sd-month">—</div><div class="del-sc-sub" id="sd-month-val">bookings</div></div>
+    <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl" id="sd-month-lbl">📅 Delivered — This Month</div><div class="del-sc-num" id="sd-month">—</div><div class="del-sc-sub" id="sd-month-val">deliveries</div></div>
     <div class="del-sc" onclick="showBkTabNav('delivered')"><div class="del-sc-lbl">🏆 Total All-Time</div><div class="del-sc-num" id="sd-total">—</div><div class="del-sc-sub">deliveries</div></div>
   </div>
   <div class="dash-grid">
     <div>
       <!-- CONVERSION FUNNEL -->
       <div class="card-wrap">
-        <div class="card-hd hd-blue">📊 Conversion Funnel — This Month <span style="font-size:11px;font-weight:400;opacity:.7;" id="fn-loc"></span></div>
+        <div class="card-hd hd-blue">📊 Conversion Funnel — <span id="fn-title">Total Pipeline</span> <span style="font-size:11px;font-weight:400;opacity:.7;" id="fn-loc"></span></div>
         <div class="card-body">
           <div class="fn-stage"><div class="fn-label">Enquiries</div><div class="fn-bar-wrap"><div class="fn-bar fnb0" id="fn0" style="width:100%"><span class="fn-num" id="fnn0">—</span></div></div><div class="fn-conv fc-hi" id="fnc0">100%</div></div>
           <div class="fn-stage"><div class="fn-label">Test Drives</div><div class="fn-bar-wrap"><div class="fn-bar fnb1" id="fn1" style="width:60%"><span class="fn-num" id="fnn1">—</span></div></div><div class="fn-conv" id="fnc1">—</div></div>
@@ -1707,8 +1707,8 @@ let bkExc=null,bkIns=null,bkStk=null,bkPastMode=false;
 let fuInt='';
 let waLead=null;
 let selectedMonthStr=(()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;})();
-function getMonthStart(){const[y,m]=selectedMonthStr.split('-').map(Number);return new Date(y,m-1,1);}
-function getMonthEnd(){const[y,m]=selectedMonthStr.split('-').map(Number);return new Date(y,m,1);}
+function getMonthStart(){if(selectedMonthStr==='all')return null;const[y,m]=selectedMonthStr.split('-').map(Number);return new Date(y,m-1,1);}
+function getMonthEnd(){if(selectedMonthStr==='all')return null;const[y,m]=selectedMonthStr.split('-').map(Number);return new Date(y,m,1);}
 function populateMonthPicker(){
   const sel=document.getElementById('month-picker');if(!sel)return;
   const allDates=[];
@@ -1716,7 +1716,8 @@ function populateMonthPicker(){
   allLeads.forEach(l=>{const d=parseD(l['Created DT']);if(d)allDates.push(d);});
   const now=new Date();
   const earliest=allDates.length?new Date(Math.min(...allDates.map(d=>d.getTime()))):new Date(now.getFullYear(),now.getMonth()-5,1);
-  const opts=[];let y=now.getFullYear(),m=now.getMonth();
+  const opts=[`<option value="all"${selectedMonthStr==='all'?' selected':''}>All Time</option>`];
+  let y=now.getFullYear(),m=now.getMonth();
   const earY=Math.max(earliest.getFullYear(),now.getFullYear()-2),earM=earliest.getFullYear()>=now.getFullYear()-2?earliest.getMonth():0;
   while(y>earY||(y===earY&&m>=earM)){
     const key=`${y}-${String(m+1).padStart(2,'0')}`;
@@ -1898,8 +1899,9 @@ function renderDashboard(){
   const leads=spFilt(locFilt(allLeads));const bks=spFilt(locFilt(allBK));const tds=spFilt(locFilt(allTD));
   const active=leads.filter(l=>l['Status']!=='Lost'&&l['Status']!=='Delivered');
   const ms=getMonthStart();const me=getMonthEnd();const today=new Date();today.setHours(0,0,0,0);
-  const mBks=bks.filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms&&d<me&&b['Status']!=='Cancelled';});
-  const mTDs=tds.filter(t=>{const d=parseD(t['DateTime']);return d&&d>=ms&&d<me;});
+  const inPeriod=d=>ms?(d&&d>=ms&&d<me):!!d;
+  const mBks=bks.filter(b=>{const d=parseD(b['Booking DT']);return inPeriod(d)&&b['Status']!=='Cancelled';});
+  const mTDs=tds.filter(t=>{const d=parseD(t['DateTime']);return inPeriod(d);});
   const delivered=mBks.filter(b=>b['Status']==='Delivered');
   const todayLeads=leads.filter(l=>{const c=parseD(l['Created DT']);return c&&daysBetween(today,c)===0;});
   const bkts=active.map(l=>({lead:l,b:calcBucket(l)}));
@@ -1910,8 +1912,9 @@ function renderDashboard(){
   const mInS=mBks.filter(b=>b['In Stock']==='Yes'&&b['Status']!=='Delivered').length;
   const mVNA=mBks.filter(b=>b['In Stock']==='No'&&b['Status']!=='Delivered').length;
   document.getElementById('s-hot').textContent=hots.length;
-  document.getElementById('s-booked').textContent=totalTgt?`${mBks.length}/${totalTgt}`:mBks.length;
-  const bkPct=totalTgt?Math.round(mBks.length/totalTgt*100):null;
+  const bkLbl=document.getElementById('s-bk-lbl');if(bkLbl)bkLbl.textContent=ms?'🚗 Bookings (Month)':'🚗 Bookings (All Time)';
+  document.getElementById('s-booked').textContent=(!ms||!totalTgt)?mBks.length:`${mBks.length}/${totalTgt}`;
+  const bkPct=(ms&&totalTgt)?Math.round(mBks.length/totalTgt*100):null;
   document.getElementById('s-bk-vs-tgt').textContent=bkPct!==null?`${bkPct}% of target · ${mInS} in-stk · ${mVNA} VNA`:`${mInS} in-stk · ${mVNA} VNA`;
   document.getElementById('s-tdc').textContent=mTDs.length+' test drives';
   const onT=active.filter(l=>calcBucket(l)!=='red');const comp=active.length?Math.round(onT.length/active.length*100):100;
@@ -1922,9 +1925,25 @@ function renderDashboard(){
   const fbEl=document.getElementById('fu-badge');fbEl.textContent=ambs.length;fbEl.style.display=ambs.length>0?'inline-block':'none';
   document.getElementById('cnt-red').textContent=reds.length;document.getElementById('cnt-amber').textContent=ambs.length;document.getElementById('cnt-hot').textContent=hots.length;
   renderDashSec('dash-red-list',reds.map(x=>x.lead),'red');renderDashSec('dash-amber-list',ambs.map(x=>x.lead),'amber');renderDashSec('dash-hot-list',hots.map(x=>x.lead),'hot');
-  const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return d&&d>=ms&&d<me&&b['Status']!=='Cancelled';});
-  const mLeads=leads.filter(l=>{const d=parseD(l['Created DT']);return d&&d>=ms&&d<me;});
-  renderWaitAlerts(bks);renderFunnel(mLeads,mTDs,mBks,mBks.filter(b=>b['Status']==='Delivered'));renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));renderNewLeadsToday(leads);
+  const allMonthBks=spFilt(allBK).filter(b=>{const d=parseD(b['Booking DT']);return inPeriod(d)&&b['Status']!=='Cancelled';});
+  const allActiveBks=bks.filter(b=>b['Status']!=='Cancelled');
+  const tdLeadIds=new Set(tds.map(t=>t['Lead ID']));
+  // Funnel: when a specific month is selected, scope to leads created in that month
+  let funnelLeads,funnelTDs,funnelBks,funnelDel,funnelTitle;
+  if(!ms){
+    // All Time — show total pipeline
+    funnelLeads=leads;funnelTDs=leads.filter(l=>tdLeadIds.has(l['Lead ID']));funnelBks=allActiveBks;funnelDel=allActiveBks.filter(b=>b['Status']==='Delivered');funnelTitle='Total Pipeline';
+  }else{
+    // Specific month — scope all funnel stages to leads created in that month
+    funnelLeads=leads.filter(l=>{const d=parseD(l['Created DT']);return d&&d>=ms&&d<me;});
+    funnelTDs=funnelLeads.filter(l=>tdLeadIds.has(l['Lead ID']));
+    const funnelLeadIds=new Set(funnelLeads.map(l=>l['Lead ID']));
+    funnelBks=allActiveBks.filter(b=>funnelLeadIds.has(b['Lead ID']));
+    funnelDel=funnelBks.filter(b=>b['Status']==='Delivered');
+    funnelTitle=new Date(ms).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  }
+  const fnTitleEl=document.getElementById('fn-title');if(fnTitleEl)fnTitleEl.textContent=funnelTitle;
+  renderWaitAlerts(bks);renderFunnel(funnelLeads,funnelTDs,funnelBks,funnelDel);renderFinPen(mBks);renderTDBoard(mTDs);renderSalesLeaderboard(mBks,mTDs);renderTargetCard(allMonthBks);renderSPTable(active,mTDs);renderNextDeliveries(spFilt(allBK));renderDeliveryStats(spFilt(allBK));renderNewLeadsToday(leads);
   const role=currentUser&&currentUser.role;
   const isSP=role==='salesperson';
   const isTL=role==='team_leader';
@@ -2619,9 +2638,9 @@ function renderSalesLeaderboard(mBks,mTDs){
 
 // ═══ DELIVERY STATS ═══
 function getDeliveryStats(bks){
-  const now=new Date();const ms=getMonthStart();const me=getMonthEnd();const today=new Date();today.setHours(0,0,0,0);
+  const ms=getMonthStart();const me=getMonthEnd();const today=new Date();today.setHours(0,0,0,0);
   const allDel=bks.filter(b=>b['Status']==='Delivered');
-  const monthDel=allDel.filter(b=>{const d=parseD(b['Actual Delivery']);return d&&d>=ms&&d<me;});
+  const monthDel=ms?allDel.filter(b=>{const d=parseD(b['Actual Delivery']);return d&&d>=ms&&d<me;}):allDel;
   const todayDel=allDel.filter(b=>{const d=parseD(b['Actual Delivery']);if(!d)return false;const dd=new Date(d);dd.setHours(0,0,0,0);return dd.getTime()===today.getTime();});
   return{all:allDel.length,month:monthDel.length,today:todayDel.length,todayNames:todayDel.map(b=>b['Customer Name']||'—').join(', ')};
 }
@@ -2648,6 +2667,7 @@ function renderNextDeliveries(bks){
 // ═══ DELIVERY STAT RENDERING ═══
 function renderDeliveryStats(bks){
   const s=getDeliveryStats(locFilt(bks));
+  const sdLbl=document.getElementById('sd-month-lbl');if(sdLbl){const _ms=getMonthStart();sdLbl.textContent=_ms?`📅 Delivered — ${new Date(_ms).toLocaleString('en-IN',{month:'short',year:'numeric'})}`:'📅 Delivered — All Time';}
   document.getElementById('sd-today').textContent=s.today;
   document.getElementById('sd-today-names').textContent=s.todayNames||'—';
   document.getElementById('sd-month').textContent=s.month;
