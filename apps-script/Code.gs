@@ -84,7 +84,15 @@ function addFollowUp(d){
 }
 function addBooking(d){
   const sh=getOrCreate("Bookings",BH);const tz=Session.getScriptTimeZone();
-  d["Booking ID"]="BK-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");d["Status"]=d["Status"]||"Booked";
+  d["Booking ID"]="BK-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");
+  if(!d["Booking DT"])d["Booking DT"]=Utilities.formatDate(new Date(),tz,"yyyy-MM-dd HH:mm");
+  // Normalise status case
+  const sl=(d["Status"]||"").trim().toLowerCase();
+  if(sl==="delivered")d["Status"]="Delivered";
+  else if(sl==="cancelled"||sl==="canceled")d["Status"]="Cancelled";
+  else if(sl==="booked")d["Status"]="Booked";
+  // Auto-infer Delivered from Actual Delivery if Status is blank
+  d["Status"]=d["Status"]||(d["Actual Delivery"]?"Delivered":"Booked");
   sh.appendRow(BH.map(h=>d[h]||""));
   if(d["Lead ID"]){const lsh=getOrCreate("Leads",LH);const lr=lsh.getLastRow();if(lr>=2){const ids=lsh.getRange(2,1,lr-1,1).getValues().flat();const ix=ids.indexOf(d["Lead ID"]);if(ix>=0)lsh.getRange(ix+2,LH.indexOf("Status")+1).setValue("Booked");}}
   return{status:"ok",bookingId:d["Booking ID"]};
