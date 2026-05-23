@@ -2930,10 +2930,10 @@ async function uploadStockBatch(){
 // ─── AUTH ───
 let currentUser=null;let allUsers=[];
 const ROLE_TABS={
-  masteradmin: ['dashboard','leads','new-lead','followup','bookings','stock','setup'],
-  manager:     ['dashboard','leads','new-lead','followup','bookings','stock'],
-  branch_head: ['dashboard','leads','new-lead','followup','bookings','stock'],
-  team_leader: ['dashboard','leads','new-lead','followup','bookings','stock'],
+  masteradmin: ['dashboard','leads','new-lead','followup','bookings','stock','analytics','setup'],
+  manager:     ['dashboard','leads','new-lead','followup','bookings','stock','analytics'],
+  branch_head: ['dashboard','leads','new-lead','followup','bookings','stock','analytics'],
+  team_leader: ['dashboard','leads','new-lead','followup','bookings','stock','analytics'],
   salesperson: ['dashboard','leads','new-lead','followup','bookings']
 };
 const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',team_leader:'TEAM LEADER',salesperson:'SALESPERSON'};
@@ -2996,7 +2996,7 @@ function populateSPDropdowns(){
 }
 function applyRoleTabs(){
   const allowed=ROLE_TABS[currentUser.role]||[];
-  const keys=['dashboard','leads','new-lead','followup','bookings','stock','setup'];
+  const keys=['dashboard','leads','new-lead','followup','bookings','stock','analytics','setup'];
   document.querySelectorAll('nav .tab').forEach((tab,i)=>{tab.style.display=allowed.includes(keys[i])?'':'none';});
   const spFilterEl=document.getElementById('fl-sp');if(spFilterEl)spFilterEl.closest('.filter-bar')&&(spFilterEl.style.display=(currentUser.role==='salesperson'||currentUser.role==='team_leader')?'none':'');
 }
