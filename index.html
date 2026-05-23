@@ -1017,7 +1017,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field"><label>Product VC Number</label><input type="text" id="bk-vc" placeholder="Tata Motors VC No."></div>
         <div class="field"><label>Booking Amount (₹) <span class="req">*</span></label><input type="number" id="bk-amount" placeholder="e.g. 11000"><span class="err">Required</span></div>
         <div class="field"><label>Payment Mode</label><select id="bk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
-        <div class="field"><label>Discount Offered (₹)</label><input type="number" id="bk-discount" placeholder="e.g. 25000"></div>
+        <div class="field" id="bk-discount-row"><label>Discount Offered (₹)</label><input type="number" id="bk-discount" placeholder="e.g. 25000"></div>
         <div class="field"><label>Salesperson <span class="req">*</span></label><select id="bk-sp"><option value="">Select…</option></select><span class="err">Required</span></div>
         <div class="field">
           <label>Booking Date <span class="auto-lbl" id="bk-dt-auto-lbl">AUTO</span><span id="bk-past-toggle" style="display:none;margin-left:10px;"><label style="text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;color:var(--amber);cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><input type="checkbox" id="bk-past-chk" onchange="togglePastBk()"> ⏰ Past booking?</label></span></label>
@@ -1659,7 +1659,7 @@ function updateStock(d){
         <div class="field"><label>Product VC Number</label><input type="text" id="ebk-vc" placeholder="Tata Motors VC No."></div>
         <div class="field"><label>Booking Amount (₹) <span class="req">*</span></label><input type="number" id="ebk-amount" placeholder="e.g. 11000"><span class="err">Required</span></div>
         <div class="field"><label>Payment Mode</label><select id="ebk-payment"><option value="">Select…</option><option>Cash</option><option>Finance</option><option>Cash + Finance</option></select></div>
-        <div class="field"><label>Discount Offered (₹)</label><input type="number" id="ebk-discount" placeholder="e.g. 25000"></div>
+        <div class="field" id="ebk-discount-row"><label>Discount Offered (₹)</label><input type="number" id="ebk-discount" placeholder="e.g. 25000"></div>
         <div class="field"><label>Salesperson</label><select id="ebk-sp"><option value="">Select…</option></select></div>
         <div class="field full"><label>Customer's Expected Delivery</label>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
@@ -2311,7 +2311,8 @@ function _bkCard(b,type){
   const bkFootBtns=btnEdit+btnConvert+btnPlan+btnDeliv+btnCancel;
   const cls=`bk-card bk-${type==='stk'?'stk':type==='ord'?'ord':'del'}`;const bd=parseD(b['Booking DT']);const days=bd?daysBetween(bd,now):0;
   let wBadge='';if(type==='ord'){const wc=days>60?'wait-crit':days>thr?'wait-warn':'wait-ok';wBadge=`<span class="${wc}">⏳ ${days}d waiting</span>`;}
-  const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
+  const _discOk=currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='branch_head');
+  const tags=[b['Exchange']==='Yes'?'<span class="tag t-exc">🔄 Exchange</span>':'',b['In-house Insurance']==='Yes'?'<span class="tag t-ins">🛡 Insurance</span>':'',_discOk&&b['Discount Amount']&&+b['Discount Amount']>0?`<span class="tag t-disc">💸 ₹${(+b['Discount Amount']).toLocaleString('en-IN')} off</span>`:'',b['VC Number']?`<span class="tag t-vc">VC: ${b['VC Number']}</span>`:'',b['Customer Expected Delivery']==='ASAP'?'<span class="tag t-asap">🔴 ASAP</span>':b['Customer Expected Delivery']?`<span class="tag" style="background:var(--blue-lt);color:var(--blue-dk);border:1px solid #BAD3EF;">Exp. ${b['Customer Expected Delivery']}</span>`:''  ].filter(Boolean).join(' ');
   return `<div class="${cls}">
     <div class="bk-head"><span class="bk-name">${b['Customer Name']||'—'}</span><span style="font-size:11.5px;color:var(--gray-500);">${b['Phone']||''}</span>${locTagHtml(b['Location'])}<span class="bk-id">${b['Booking ID']||'—'}</span>${wBadge}</div>
     <div class="bk-body"><span>🚗 <strong>${b['Model']||'—'}</strong> ${b['Variant']||''} ${b['Color']?'· '+b['Color']:''}</span><span>💰 ₹${(+b['Booking Amount']||0).toLocaleString('en-IN')}</span><span>💳 ${b['Payment Mode']||'—'}</span>${b['Lead Source']?`<span>📢 ${b['Lead Source']}</span>`:''}<span>👤 ${b['Salesperson']||'—'}</span>${b['Stock Ref']?`<span>🔢 ${b['Stock Ref']}</span>`:''}</div>
@@ -2976,6 +2977,8 @@ function showApp(){
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
   renderNotifBell();loadAll();if(currentUser.role==='masteradmin')renderUsersTable();
   const pastToggle=document.getElementById('bk-past-toggle');if(pastToggle){const r=currentUser.role;pastToggle.style.display=(r==='masteradmin'||r==='manager'||r==='branch_head')?'inline-flex':'none';}
+  const _canDisc=currentUser.role==='masteradmin'||currentUser.role==='branch_head';
+  ['bk-discount-row','ebk-discount-row'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=_canDisc?'':'none';});
 }
 function populateSPDropdowns(){
   const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='manager'||u.role==='team_leader').map(u=>u.display||u.username);
