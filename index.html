@@ -2088,6 +2088,7 @@ function renderLeads(leads){
   const now=new Date();
   list.innerHTML=leads.map((l,i)=>{
     const b=calcBucket(l);const age=Math.floor(hoursBetween(parseD(l['Created DT'])||now,now)/24);
+    const missingBk=l['Status']==='Booked'&&!allBK.some(bk=>bk['Lead ID']===l['Lead ID']&&bk['Status']!=='Cancelled');
     let aTxt='',aCls='';if(l['Created DT']){aTxt=age===0?'Today':age===1?'Yesterday':`${age}d old`;aCls=age>7?'age-crit':age>3?'age-warn':age===0?'age-new':'age-ok';}
     const nf=parseD(l['Next Followup DT']);let fuTxt='—';if(nf){const dO=daysBetween(nf,now);const tod=new Date();tod.setHours(0,0,0,0);const fd=new Date(nf);fd.setHours(0,0,0,0);if(dO>0)fuTxt=`<span class="ot">⚠ ${dO}d overdue</span>`;else if(fd.getTime()===tod.getTime())fuTxt='<span class="dt">Due Today</span>';else fuTxt=fmtDate(nf);}
     const lcTxt=l['Last Contact DT']?fmtDate(parseD(l['Last Contact DT'])):'Never contacted';
@@ -2109,10 +2110,11 @@ function renderLeads(leads){
         <span style="color:var(--gray-400);">📅 Added: ${l['Created DT']?fmtDate(parseD(l['Created DT'])):'—'}${l['Salesperson']?' · by <strong>'+l['Salesperson']+'</strong>':''}</span>
       </div>
       ${l['VoC Notes']?`<div style="padding:5px 14px 8px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong>${l['VoC Notes'].split(' | ').map((e,i)=>`<div style="margin-top:3px;padding:2px 7px;border-left:2px solid var(--amber-bd);${i===0?'color:var(--gray-800);':''}">${e}</div>`).join('')}</div>`:''}
+      ${missingBk?`<div style="padding:6px 14px;font-size:11.5px;font-weight:700;color:#7B3F00;background:#FFF3E0;border-top:2px solid #FFA000;display:flex;align-items:center;gap:8px;">⚠ Lead is marked Booked but no booking record exists — complete the booking form below.</div>`:''}
       <div class="lc-actions">
         <button class="btn btn-ghost btn-xs" onclick="prefillFU('${le}')">📞 Log Follow-up</button>
         <button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬 WhatsApp</button>
-        <button class="btn btn-success btn-xs" onclick="prefillBooking('${le}')">🚗 Book</button>
+        <button class="btn btn-xs" style="${missingBk?'background:#E65100;color:#fff;font-weight:800;border:none;':'background:var(--green);color:#fff;border:none;'}" onclick="prefillBooking('${le}')">${missingBk?'⚠ Create Booking Record':'🚗 Book'}</button>
         <button class="btn btn-danger btn-xs" onclick="prefillFULost('${le}')">❌ Mark Lost</button>
         <button class="btn btn-ghost btn-xs" onclick="openEditLead('${le}')">✏ Edit</button>
         <span style="font-size:10px;color:var(--gray-400);margin-left:auto;">ID: ${l['Lead ID']||'—'}</span>
@@ -2238,9 +2240,11 @@ async function submitFollowUp(){
   const method=document.getElementById('fu-method').value;const outcome=document.getElementById('fu-outcome').value;
   if(!method){document.getElementById('fu-method').closest('.field').classList.add('invalid');return;}if(!outcome){document.getElementById('fu-outcome').closest('.field').classList.add('invalid');return;}
   const isTD=document.getElementById('fu-td-chk').checked;
-  const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':document.getElementById('fu-status-upd').value,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||''};
+  const statusAfter=document.getElementById('fu-status-upd').value;
+  const leadForBooking=statusAfter==='Booked'&&fuSelectedLead?{...fuSelectedLead}:null;
+  const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':statusAfter,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||''};
   const st=document.getElementById('fu-status');setMsg(st,'ld','⟳ Logging…');
-  try{await api({action:'addFollowUp',data:JSON.stringify(d)});setMsg(st,'ok','✓ Logged!'+(isTD?' + Test Drive!':''));fuClearForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
+  try{await api({action:'addFollowUp',data:JSON.stringify(d)});setMsg(st,'ok','✓ Logged!'+(isTD?' + Test Drive!':''));fuClearForm();await loadAll();if(leadForBooking)setTimeout(()=>prefillBooking(encodeURIComponent(JSON.stringify(leadForBooking))),500);}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
 function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';const tdChk=document.getElementById('fu-td-chk');if(tdChk)tdChk.checked=false;document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
 function prefillFU(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);},100);}
