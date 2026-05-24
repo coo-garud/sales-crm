@@ -439,10 +439,15 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
 .notif-item.unread:hover{background:#FFF3CD;}
 .notif-ico{font-size:20px;flex-shrink:0;margin-top:1px;}
 .notif-body{flex:1;min-width:0;}
-.notif-name{font-weight:700;font-size:12.5px;color:var(--gray-800);}
-.notif-sub{font-size:11px;color:var(--gray-500);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-name{font-weight:700;font-size:12.5px;color:var(--gray-800);display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.notif-sub{font-size:11px;color:var(--gray-500);margin-top:2px;line-height:1.5;}
 .notif-time{font-size:10px;color:var(--gray-400);white-space:nowrap;flex-shrink:0;}
 .notif-empty{padding:28px 14px;text-align:center;font-size:12px;color:var(--gray-400);}
+.ntb{font-size:9px;font-weight:800;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.ntb-lead{background:#E3F2FD;color:#1565C0;}
+.ntb-bk{background:#E8F5E9;color:#1B5E20;}
+.notif-detail{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px;}
+.notif-detail span{font-size:11px;color:var(--gray-600);}
 .notif-toast{position:fixed;bottom:24px;right:24px;background:var(--blue-dk);color:#fff;border-radius:var(--r);padding:11px 16px 11px 14px;box-shadow:0 4px 18px rgba(0,0,0,.22);z-index:700;display:flex;align-items:flex-start;gap:10px;max-width:300px;transition:opacity .3s;}
 .notif-toast-ico{font-size:18px;flex-shrink:0;}
 .notif-toast-body{flex:1;min-width:0;}
@@ -3280,36 +3285,65 @@ window.onload=async function(){
 
 // ═══ NOTIFICATIONS ═══
 const notifSeenKey=()=>'scc_seen_'+( currentUser?.username||'');
+const notifSeenBkKey=()=>'scc_seen_bk_'+(currentUser?.username||'');
 const notifStoreKey=()=>'scc_notifs_'+(currentUser?.username||'');
 const notifInitKey=()=>'scc_notif_init_'+(currentUser?.username||'');
 function getSeenLeads(){return new Set(JSON.parse(localStorage.getItem(notifSeenKey())||'[]'));}
 function saveSeenLeads(s){localStorage.setItem(notifSeenKey(),JSON.stringify([...s]));}
+function getSeenBks(){return new Set(JSON.parse(localStorage.getItem(notifSeenBkKey())||'[]'));}
+function saveSeenBks(s){localStorage.setItem(notifSeenBkKey(),JSON.stringify([...s]));}
 function getStoredNotifs(){return JSON.parse(localStorage.getItem(notifStoreKey())||'[]');}
-function saveStoredNotifs(n){localStorage.setItem(notifStoreKey(),JSON.stringify(n.slice(0,60)));}
+function saveStoredNotifs(n){localStorage.setItem(notifStoreKey(),JSON.stringify(n.slice(0,80)));}
 function isRelevantLead(l){
   if(!currentUser)return false;
   const r=currentUser.role;
   if(r==='salesperson'){const spN=(l['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
   if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((l['Salesperson']||'').toLowerCase());}
   if(r==='branch_head'||r==='manager'){return currentUser.branch?(l['Location']||'').includes(currentUser.branch):true;}
-  return true; // masteradmin
+  return true;
+}
+function isRelevantBk(b){
+  if(!currentUser)return false;
+  const r=currentUser.role;
+  if(r==='salesperson'){const spN=(b['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
+  if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((b['Salesperson']||'').toLowerCase());}
+  if(r==='branch_head'||r==='manager'){return currentUser.branch?(b['Location']||'').includes(currentUser.branch):true;}
+  return true;
 }
 function checkNewLeadNotifs(isFirstLoad){
   if(!currentUser)return;
-  const seen=getSeenLeads();
-  if(isFirstLoad){allLeads.forEach(l=>l['Lead ID']&&seen.add(l['Lead ID']));saveSeenLeads(seen);localStorage.setItem(notifInitKey(),'1');renderNotifBell();return;}
+  const seen=getSeenLeads();const seenBk=getSeenBks();
+  if(isFirstLoad){
+    allLeads.forEach(l=>l['Lead ID']&&seen.add(l['Lead ID']));
+    allBK.forEach(b=>b['Booking ID']&&seenBk.add(b['Booking ID']));
+    saveSeenLeads(seen);saveSeenBks(seenBk);localStorage.setItem(notifInitKey(),'1');renderNotifBell();return;
+  }
+  const notifs=getStoredNotifs();let added=0;
+  // New leads
   const newLeads=allLeads.filter(l=>l['Lead ID']&&!seen.has(l['Lead ID'])&&isRelevantLead(l));
-  if(newLeads.length){
-    const notifs=getStoredNotifs();
-    newLeads.forEach(l=>{
-      notifs.unshift({id:l['Lead ID'],leadEnc:encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27'),name:l['Customer Name']||'—',phone:l['Phone']||'',model:l['Model Interest']||'—',sp:l['Salesperson']||'—',loc:l['Location']||'',time:new Date().toISOString(),read:false});
-    });
+  newLeads.forEach(l=>{
+    const src=l['Source']||'';const interest=l['Interest Level']||'Warm';const status=l['Status']||'Active';
+    notifs.unshift({id:l['Lead ID'],type:'lead',leadEnc:encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27'),name:l['Customer Name']||'—',phone:l['Phone']||'',model:l['Model Interest']||'—',sp:l['Salesperson']||'',loc:l['Location']||'',source:src,interest,status,time:new Date().toISOString(),read:false});
+    added++;
+  });
+  // New bookings
+  const newBks=allBK.filter(b=>b['Booking ID']&&!seenBk.has(b['Booking ID'])&&isRelevantBk(b)&&b['Status']!=='Cancelled');
+  newBks.forEach(b=>{
+    const lead=allLeads.find(l=>l['Lead ID']===b['Lead ID']);
+    const enc=lead?encodeURIComponent(JSON.stringify(lead)).replace(/'/g,'%27'):'';
+    notifs.unshift({id:b['Booking ID'],type:'booking',leadEnc:enc,name:b['Customer Name']||'—',phone:b['Phone']||'',model:b['Model']||'—',sp:b['Salesperson']||'',loc:b['Location']||'',source:b['Lead Source']||'',amount:b['Booking Amount']||'',payment:b['Payment Mode']||'',time:new Date().toISOString(),read:false});
+    added++;
+  });
+  if(added){
     saveStoredNotifs(notifs);
-    if(newLeads.length===1)showNotifToast('New Lead Allotted',`${newLeads[0]['Customer Name']||'—'} · ${newLeads[0]['Model Interest']||'—'} · ${newLeads[0]['Salesperson']||'—'}`);
-    else showNotifToast(`${newLeads.length} New Leads Allotted`,newLeads.map(l=>l['Customer Name']||'—').join(', ').substring(0,60)+'…');
+    const leadCount=newLeads.length,bkCount=newBks.length;
+    if(bkCount&&!leadCount)showNotifToast(bkCount===1?'New Booking 🚗':`${bkCount} New Bookings 🚗`,newBks.map(b=>`${b['Customer Name']||'—'} · ${b['Model']||'—'}`).join(' | ').substring(0,70));
+    else if(leadCount&&!bkCount)showNotifToast(leadCount===1?'New Lead Allotted 🆕':`${leadCount} New Leads 🆕`,newLeads.map(l=>`${l['Customer Name']||'—'} · ${l['Source']||'—'} · ${l['Model Interest']||'—'}`).join(' | ').substring(0,70));
+    else showNotifToast(`${added} New Updates`,`${leadCount} lead${leadCount!==1?'s':''} · ${bkCount} booking${bkCount!==1?'s':''}`);
   }
   allLeads.forEach(l=>l['Lead ID']&&seen.add(l['Lead ID']));
-  saveSeenLeads(seen);
+  allBK.forEach(b=>b['Booking ID']&&seenBk.add(b['Booking ID']));
+  saveSeenLeads(seen);saveSeenBks(seenBk);
   renderNotifBell();
 }
 function renderNotifBell(){
@@ -3328,12 +3362,38 @@ function renderNotifPanel(){
   const notifs=getStoredNotifs();
   const list=document.getElementById('notif-list');
   if(!list)return;
-  if(!notifs.length){list.innerHTML='<div class="notif-empty">🔔<br>No notifications yet.<br><span style="font-size:10px;">New leads allotted to you will appear here.</span></div>';return;}
+  if(!notifs.length){list.innerHTML='<div class="notif-empty">🔔<br>No notifications yet.<br><span style="font-size:10px;">New leads and bookings will appear here.</span></div>';return;}
+  const intIco=i=>i==='Hot'?'🔥':i==='Cold'?'❄️':'🔵';
   list.innerHTML=notifs.map((n,i)=>{
-    const t=new Date(n.time);const age=Math.round((Date.now()-t)/60000);const tStr=age<1?'Just now':age<60?age+'m ago':age<1440?Math.round(age/60)+'h ago':t.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+    const t=new Date(n.time);const age=Math.round((Date.now()-t)/60000);
+    const tStr=age<1?'Just now':age<60?age+'m ago':age<1440?Math.round(age/60)+'h ago':t.toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+    const isBk=n.type==='booking';
+    const badge=isBk?'<span class="ntb ntb-bk">🚗 New Booking</span>':'<span class="ntb ntb-lead">🆕 New Lead</span>';
+    let details='';
+    if(isBk){
+      details=[
+        n.model?`🚗 <strong>${n.model}</strong>`:'',
+        n.loc?`📍 ${n.loc}`:'',
+        n.sp?`👤 ${n.sp}`:'',
+        n.source?`📢 ${n.source}`:'',
+        n.amount?`💰 ₹${Number(n.amount).toLocaleString('en-IN')}`:'' ,
+        n.payment?`💳 ${n.payment}`:'',
+      ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    }else{
+      details=[
+        n.source?`📢 <strong>${n.source}</strong>`:'',
+        n.model?`🚗 ${n.model}`:'',
+        n.interest?`${intIco(n.interest)} ${n.interest}`:'',
+        n.sp?`👤 ${n.sp}`:'',
+        n.loc?`📍 ${n.loc}`:'',
+      ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    }
     return `<div class="notif-item${n.read?'':' unread'}" onclick="notifClick(${i})">
-      <div class="notif-ico">👤</div>
-      <div class="notif-body"><div class="notif-name">${n.name} <span style="font-size:10.5px;color:var(--gray-400);">${n.phone}</span></div><div class="notif-sub">${n.model} · ${n.sp}${n.loc?' · '+n.loc:''}</div></div>
+      <div class="notif-ico">${isBk?'🚗':'👤'}</div>
+      <div class="notif-body">
+        <div class="notif-name">${badge} ${n.name} <span style="font-size:10.5px;font-weight:400;color:var(--gray-400);">${n.phone}</span></div>
+        <div class="notif-sub">${details}</div>
+      </div>
       <div class="notif-time">${tStr}</div>
     </div>`;
   }).join('');
