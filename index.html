@@ -840,6 +840,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <select class="fi" id="fl-sp" onchange="applyFilters()"><option value="">All Salespeople</option></select>
     <select class="fi" id="fl-model" onchange="applyFilters()"><option value="">All Models</option></select>
     <select class="fi" id="fl-voc" onchange="applyFilters()"><option value="">All VoC</option><option value="thin">⚠ Thin VoC only</option></select>
+    <select class="fi" id="fl-td" onchange="applyFilters()"><option value="">All TD</option><option value="done">🏁 TD Done</option><option value="pending">⏳ TD Pending</option></select>
     <select class="fi" id="fl-sort" onchange="applyFilters()" title="Sort order">
       <option value="priority">Sort: Priority</option>
       <option value="activity">Recent Activity ↓</option>
@@ -964,7 +965,8 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <div class="seg-group"><button class="seg-btn btn-sm" id="fui-hot" onclick="selFUInt('Hot',this)">🔥 Hot</button><button class="seg-btn btn-sm" id="fui-warm" onclick="selFUInt('Warm',this)">🔵 Warm</button><button class="seg-btn btn-sm" id="fui-cold" onclick="selFUInt('Cold',this)">❄ Cold</button></div>
             <input type="hidden" id="fu-interest"></div>
           <div class="field"><label>Update Lead Status</label>
-            <select id="fu-status-upd"><option value="Active">Active (continuing)</option><option value="Booked">Booked — Converted! 🎉</option><option value="Lost">Lost — Not pursuing</option></select></div>
+            <select id="fu-status-upd" onchange="onFUStatusChange(this.value)"><option value="Active">Active (continuing)</option><option value="Booked">Booked — Converted! 🎉</option><option value="Lost">Lost — Not pursuing</option></select></div>
+          <div id="fu-booking-warn" style="display:none;background:#FFF3E0;border:1.5px solid #FFA000;border-radius:6px;padding:9px 13px;font-size:12.5px;font-weight:700;color:#E65100;">🚗 You will be required to fill the Booking Form after submitting this follow-up. Have the booking details ready.</div>
           <div class="field full" id="fu-lost-row" style="display:none;"><label>Lost Reason</label>
             <select id="fu-lost-reason"><option value="">Select…</option><option>Bought from competitor</option><option>Bought different brand</option><option>No longer buying</option><option>Price too high</option><option>Finance not approved</option><option>Unreachable (multiple attempts)</option><option>Other</option></select></div>
         </div>
@@ -1057,7 +1059,8 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       </div>
       <div class="field" style="margin-top:10px;"><label>Notes</label><textarea id="bk-notes" placeholder="Special requests, accessories, commitments…" style="min-height:44px;"></textarea></div>
     </div>
-    <div class="ffoot"><button class="btn btn-success" onclick="submitBooking()">Confirm Booking →</button><button class="btn btn-secondary" onclick="toggleNewBkForm()">Cancel</button><span class="smsg" id="bk-status"></span></div>
+    <div id="bk-required-banner" style="display:none;background:#B71C1C;color:#fff;padding:10px 16px;border-radius:6px;margin-bottom:12px;font-size:13px;font-weight:700;display:none;align-items:center;gap:10px;">🚨 Booking form is mandatory — this lead was marked Booked in a follow-up. You cannot skip this step.</div>
+    <div class="ffoot"><button class="btn btn-success" onclick="submitBooking()">Confirm Booking →</button><button class="btn btn-secondary" id="bk-cancel-btn" onclick="toggleNewBkForm()">Cancel</button><span class="smsg" id="bk-status"></span></div>
   </div>
   <!-- BULK BOOKING UPLOAD ZONE -->
   <div id="bulk-bk-form" style="display:none;margin-bottom:12px;">
@@ -1141,7 +1144,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       </div>
     </div>
   </div>
-  <div class="bk-tabs"><div class="btab" onclick="showBkTab('all')">📋 All</div><div class="btab active" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div><div class="btab" onclick="showBkTab('cancelled')">❌ Cancelled</div></div>
+  <div class="bk-tabs"><div class="btab active" onclick="showBkTab('all')">📋 All</div><div class="btab" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div><div class="btab" onclick="showBkTab('cancelled')">❌ Cancelled</div></div>
   <div class="filter-bar" style="margin-bottom:10px;">
     <select class="fi" id="bk-floc" onchange="renderBookings()"><option value="">All Locations</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select>
     <select class="fi" id="bk-fmodel" onchange="renderBookings()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
@@ -1156,8 +1159,8 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <button class="btn-ghost btn btn-sm" onclick="clearBkFilters()">Clear</button>
     <span style="font-size:11px;color:var(--gray-400);margin-left:auto;" id="bk-count"></span>
   </div>
-  <div id="bk-al" style="display:none;"><div class="leads-list" id="bk-al-list"><div class="empty-st"><div class="ico">📋</div><p>No bookings yet.</p></div></div></div>
-  <div id="bk-is"><div class="leads-list" id="bk-il"><div class="empty-st"><div class="ico">📦</div><p>No in-stock bookings.</p></div></div></div>
+  <div id="bk-al"><div class="leads-list" id="bk-al-list"><div class="empty-st"><div class="ico">📋</div><p>No bookings yet.</p></div></div></div>
+  <div id="bk-is" style="display:none;"><div class="leads-list" id="bk-il"><div class="empty-st"><div class="ico">📦</div><p>No in-stock bookings.</p></div></div></div>
   <div id="bk-oo" style="display:none;"><div class="leads-list" id="bk-ol"><div class="empty-st"><div class="ico">🔄</div><p>No VNA bookings.</p></div></div></div>
   <div id="bk-dv" style="display:none;"><div class="leads-list" id="bk-dl"><div class="empty-st"><div class="ico">🚗</div><p>No deliveries yet.</p></div></div></div>
   <div id="bk-cn" style="display:none;"><div class="leads-list" id="bk-cl"><div class="empty-st"><div class="ico">❌</div><p>No cancelled bookings.</p></div></div></div>
@@ -1717,7 +1720,7 @@ function updateStock(d){
 // ═══ STATE ═══
 let SCRIPT_URL=localStorage.getItem('scc_url')||'';
 let allLeads=[],allFU=[],allBK=[],allTD=[],allStock=[];
-let currentLoc='ALL',currentBkTab='instock';
+let currentLoc='ALL',currentBkTab='all';
 let nlSrc='',nlLocV='',nlInt='Warm';
 let bkExc=null,bkIns=null,bkStk=null,bkPastMode=false;
 let fuInt='';
@@ -1747,7 +1750,7 @@ function onMonthChange(v){selectedMonthStr=v;renderDashboard();}
 
 // ═══ UTILS ═══
 function fmtDT(d){return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});}
-function fmtDate(d){return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtDate(d){if(!d)return '—';return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
 function parseD(s){
   if(!s)return null;
   if(typeof s==='string'){
@@ -2066,13 +2069,14 @@ function tdBadge(l){return hasTDDone(l['Lead ID'])?'<span class="pill pill-td">�
 function filterLeadsData(){
   const q=(document.getElementById('fl-search')||{}).value?.toLowerCase()||'';
   const st=(document.getElementById('fl-status')||{}).value||'';const src=(document.getElementById('fl-src')||{}).value||'';
-  const sp=(document.getElementById('fl-sp')||{}).value||'';const model=(document.getElementById('fl-model')||{}).value||'';const vf=(document.getElementById('fl-voc')||{}).value||'';
+  const sp=(document.getElementById('fl-sp')||{}).value||'';const model=(document.getElementById('fl-model')||{}).value||'';const vf=(document.getElementById('fl-voc')||{}).value||'';const tdf=(document.getElementById('fl-td')||{}).value||'';
   const sortBy=(document.getElementById('fl-sort')||{}).value||'priority';
   const dateFrom=document.getElementById('fl-date-from')?.value||'';const dateTo=document.getElementById('fl-date-to')?.value||'';
   let leads=spFilt(locFilt(allLeads));
   leads=leads.filter(l=>{
     if(q){const txt=[l['Customer Name'],l['Phone'],l['Model Interest'],l['Salesperson'],l['Customer Area']].join(' ').toLowerCase();if(!txt.includes(q))return false;}
     if(src&&l['Source']!==src)return false;if(sp&&canonicalSP(l['Salesperson']).toLowerCase()!==sp.toLowerCase())return false;if(model&&l['Model Interest']!==model)return false;if(vf==='thin'&&!isVocThin(l))return false;
+    if(tdf==='done'&&!hasTDDone(l['Lead ID']))return false;if(tdf==='pending'&&hasTDDone(l['Lead ID']))return false;
     if(st){if(st==='uncontacted'){if(l['Last Contact DT']||(parseInt(l['Followup Count'])||0)>0)return false;}else{const b=calcBucket(l);if(b!==st)return false;}}
     if(dateFrom||dateTo){const d=parseD(l['Created DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;}
     return true;
@@ -2086,7 +2090,7 @@ function filterLeadsData(){
   return leads;
 }
 function applyFilters(){renderLeads(filterLeadsData());}
-function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc','fl-sort','fl-date-from','fl-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'&&id==='fl-sort'?'priority':'';});applyFilters();}
+function clearFilters(){['fl-search','fl-status','fl-src','fl-sp','fl-model','fl-voc','fl-td','fl-sort','fl-date-from','fl-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'&&id==='fl-sort'?'priority':'';});applyFilters();}
 function populateFilters(){const seenSP=new Map();allLeads.map(l=>l['Salesperson']).filter(Boolean).forEach(s=>{const c=canonicalSP(s);if(!seenSP.has(c.toLowerCase()))seenSP.set(c.toLowerCase(),c);});const sps=[...seenSP.values()].sort();const mods=[...new Set(allLeads.map(l=>l['Model Interest']).filter(Boolean))].sort();const sp=document.getElementById('fl-sp');if(sp)sp.innerHTML='<option value="">All Salespeople</option><option value="unassigned">👤 Unassigned</option>'+sps.map(s=>`<option>${s}</option>`).join('');const ml=document.getElementById('fl-model');if(ml)ml.innerHTML='<option value="">All Models</option>'+mods.map(m=>`<option>${m}</option>`).join('');}
 function renderLeads(leads){
   const list=document.getElementById('leads-list');if(!list)return;document.getElementById('leads-count').textContent=leads.length+' lead'+(leads.length!==1?'s':'');
@@ -2097,7 +2101,7 @@ function renderLeads(leads){
     const missingBk=l['Status']==='Booked'&&!allBK.some(bk=>bk['Lead ID']===l['Lead ID']&&bk['Status']!=='Cancelled');
     let aTxt='',aCls='';if(l['Created DT']){aTxt=age===0?'Today':age===1?'Yesterday':`${age}d old`;aCls=age>7?'age-crit':age>3?'age-warn':age===0?'age-new':'age-ok';}
     const nf=parseD(l['Next Followup DT']);let fuTxt='—';if(nf){const dO=daysBetween(nf,now);const tod=new Date();tod.setHours(0,0,0,0);const fd=new Date(nf);fd.setHours(0,0,0,0);if(dO>0)fuTxt=`<span class="ot">⚠ ${dO}d overdue</span>`;else if(fd.getTime()===tod.getTime())fuTxt='<span class="dt">Due Today</span>';else fuTxt=fmtDate(nf);}
-    const lcTxt=l['Last Contact DT']?fmtDate(parseD(l['Last Contact DT'])):'Never contacted';
+    const lcTxt=l['Last Contact DT']?fmtDateStr(l['Last Contact DT']):'Never contacted';
     const fuH=allFU.filter(f=>f['Lead ID']===l['Lead ID']).sort((a,b)=>new Date(b['DateTime'])-new Date(a['DateTime']));
     const fuHtml=fuH.length?fuH.map(f=>`<div class="fu-item"><span class="fu-dt">${f['DateTime']||''}</span><span class="fu-method">${f['Method']||''}</span><span class="fu-notes">${f['Outcome']||''}${f['Notes']?' · '+f['Notes']:''}</span><span class="fu-by">${f['Salesperson']||''}</span></div>`).join(''):`<div style="padding:10px;text-align:center;font-size:11.5px;color:var(--gray-400);">No follow-ups logged yet.</div>`;
     const lc={red:'lred',amber:'lamber',hot:'lhot',warm:'lwarm',green:'lgreen',lost:'llost',cold:'lcold'}[b]||'lwarm';
@@ -2113,7 +2117,7 @@ function renderLeads(leads){
         ${l['Customer Expected Delivery']?`<span>📅 Wants: <strong>${l['Customer Expected Delivery']}</strong></span>`:''}
         <span>📞 Last: <strong>${lcTxt}</strong></span><span>📅 Next: ${fuTxt}</span>
         <span>🔁 ${l['Followup Count']||0} FU${(l['Followup Count']||0)!=1?'s':''}</span>
-        <span style="color:var(--gray-400);">📅 Added: ${l['Created DT']?fmtDate(parseD(l['Created DT'])):'—'}${l['Salesperson']?' · by <strong>'+l['Salesperson']+'</strong>':''}</span>
+        <span style="color:var(--gray-400);">📅 Added: ${fmtDateStr(l['Created DT'])||'—'}${l['Salesperson']?' · by <strong>'+l['Salesperson']+'</strong>':''}</span>
       </div>
       ${l['VoC Notes']?`<div style="padding:5px 14px 8px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong>${l['VoC Notes'].split(' | ').map((e,i)=>`<div style="margin-top:3px;padding:2px 7px;border-left:2px solid var(--amber-bd);${i===0?'color:var(--gray-800);':''}">${e}</div>`).join('')}</div>`:''}
       ${missingBk?`<div style="padding:6px 14px;font-size:11.5px;font-weight:700;color:#7B3F00;background:#FFF3E0;border-top:2px solid #FFA000;display:flex;align-items:center;gap:8px;">⚠ Lead is marked Booked but no booking record exists — complete the booking form below.</div>`:''}
@@ -2123,6 +2127,7 @@ function renderLeads(leads){
         <button class="btn btn-xs" style="${missingBk?'background:#E65100;color:#fff;font-weight:800;border:none;':'background:var(--green);color:#fff;border:none;'}" onclick="prefillBooking('${le}')">${missingBk?'⚠ Create Booking Record':'🚗 Book'}</button>
         <button class="btn btn-danger btn-xs" onclick="prefillFULost('${le}')">❌ Mark Lost</button>
         <button class="btn btn-ghost btn-xs" onclick="openEditLead('${le}')">✏ Edit</button>
+        ${currentUser&&currentUser.role==='masteradmin'?`<button class="btn btn-xs" style="background:#B71C1C;color:#fff;border:none;" onclick="deleteLead('${le}')">🗑 Delete</button>`:''}
         <span style="font-size:10px;color:var(--gray-400);margin-left:auto;">ID: ${l['Lead ID']||'—'}</span>
         <span class="expand-arrow" style="cursor:pointer;" onclick="togLC(${i})">▾</span>
       </div>
@@ -2161,6 +2166,15 @@ function openEditLead(enc){
   document.getElementById('edit-lead-modal').classList.add('open');
 }
 function closeEditLead(){document.getElementById('edit-lead-modal').classList.remove('open');}
+async function deleteLead(enc){
+  const l=JSON.parse(decodeURIComponent(enc));
+  if(!confirm(`Delete lead for "${l['Customer Name']||'—'}" (${l['Lead ID']||''})?\n\nThis permanently removes the lead and cannot be undone.`))return;
+  try{
+    await api({action:'deleteLead',data:JSON.stringify({rowIndex:l.rowIndex})});
+    allLeads=allLeads.filter(x=>String(x.rowIndex)!==String(l.rowIndex));
+    renderLeads(filterLeadsData());renderDashboard();
+  }catch(e){alert('Error deleting lead: '+e.message);}
+}
 async function submitEditLead(){
   const ri=document.getElementById('el-ri').value;
   const lid=document.getElementById('el-lid').value;
@@ -2240,7 +2254,8 @@ function fuSelLead(l){fuSelectedLead=l;document.getElementById('fu-lead-id').val
 var fuSelectedLead=null;
 function fuClearSel(){fuSelectedLead=null;document.getElementById('fu-lead-id').value='';document.getElementById('fu-lead-info').style.display='none';document.getElementById('fu-search').value='';document.getElementById('fu-results').style.display='none';}
 function selFUInt(val,btn){fuInt=val;['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});if(btn)btn.classList.add('sel-'+val.toLowerCase());else{const el=document.getElementById('fui-'+val.toLowerCase());if(el)el.classList.add('sel-'+val.toLowerCase());}document.getElementById('fu-interest').value=val;}
-document.addEventListener('change',e=>{if(e.target.id==='fu-status-upd')document.getElementById('fu-lost-row').style.display=e.target.value==='Lost'?'block':'none';});
+function onFUStatusChange(v){document.getElementById('fu-lost-row').style.display=v==='Lost'?'block':'none';document.getElementById('fu-booking-warn').style.display=v==='Booked'?'flex':'none';}
+let bookingRequired=false;
 async function submitFollowUp(){
   const lid=document.getElementById('fu-lead-id').value;if(!lid){setMsg(document.getElementById('fu-status'),'err','✗ Select a lead first');return;}
   const method=document.getElementById('fu-method').value;const outcome=document.getElementById('fu-outcome').value;
@@ -2250,12 +2265,24 @@ async function submitFollowUp(){
   const leadForBooking=statusAfter==='Booked'&&fuSelectedLead?{...fuSelectedLead}:null;
   const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':statusAfter,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||''};
   const st=document.getElementById('fu-status');setMsg(st,'ld','⟳ Logging…');
-  try{await api({action:'addFollowUp',data:JSON.stringify(d)});setMsg(st,'ok','✓ Logged!'+(isTD?' + Test Drive!':''));fuClearForm();await loadAll();if(leadForBooking)setTimeout(()=>prefillBooking(encodeURIComponent(JSON.stringify(leadForBooking))),500);}catch(e){setMsg(st,'err','✗ '+e.message);}
+  try{
+    await api({action:'addFollowUp',data:JSON.stringify(d)});
+    setMsg(st,'ok','✓ Logged!'+(isTD?' + Test Drive!':''));
+    fuClearForm();await loadAll();
+    if(leadForBooking){
+      bookingRequired=true;
+      setTimeout(()=>prefillBookingRequired(encodeURIComponent(JSON.stringify(leadForBooking))),500);
+    }
+  }catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';const tdChk=document.getElementById('fu-td-chk');if(tdChk)tdChk.checked=false;document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
+function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';document.getElementById('fu-booking-warn').style.display='none';const tdChk=document.getElementById('fu-td-chk');if(tdChk)tdChk.checked=false;document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
 function prefillFU(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);},100);}
 function prefillFULost(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);document.getElementById('fu-status-upd').value='Lost';document.getElementById('fu-lost-row').style.display='block';},100);}
-function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{clearBkForm();document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());},150);}
+function _fillBkForm(l){clearBkForm();document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());}
+function prefillBooking(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{_fillBkForm(l);_setBkMandatory(false);},150);}
+function prefillBookingRequired(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('bookings');setTimeout(()=>{_fillBkForm(l);_setBkMandatory(true);},150);}
+function _setBkMandatory(on){const banner=document.getElementById('bk-required-banner');const cancelBtn=document.getElementById('bk-cancel-btn');if(banner){banner.style.display=on?'flex':'none';}if(cancelBtn){cancelBtn.style.display=on?'none':'';}}
+
 
 // ═══ BOOKINGS ═══
 function showBkTab(t){currentBkTab=t;document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));const m={all:0,instock:1,onorder:2,delivered:3,cancelled:4};document.querySelectorAll('.btab')[m[t]].classList.add('active');document.getElementById('bk-al').style.display=t==='all'?'block':'none';document.getElementById('bk-is').style.display=t==='instock'?'block':'none';document.getElementById('bk-oo').style.display=t==='onorder'?'block':'none';document.getElementById('bk-dv').style.display=t==='delivered'?'block':'none';document.getElementById('bk-cn').style.display=t==='cancelled'?'block':'none';}
@@ -2269,7 +2296,10 @@ function togglePastBk(){
 function togExc(v){bkExc=v;document.getElementById('t-exc-y').classList.toggle('on',v==='yes');document.getElementById('t-exc-n').classList.toggle('on',v==='no');['exc-make-r','exc-model-r','exc-year-r','exc-val-r'].forEach(id=>document.getElementById(id).style.display=v==='yes'?'block':'none');}
 function togIns(v){bkIns=v;document.getElementById('t-ins-y').classList.toggle('on',v==='yes');document.getElementById('t-ins-n').classList.toggle('on',v==='no');}
 function togStk(v){bkStk=v;document.getElementById('t-stk-y').classList.toggle('on',v==='yes');document.getElementById('t-stk-n').classList.toggle('on',v==='no');document.getElementById('bk-ref-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-syard-r').style.display=v==='yes'?'block':'none';document.getElementById('bk-edel-r').style.display=v==='no'?'block':'none';}
-function toggleNewBkForm(){const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open')){document.getElementById('bk-dt').value=fmtDT(new Date());resetPastBkMode();populateSPDropdowns();}}
+function toggleNewBkForm(){
+  if(bookingRequired){alert('⛔ This booking is mandatory — the lead was marked Booked in a follow-up.\n\nYou must complete the booking record. Please fill in the required details and click "Confirm Booking".');return;}
+  const f=document.getElementById('new-bk-form');f.classList.toggle('open');if(f.classList.contains('open')){document.getElementById('bk-dt').value=fmtDT(new Date());resetPastBkMode();populateSPDropdowns();}
+}
 function bkLeadSearch(){const q=document.getElementById('bk-ls').value.trim().toLowerCase();if(!q)return;const m=spFilt(locFilt(allLeads)).filter(l=>(l['Customer Name']||'').toLowerCase().includes(q)||(l['Phone']||'').includes(q)).slice(0,8);const res=document.getElementById('bk-lr');const list=document.getElementById('bk-ll');res.style.display='block';if(!m.length){list.innerHTML='<div style="padding:9px 12px;font-size:12px;color:var(--gray-400);">No leads found.</div>';return;}list.innerHTML=m.map(l=>{const le=JSON.stringify(l).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');return `<div class="lr" onclick="bkSelLead(${le})"><div><div class="lr-name">${l['Customer Name']||'—'}</div><div style="font-size:11px;color:var(--gray-500);">${l['Phone']||''}</div></div><span class="lr-detail">${l['Model Interest']||'—'} · ${l['Location']||''}</span></div>`;}).join('');}
 function bkSelLead(l){document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-lr').style.display='none';document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';}
 function bkClearLead(){document.getElementById('bk-lead-id').value='';document.getElementById('bk-sel').style.display='none';document.getElementById('bk-ls').value='';document.getElementById('bk-lr').style.display='none';}
@@ -2280,7 +2310,7 @@ async function submitBooking(){
   if(!bkStk){setMsg(document.getElementById('bk-status'),'err','✗ Set vehicle availability');return;}
   d['Lead ID']=document.getElementById('bk-lead-id').value;const _pastDT=bkPastMode&&document.getElementById('bk-dt-past').value?new Date(document.getElementById('bk-dt-past').value):null;d['Booking DT']=_pastDT&&!isNaN(_pastDT)?fmtDT(_pastDT):fmtDT(new Date());d['Variant']=document.getElementById('bk-variant').value;d['Color']=document.getElementById('bk-color').value;d['Payment Mode']=document.getElementById('bk-payment').value;d['Lead Source']=document.getElementById('bk-src').value;d['VC Number']=document.getElementById('bk-vc').value;d['Discount Amount']=document.getElementById('bk-discount').value;d['Exchange']=bkExc==='yes'?'Yes':'No';d['Old Car Make']=document.getElementById('bk-exc-make').value;d['Old Car Model']=document.getElementById('bk-exc-model').value;d['Old Car Year']=document.getElementById('bk-exc-year').value;d['Exchange Value']=document.getElementById('bk-exc-val').value;d['In-house Insurance']=bkIns==='yes'?'Yes':'No';d['In Stock']=bkStk==='yes'?'Yes':'No';d['Stock Ref']=document.getElementById('bk-stock-ref').value;d['Stockyard']=document.getElementById('bk-stockyard').value;d['Expected Arrival']=document.getElementById('bk-expected-del').value;const asap=document.getElementById('bk-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('bk-cust-del').value||'');d['Notes']=document.getElementById('bk-notes').value;d['Planned Delivery']=document.getElementById('bk-planned-del').value||'';d['Status']='Booked';
   const st=document.getElementById('bk-status');setMsg(st,'ld','⟳ Saving…');
-  try{const r=await api({action:'addBooking',data:JSON.stringify(d)});setMsg(st,'ok','✅ Booking confirmed! '+r.bookingId);toggleNewBkForm();clearBkForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
+  try{const r=await api({action:'addBooking',data:JSON.stringify(d)});bookingRequired=false;_setBkMandatory(false);setMsg(st,'ok','✅ Booking confirmed! '+r.bookingId);document.getElementById('new-bk-form').classList.remove('open');clearBkForm();await loadAll();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
 function resetPastBkMode(){bkPastMode=false;const chk=document.getElementById('bk-past-chk');if(chk)chk.checked=false;const dtA=document.getElementById('bk-dt');const dtP=document.getElementById('bk-dt-past');const lbl=document.getElementById('bk-dt-auto-lbl');if(dtA)dtA.style.display='';if(dtP)dtP.style.display='none';if(lbl)lbl.style.display='';}
 function clearBkForm(){['bk-name','bk-phone','bk-model','bk-variant','bk-color','bk-amount','bk-notes','bk-stock-ref','bk-vc','bk-discount','bk-exc-make','bk-exc-model','bk-exc-year','bk-exc-val','bk-planned-del'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-loc').value='';document.getElementById('bk-payment').value='';document.getElementById('bk-src').value='';document.getElementById('bk-asap').checked=false;const bkDel=document.getElementById('bk-cust-del');if(bkDel){bkDel.value='';bkDel.disabled=false;}bkExc=null;bkIns=null;bkStk=null;bkClearLead();['t-exc-y','t-exc-n','t-ins-y','t-ins-n','t-stk-y','t-stk-n'].forEach(id=>document.getElementById(id).classList.remove('on'));['exc-make-r','exc-model-r','exc-year-r','exc-val-r','bk-ref-r','bk-syard-r','bk-edel-r'].forEach(id=>document.getElementById(id).style.display='none');document.querySelectorAll('#new-bk-form .field').forEach(f=>f.classList.remove('invalid'));resetPastBkMode();populateSPDropdowns();}

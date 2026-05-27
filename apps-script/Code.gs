@@ -26,6 +26,8 @@ function handleReq(e){
       case "getUsers":res=getUsers();break;
       case "saveUser":res=saveUser(JSON.parse(p.data));break;
       case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
+      case "deleteLead":res=deleteLead(JSON.parse(p.data));break;
+      case "bulkSetInsurance":res=bulkSetInsurance();break;
       default:res={status:"ok",msg:"Sales CRM API v3 running"};
     }
   }catch(err){res={status:"error",msg:err.toString()};}
@@ -163,4 +165,17 @@ function deleteUser(d){
   const ids=sh.getRange(2,1,last-1,1).getValues().flat().map(String);const ix=ids.indexOf(String(d.username));
   if(ix>=0)sh.deleteRow(ix+2);
   return{status:"ok"};
+}
+function deleteLead(d){
+  const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  sh.deleteRow(ri);
+  return{status:"ok"};
+}
+function bulkSetInsurance(){
+  const sh=getOrCreate("Bookings",BH);const last=sh.getLastRow();if(last<2)return{status:"ok",updated:0};
+  const ci=BH.indexOf("In-house Insurance")+1;
+  const vals=sh.getRange(2,ci,last-1,1).getValues();
+  let updated=0;
+  vals.forEach((row,i)=>{const v=String(row[0]).trim();if(v!=='Yes'){sh.getRange(i+2,ci).setValue("Yes");updated++;}});
+  return{status:"ok",updated:updated};
 }
