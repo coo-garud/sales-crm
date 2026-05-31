@@ -905,7 +905,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       <div class="rc"><div class="rc-hd" style="background:var(--red);">⏱ First Contact SLAs</div>
         <div class="rc-body" style="display:flex;flex-direction:column;gap:7px;font-size:12px;">
           <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:5px;padding:7px 10px;"><strong>Walk-in / Tele-in</strong> → Log within <strong>1 hour</strong></div>
-          <div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:5px;padding:7px 10px;"><strong>CarDekho / Spinny / Meta</strong> → First call within <strong>4 hours</strong></div>
+          <div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:5px;padding:7px 10px;"><strong>CarDekho / Spinny / Meta / 91 Wheels</strong> → First call within <strong>15 minutes</strong></div>
           <div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:5px;padding:7px 10px;"><strong>Reference</strong> → First call within <strong>24 hours</strong></div>
         </div>
       </div>
@@ -1883,7 +1883,7 @@ async function loadAll(){
 }
 
 // ═══ BUCKET LOGIC ═══
-function fcThr(src){if(['Walk-in','Tele-in'].includes(src))return 1;if(['CarDekho','Spinny','Meta','Events'].includes(src))return 4;return 24;}
+function fcThr(src){if(['Walk-in','Tele-in'].includes(src))return 1;if(['CarDekho','Spinny','Meta','91 Wheels'].includes(src))return 0.25;return 24;}
 function calcBucket(l){
   const st=l['Status'];if(st==='Booked'||st==='Delivered')return 'green';if(st==='Lost')return 'lost';
   const now=new Date();const cr=parseD(l['Created DT']);const lc=parseD(l['Last Contact DT']);const nf=parseD(l['Next Followup DT']);
