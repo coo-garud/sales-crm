@@ -1146,6 +1146,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   </div>
   <div class="bk-tabs"><div class="btab active" onclick="showBkTab('all')">📋 All</div><div class="btab" onclick="showBkTab('instock')">✅ In Stock</div><div class="btab" onclick="showBkTab('onorder')">🔄 VNA</div><div class="btab" onclick="showBkTab('delivered')">🚗 Delivered</div><div class="btab" onclick="showBkTab('cancelled')">❌ Cancelled</div></div>
   <div class="filter-bar" style="margin-bottom:10px;">
+    <input type="text" class="fi" id="bk-search" placeholder="Name / Phone / Model…" style="width:180px;" oninput="renderBookings()">
     <select class="fi" id="bk-floc" onchange="renderBookings()"><option value="">All Locations</option><option>Palam (Dwarka)</option><option>Najafgarh</option><option>Narela</option></select>
     <select class="fi" id="bk-fmodel" onchange="renderBookings()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
     <select class="fi" id="bk-sort" onchange="renderBookings()" title="Sort order">
@@ -2318,6 +2319,8 @@ function renderBookings(){
   let bks=spFilt(locFilt(allBK));const lf=document.getElementById('bk-floc')?.value||'';const mf=document.getElementById('bk-fmodel')?.value||'';
   const sortBy=document.getElementById('bk-sort')?.value||'newest';
   const dateFrom=document.getElementById('bk-date-from')?.value||'';const dateTo=document.getElementById('bk-date-to')?.value||'';
+  const sq=(document.getElementById('bk-search')?.value||'').toLowerCase().trim();
+  if(sq)bks=bks.filter(b=>[b['Customer Name'],b['Phone'],b['Model'],b['Booking ID'],b['Salesperson'],b['VC Number']].join(' ').toLowerCase().includes(sq));
   if(lf)bks=bks.filter(b=>(b['Location']||'').includes(lf)||lf.includes(b['Location']||''));if(mf)bks=bks.filter(b=>b['Model']===mf);
   if(dateFrom||dateTo)bks=bks.filter(b=>{const d=parseD(b['Booking DT']);if(!d)return false;if(dateFrom&&d<new Date(dateFrom))return false;if(dateTo&&d>new Date(dateTo+'T23:59:59'))return false;return true;});
   if(sortBy==='oldest')bks.sort((a,b)=>(parseD(a['Booking DT'])||0)-(parseD(b['Booking DT'])||0));
@@ -2329,7 +2332,7 @@ function renderBookings(){
   const allSorted=[...bks].sort((a,b)=>(parseD(b['Booking DT'])||0)-(parseD(a['Booking DT'])||0));
   renderBkList('bk-al-list',allSorted,'all');renderBkList('bk-il',ins,'stk');renderBkList('bk-ol',ood,'ord');renderBkList('bk-dl',del,'del');renderBkList('bk-cl',cancelled,'can');
 }
-function clearBkFilters(){['bk-floc','bk-fmodel','bk-date-from','bk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-sort').value='newest';renderBookings();}
+function clearBkFilters(){['bk-search','bk-floc','bk-fmodel','bk-date-from','bk-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('bk-sort').value='newest';renderBookings();}
 function _bkCard(b,type){
   const now=new Date();const thr=getTargets().wait||30;
   const ri=b['rowIndex']||'';const bkId=b['Booking ID']||'';const cname=(b['Customer Name']||'').replace(/'/g,'');const pd=b['Planned Delivery']||'';const pdLbl=pd?'Update':'Set';
