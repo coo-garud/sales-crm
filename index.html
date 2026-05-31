@@ -1054,7 +1054,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field full"><label>Vehicle In Stock?</label>
           <div style="display:flex;gap:8px;"><div class="tog-row" id="t-stk-y" onclick="togStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-stk-n" onclick="togStk('no')" style="flex:1;"><span class="tl">🔄 No — VNA</span><div class="tsw"></div></div></div></div>
         <div class="field" id="bk-ref-r" style="display:none;"><label>Chassis / Stock Ref No.</label><input type="text" id="bk-stock-ref" placeholder="Chassis No."></div>
-        <div class="field" id="bk-syard-r" style="display:none;"><label>Stockyard</label><select id="bk-stockyard"><option>Common Stockyard</option><option>Palam Stockyard</option><option>Najafgarh Stockyard</option><option>Narela Stockyard</option></select></div>
+        <div class="field" id="bk-syard-r" style="display:none;"><label>Stockyard</label><select id="bk-stockyard"><option>Common Stockyard</option><option>Palam Showroom</option><option>Najafgarh Showroom</option><option>Narela Showroom</option></select></div>
         <div class="field" id="bk-edel-r" style="display:none;"><label>Expected Arrival (Dealer)</label><input type="date" id="bk-expected-del"><span class="hint">When vehicle arrives at dealership</span></div>
       </div>
       <div class="field" style="margin-top:10px;"><label>Notes</label><textarea id="bk-notes" placeholder="Special requests, accessories, commitments…" style="min-height:44px;"></textarea></div>
@@ -1101,7 +1101,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
                   <tr style="background:#F5F5FF;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Discount Amount</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">discount amount, discount</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Number only</td></tr>
                   <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">In Stock</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">in stock, stock</td><td style="padding:5px 8px;border:1px solid #E8EAF6;"><strong>Yes · No</strong> (Yes = In Stock, No = VNA)</td></tr>
                   <tr style="background:#F5F5FF;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Stock Ref</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">stock ref, chassis, chassis no</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Chassis or stock reference number</td></tr>
-                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Stockyard</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">stockyard, yard</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">e.g. Palam Stockyard, Najafgarh Stockyard</td></tr>
+                  <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Stockyard</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">stockyard, yard</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Common Stockyard · Palam Showroom · Najafgarh Showroom · Narela Showroom</td></tr>
                   <tr style="background:#F5F5FF;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Expected Arrival</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">expected arrival, arrival</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Date (YYYY-MM-DD) — for VNA bookings</td></tr>
                   <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Customer Expected Delivery</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">customer expected delivery, expected delivery</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Date or ASAP</td></tr>
                   <tr style="background:#F5F5FF;"><td style="padding:5px 8px;border:1px solid #E8EAF6;">Planned Delivery</td><td style="padding:5px 8px;border:1px solid #E8EAF6;font-family:monospace;">planned delivery, planned</td><td style="padding:5px 8px;border:1px solid #E8EAF6;">Date (YYYY-MM-DD)</td></tr>
@@ -1178,7 +1178,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
         <div class="field"><label>Model <span class="req">*</span></label><select id="stk-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
         <div class="field"><label>Variant</label><input type="text" id="stk-variant" placeholder="e.g. XZ+"></div>
         <div class="field"><label>Color</label><input type="text" id="stk-color" placeholder="e.g. Pristine White"></div>
-        <div class="field"><label>Current Location <span class="req">*</span></label><select id="stk-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select><span class="err">Required</span></div>
+        <div class="field"><label>Current Location <span class="req">*</span></label><select id="stk-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Showroom</option><option>Najafgarh Showroom</option><option>Narela Showroom</option></select><span class="err">Required</span></div>
         <div class="field"><label>Notes</label><input type="text" id="stk-notes" placeholder="Any notes…"></div>
       </div>
     </div>
@@ -1207,7 +1207,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
                 <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Model</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Model</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Auto-normalised: Punch → Tata Punch, Nexon → Tata Nexon, Harrier → Tata Harrier, Safari → Tata Safari, Curvv → Tata Curvv, Altroz → Tata Altroz, Tiago → Tata Tiago, Tigor → Tata Tigor</td></tr>
                 <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Product Line / Product_Line</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Variant</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">e.g. Pure, Adventure, Accomplished+, Creative+</td></tr>
                 <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Chassis Color / Color / Colour</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Color</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Auto-normalised from DMS codes: daytona_grey → Daytona Grey, pristin_whte → Pristine White, bengal_rogue → Bengal Rouge, arizona_blue → Arizona Blue, ocn_blue → Ocean Blue, etc.</td></tr>
-                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Current Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;"><strong>Bijwasan / Palam</strong> → Common Stockyard &nbsp;|&nbsp; <strong>Najafgarh / Nafaj</strong> → Najafgarh Stockyard &nbsp;|&nbsp; <strong>Dabri / Dabari</strong> → Palam Stockyard &nbsp;|&nbsp; <strong>Narela</strong> → Narela Stockyard</td></tr>
+                <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Current Location</td><td style="padding:5px 8px;border:1px solid #E3F2FD;"><strong>Palam / Bijwasan / Dabri</strong> → Palam Showroom &nbsp;|&nbsp; <strong>Najafgarh / Nafaj</strong> → Najafgarh Showroom &nbsp;|&nbsp; <strong>Narela</strong> → Narela Showroom &nbsp;|&nbsp; <strong>Common / Stockyard / Yard</strong> → Common Stockyard</td></tr>
                 <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Allotted/Unallotted</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Status</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">"Allotted" → <strong>Allocated</strong>. "Unallotted" or blank → <strong>Available</strong>.</td></tr>
                 <tr style="background:#fff;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Physical Status</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Status override</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">"Transit" → Available (vehicle in transit treated as available)</td></tr>
                 <tr style="background:#F5F9FF;"><td style="padding:5px 8px;border:1px solid #E3F2FD;font-family:monospace;">Product/VC · VC#</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Notes (VC: …)</td><td style="padding:5px 8px;border:1px solid #E3F2FD;">Stored in Notes field for reference</td></tr>
@@ -1255,7 +1255,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
     <div class="scp"><div class="scp-num" id="scp-tot" style="color:var(--blue-dk);">—</div><div class="scp-lbl">Total Active Stock</div></div>
   </div>
   <div class="filter-bar">
-    <select class="fi" id="stk-floc" onchange="renderStock()"><option value="">All Locations</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select>
+    <select class="fi" id="stk-floc" onchange="renderStock()"><option value="">All Locations</option><option>Common Stockyard</option><option>Palam Showroom</option><option>Najafgarh Showroom</option><option>Narela Showroom</option></select>
     <select class="fi" id="stk-fm" onchange="renderStock()"><option value="">All Models</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option></select>
     <select class="fi" id="stk-fs" onchange="renderStock()"><option value="">All Status</option><option value="Available">Available</option><option value="Allocated">Allocated</option><option value="Sold">Delivered</option></select>
     <select class="fi" id="stk-sort" onchange="renderStock()" title="Sort order">
@@ -1496,7 +1496,7 @@ function updateStock(d){
       <input type="hidden" id="conv-bkid">
       <div class="field" style="margin-bottom:10px;"><label>Chassis Number <span class="req">*</span></label><input type="text" id="conv-chassis" placeholder="Full chassis number"></div>
       <div class="field" style="margin-bottom:10px;"><label>Stockyard Location <span class="req">*</span></label>
-        <select id="conv-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option><option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option><option>Narela Stockyard</option><option>Narela Showroom</option></select></div>
+        <select id="conv-loc"><option value="">Select…</option><option>Common Stockyard</option><option>Palam Showroom</option><option>Najafgarh Showroom</option><option>Narela Showroom</option></select></div>
       <div style="display:flex;gap:8px;margin-top:14px;">
         <button class="btn btn-success" style="flex:1;" onclick="confirmConvertToStock()">Confirm — Vehicle Arrived ✅</button>
         <button class="btn btn-secondary" onclick="closeConvertModal()">Cancel</button>
@@ -1608,9 +1608,9 @@ function updateStock(d){
       <div class="field" style="margin-bottom:14px;"><label>New Location <span class="req">*</span></label>
         <select id="move-loc">
           <option value="">Select location…</option>
-          <option>Common Stockyard</option><option>Palam Stockyard</option><option>Palam Showroom</option>
-          <option>Najafgarh Stockyard</option><option>Najafgarh Showroom</option>
-          <option>Narela Stockyard</option><option>Narela Showroom</option>
+          <option>Common Stockyard</option><option>Palam Showroom</option>
+          <option>Najafgarh Showroom</option>
+          <option>Narela Showroom</option>
           <option>In Transit</option>
         </select>
       </div>
@@ -1694,7 +1694,7 @@ function updateStock(d){
         <div class="field full"><label>Vehicle In Stock?</label>
           <div style="display:flex;gap:8px;"><div class="tog-row" id="t-ebk-stk-y" onclick="togEStk('yes')" style="flex:1;"><span class="tl">✅ Yes — In Stockyard</span><div class="tsw"></div></div><div class="tog-row" id="t-ebk-stk-n" onclick="togEStk('no')" style="flex:1;"><span class="tl">🔄 No — VNA</span><div class="tsw"></div></div></div></div>
         <div class="field" id="ebk-ref-r" style="display:none;"><label>Chassis / Stock Ref No.</label><input type="text" id="ebk-stock-ref" placeholder="Chassis No."></div>
-        <div class="field" id="ebk-syard-r" style="display:none;"><label>Stockyard</label><select id="ebk-stockyard"><option>Common Stockyard</option><option>Palam Stockyard</option><option>Najafgarh Stockyard</option><option>Narela Stockyard</option></select></div>
+        <div class="field" id="ebk-syard-r" style="display:none;"><label>Stockyard</label><select id="ebk-stockyard"><option>Common Stockyard</option><option>Palam Showroom</option><option>Najafgarh Showroom</option><option>Narela Showroom</option></select></div>
         <div class="field" id="ebk-edel-r" style="display:none;"><label>Expected Arrival (Dealer)</label><input type="date" id="ebk-expected-del"></div>
       </div>
       <div class="field" style="margin-top:4px;"><label>Notes</label><textarea id="ebk-notes" placeholder="Special requests, accessories, commitments…" style="min-height:44px;"></textarea></div>
@@ -2890,10 +2890,10 @@ function parseStockData(rows){
   // Location normalizer
   function normLoc(raw){
     const r=(raw||'').toLowerCase().trim();
-    if(r.includes('bijwasan')||r.includes('palam'))return 'Common Stockyard';
-    if(r.includes('najaf')||r.includes('nafaj'))return 'Najafgarh Stockyard';
-    if(r.includes('dabari')||r.includes('dabri'))return 'Palam Stockyard';
-    if(r.includes('narela'))return 'Narela Stockyard';
+    if(r.includes('palam')||r.includes('bijwasan')||r.includes('dabri')||r.includes('dabari'))return 'Palam Showroom';
+    if(r.includes('najaf')||r.includes('nafaj'))return 'Najafgarh Showroom';
+    if(r.includes('narela'))return 'Narela Showroom';
+    if(r.includes('common')||r.includes('stockyard')||r.includes('yard'))return 'Common Stockyard';
     return raw||'Common Stockyard';
   }
   // Model normalizer
