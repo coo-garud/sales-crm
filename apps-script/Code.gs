@@ -58,6 +58,7 @@ function addLead(d){
   d["Lead ID"]="LEAD-"+Utilities.formatDate(new Date(),tz,"yyyyMMddHHmmss");
   d["Created DT"]=d["Created DT"]||Utilities.formatDate(new Date(),tz,"yyyy-MM-dd HH:mm");
   d["Status"]=d["Status"]||"Active";d["Interest Level"]=d["Interest Level"]||"Warm";d["Followup Count"]="0";
+  if(d["VoC Notes"]&&String(d["VoC Notes"]).trim()){d["First Contact DT"]=d["First Contact DT"]||d["Created DT"];d["Last Contact DT"]=d["Last Contact DT"]||d["Created DT"];}
   sh.appendRow(LH.map(h=>d[h]||""));return{status:"ok",leadId:d["Lead ID"]};
 }
 function addFollowUp(d){

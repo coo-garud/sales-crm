@@ -2241,6 +2241,7 @@ async function submitNewLead(){
   d['Budget']=document.getElementById('nl-budget').value;d['Finance/Cash']=document.getElementById('nl-finance').value;
   d['Customer Area']=document.getElementById('nl-area').value;d['Customer City']=document.getElementById('nl-city').value;
   d['VoC Notes']=document.getElementById('nl-notes').value;d['Next Followup DT']=document.getElementById('nl-nextfu').value;d['Status']='Active';
+  if(d['VoC Notes'].trim()){d['First Contact DT']=d['Created DT'];d['Last Contact DT']=d['Created DT'];}
   const asap=document.getElementById('nl-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('nl-del-date').value||'');
   const st=document.getElementById('nl-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addLead',data:JSON.stringify(d)});setMsg(st,'ok','✓ Lead saved! '+r.leadId);clearNLForm();allLeads.push({...d,'Lead ID':r.leadId,'Followup Count':'0'});renderDashboard();}catch(e){setMsg(st,'err','✗ '+e.message);}
