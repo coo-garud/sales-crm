@@ -1,7 +1,7 @@
 // Sales Command Centre — Apps Script v3
 // Auto-creates 6 sheets: Leads, FollowUps, Bookings, TestDrives, Stock, Users
 
-const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
+const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
@@ -28,6 +28,7 @@ function handleReq(e){
       case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
       case "deleteLead":res=deleteLead(JSON.parse(p.data));break;
       case "bulkSetInsurance":res=bulkSetInsurance();break;
+      case "backfillPalamContactDT":res=backfillPalamContactDT();break;
       default:res={status:"ok",msg:"Sales CRM API v3 running"};
     }
   }catch(err){res={status:"error",msg:err.toString()};}
@@ -49,7 +50,7 @@ function sheetToArr(sh,headers){
 function getAll(){return{status:"ok",leads:sheetToArr(getOrCreate("Leads",LH),LH),followups:sheetToArr(getOrCreate("FollowUps",FH),FH),bookings:sheetToArr(getOrCreate("Bookings",BH),BH),testdrives:sheetToArr(getOrCreate("TestDrives",TH),TH),stock:sheetToArr(getOrCreate("Stock",SH),SH)};}
 function updateLead(d){
   const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
-  const editable=["Customer Name","Phone","Alt Phone","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes","Created DT"];
+  const editable=["Customer Name","Phone","Alt Phone","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes","Created DT","Exchange Interest"];
   editable.forEach(col=>{const ci=LH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
   return{status:"ok"};
 }
@@ -82,6 +83,7 @@ function addFollowUp(d){
       if(d["Interest After"])lsh.getRange(rn,li("Interest Level")).setValue(d["Interest After"]);
       if(d["Notes"]){const existing=String(lsh.getRange(rn,li("VoC Notes")).getValue()||'').trim();const newEntry='['+now+'] '+d["Notes"];lsh.getRange(rn,li("VoC Notes")).setValue(existing?(existing+' | '+newEntry):newEntry);}
       if(d["Status After"]==="Lost"&&d["Lost Reason"])lsh.getRange(rn,li("Lost Reason")).setValue(d["Lost Reason"]);
+      if(d["Exchange Interest"]==="Yes")lsh.getRange(rn,li("Exchange Interest")).setValue("Yes");
       const cnt=parseInt(lsh.getRange(rn,li("Followup Count")).getValue())||0;lsh.getRange(rn,li("Followup Count")).setValue(cnt+1);
     }
   }
@@ -171,6 +173,29 @@ function deleteLead(d){
   const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
   sh.deleteRow(ri);
   return{status:"ok"};
+}
+function backfillPalamContactDT(){
+  const sh=getOrCreate("Leads",LH);const last=sh.getLastRow();if(last<2)return{status:"ok",updated:0};
+  const tz=Session.getScriptTimeZone();const today=Utilities.formatDate(new Date(),tz,"yyyy-MM-dd");
+  const data=sh.getRange(2,1,last-1,LH.length).getValues();
+  let updated=0;
+  data.forEach((row,i)=>{
+    const ri=i+2;
+    const loc=String(row[LH.indexOf("Location")]||'').toLowerCase();
+    const rawDT=row[LH.indexOf("Created DT")];
+    const createdDT=rawDT instanceof Date?Utilities.formatDate(rawDT,tz,"yyyy-MM-dd HH:mm"):String(rawDT||'');
+    const voc=String(row[LH.indexOf("VoC Notes")]||'').trim();
+    const firstCT=String(row[LH.indexOf("First Contact DT")]||'').trim();
+    const lastCT=String(row[LH.indexOf("Last Contact DT")]||'').trim();
+    if(!loc.includes('palam'))return;
+    if(!createdDT.startsWith(today))return;
+    if(!voc)return;
+    if(firstCT&&lastCT)return;
+    if(!firstCT)sh.getRange(ri,LH.indexOf("First Contact DT")+1).setValue(createdDT);
+    if(!lastCT)sh.getRange(ri,LH.indexOf("Last Contact DT")+1).setValue(createdDT);
+    updated++;
+  });
+  return{status:"ok",updated:updated};
 }
 function bulkSetInsurance(){
   const sh=getOrCreate("Bookings",BH);const last=sh.getLastRow();if(last<2)return{status:"ok",updated:0};

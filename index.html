@@ -883,6 +883,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <div class="field"><label>Color Preference</label><input type="text" id="nl-color" placeholder="e.g. Pristine White"></div>
             <div class="field"><label>Budget (₹ Approx.)</label><input type="text" id="nl-budget" placeholder="e.g. 10–12 lakhs"></div>
             <div class="field"><label>Finance / Cash</label><select id="nl-finance"><option value="">Select…</option><option>Finance</option><option>Cash</option><option>Undecided</option></select></div>
+            <div class="field"><label>Exchange Interest</label><label style="text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:7px;margin-top:4px;"><input type="checkbox" id="nl-exchange"> 🔄 Customer has an old car to exchange</label></div>
             <div class="field"><label>Customer's Area / Locality</label><input type="text" id="nl-area" placeholder="e.g. Dwarka Sec 10, Rohini…"></div>
             <div class="field"><label>Customer's City</label><input type="text" id="nl-city" placeholder="e.g. New Delhi"></div>
             <div class="field full"><label>Customer's Expected Delivery</label>
@@ -979,6 +980,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
           <textarea id="fu-notes" placeholder="Budget updated? Concerns raised? Competing cars? Decision timeline? Objections? Trigger to buy? Be specific — generic notes don't count…" style="min-height:70px;"></textarea>
           <span class="hint">Example: "Budget max ₹12L, wife prefers white, comparing Creta, decision before Diwali, needs finance"</span>
         </div>
+        <div class="field"><label style="text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:7px;"><input type="checkbox" id="fu-exchange"> 🔄 Customer interested in exchange (has old car)</label></div>
       </div>
       <div class="ffoot"><button class="btn btn-primary" onclick="submitFollowUp()">Log Follow-up →</button><button class="btn btn-secondary" onclick="fuClearForm()">Clear</button><button class="btn btn-success btn-sm" onclick="showTab('bookings')" style="margin-left:auto;">🚗 Book →</button><span class="smsg" id="fu-status"></span></div>
     </div>
@@ -1332,7 +1334,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   <div class="code-block" style="display:none;"><button class="copy-btn" onclick="copyScript()">Copy All</button><pre id="script-code">// Sales Command Centre — Apps Script v3
 // Auto-creates 5 sheets: Leads, FollowUps, Bookings, TestDrives, Stock
 
-const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery"];
+const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
@@ -1563,6 +1565,7 @@ function updateStock(d){
       <div class="field"><label>Budget</label><input type="number" id="el-budget" placeholder="e.g. 850000"></div>
       <div class="field"><label>Finance / Cash</label>
         <select id="el-finance"><option value="">Select…</option><option>Finance</option><option>Cash</option><option>Undecided</option></select></div>
+      <div class="field"><label>Exchange Interest</label><label style="text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:7px;margin-top:4px;"><input type="checkbox" id="el-exchange"> 🔄 Customer has an old car to exchange</label></div>
       <div class="field"><label>Salesperson</label>
         <select id="el-sp"><option value="">Select…</option></select></div>
       <div class="field"><label>Interest Level</label>
@@ -2109,7 +2112,7 @@ function renderLeads(leads){
     const le=encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27');
     return `<div class="lc ${lc}" id="lc-${i}">
       <div class="lc-head" onclick="togLC(${i})"><div><div class="lc-name">${l['Customer Name']||'—'}</div><div class="lc-phone">${l['Phone']||''}${l['Alt Phone']?' · '+l['Alt Phone']:''}</div></div>
-        <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${tdBadge(l)}${vocBadge(l)}</div>
+        <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${tdBadge(l)}${l['Exchange Interest']==='Yes'?'<span class="pill" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;">🔄 Exchange</span>':''}${vocBadge(l)}</div>
         <div class="lc-meta"><div style="font-size:11px;">👤 <strong>${l['Salesperson']||'—'}</strong></div>${aTxt?`<div class="${aCls}">${aTxt}</div>`:''}<span class="expand-arrow" id="arr-${i}">▾</span></div></div>
       <div class="lc-detail-row">
         <span>🚗 <strong>${l['Model Interest']||'—'}</strong>${l['Variant']?' '+l['Variant']:''}</span>
@@ -2159,6 +2162,7 @@ function openEditLead(enc){
   document.getElementById('el-city').value=l['Customer City']||'';
   document.getElementById('el-del').value=l['Customer Expected Delivery']||'';
   document.getElementById('el-voc').value=l['VoC Notes']||'';
+  document.getElementById('el-exchange').checked=l['Exchange Interest']==='Yes';
   const spSel=document.getElementById('el-sp');
   const sps=allUsers.filter(u=>u.role==='salesperson'||u.role==='team_leader'||u.role==='manager');
   spSel.innerHTML='<option value="">Select…</option>'+sps.map(u=>`<option value="${u.display||u.username}">${u.display||u.username}</option>`).join('');
@@ -2197,7 +2201,8 @@ async function submitEditLead(){
     'Customer Area':document.getElementById('el-area').value,
     'Customer City':document.getElementById('el-city').value,
     'Customer Expected Delivery':document.getElementById('el-del').value,
-    'VoC Notes':document.getElementById('el-voc').value};
+    'VoC Notes':document.getElementById('el-voc').value,
+    'Exchange Interest':document.getElementById('el-exchange').checked?'Yes':''};
   const st=document.getElementById('el-status-msg');setMsg(st,'ld','⟳ Saving…');
   try{
     await api({action:'updateLead',data:JSON.stringify(d)});
@@ -2241,12 +2246,13 @@ async function submitNewLead(){
   d['Budget']=document.getElementById('nl-budget').value;d['Finance/Cash']=document.getElementById('nl-finance').value;
   d['Customer Area']=document.getElementById('nl-area').value;d['Customer City']=document.getElementById('nl-city').value;
   d['VoC Notes']=document.getElementById('nl-notes').value;d['Next Followup DT']=document.getElementById('nl-nextfu').value;d['Status']='Active';
+  d['Exchange Interest']=document.getElementById('nl-exchange').checked?'Yes':'';
   if(d['VoC Notes'].trim()){d['First Contact DT']=d['Created DT'];d['Last Contact DT']=d['Created DT'];}
   const asap=document.getElementById('nl-asap').checked;d['Customer Expected Delivery']=asap?'ASAP':(document.getElementById('nl-del-date').value||'');
   const st=document.getElementById('nl-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addLead',data:JSON.stringify(d)});setMsg(st,'ok','✓ Lead saved! '+r.leadId);clearNLForm();allLeads.push({...d,'Lead ID':r.leadId,'Followup Count':'0'});renderDashboard();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.disabled=false;}});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;document.getElementById('err-src').style.display='none';document.getElementById('err-loc').style.display='none';nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());populateSPDropdowns();}
+function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.disabled=false;}});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;document.getElementById('nl-exchange').checked=false;document.getElementById('err-src').style.display='none';document.getElementById('err-loc').style.display='none';nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());populateSPDropdowns();}
 
 // ═══ FOLLOW-UP ═══
 function autoCheckTD(){const o=document.getElementById('fu-outcome').value;if(o.startsWith('Test Drive done')){document.getElementById('fu-td-chk').checked=true;document.getElementById('td-fields').style.display='block';}}
@@ -2265,7 +2271,8 @@ async function submitFollowUp(){
   const isTD=document.getElementById('fu-td-chk').checked;
   const statusAfter=document.getElementById('fu-status-upd').value;
   const leadForBooking=statusAfter==='Booked'&&fuSelectedLead?{...fuSelectedLead}:null;
-  const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':statusAfter,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||''};
+  const fuExchange=document.getElementById('fu-exchange').checked;
+  const d={'Lead ID':lid,'DateTime':fmtDT(new Date()),'Salesperson':fuSelectedLead?.['Salesperson']||'','Method':method,'Outcome':outcome,'Status After':statusAfter,'Interest After':fuInt,'Notes':document.getElementById('fu-notes').value,'Next Followup DT':document.getElementById('fu-nextdt').value,'Lost Reason':document.getElementById('fu-lost-reason').value,'Is TD':isTD?'yes':'no','TD Model':document.getElementById('td-model')?.value||'','TD Interest':document.getElementById('td-interest')?.value||'','Customer Name':fuSelectedLead?.['Customer Name']||'','Phone':fuSelectedLead?.['Phone']||'','Location':fuSelectedLead?.['Location']||'','Exchange Interest':fuExchange?'Yes':''};
   const st=document.getElementById('fu-status');setMsg(st,'ld','⟳ Logging…');
   try{
     await api({action:'addFollowUp',data:JSON.stringify(d)});
@@ -2277,7 +2284,7 @@ async function submitFollowUp(){
     }
   }catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';document.getElementById('fu-booking-warn').style.display='none';const tdChk=document.getElementById('fu-td-chk');if(tdChk)tdChk.checked=false;document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
+function fuClearForm(){fuClearSel();['fu-method','fu-outcome','fu-interest','fu-nextdt','fu-notes','fu-lost-reason'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('fu-status-upd').value='Active';document.getElementById('fu-lost-row').style.display='none';document.getElementById('fu-booking-warn').style.display='none';document.getElementById('fu-exchange').checked=false;const tdChk=document.getElementById('fu-td-chk');if(tdChk)tdChk.checked=false;document.getElementById('td-fields').style.display='none';fuInt='';['hot','warm','cold'].forEach(v=>{const el=document.getElementById('fui-'+v);if(el)el.classList.remove('sel-hot','sel-warm','sel-cold');});document.querySelectorAll('#tab-followup .field').forEach(f=>f.classList.remove('invalid'));}
 function prefillFU(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);},100);}
 function prefillFULost(enc){const l=JSON.parse(decodeURIComponent(enc));showTab('followup');setTimeout(()=>{document.getElementById('fu-search').value=l['Phone']||l['Customer Name'];fuSelLead(l);document.getElementById('fu-status-upd').value='Lost';document.getElementById('fu-lost-row').style.display='block';},100);}
 function _fillBkForm(l){clearBkForm();document.getElementById('new-bk-form').classList.add('open');document.getElementById('bk-lead-id').value=l['Lead ID'];document.getElementById('bk-sel').style.display='flex';document.getElementById('bk-sel-txt').textContent=`${l['Customer Name']} (${l['Phone']})`;document.getElementById('bk-name').value=l['Customer Name']||'';document.getElementById('bk-phone').value=l['Phone']||'';document.getElementById('bk-model').value=l['Model Interest']||'';document.getElementById('bk-sp').value=l['Salesperson']||'';document.getElementById('bk-loc').value=l['Location']||'';document.getElementById('bk-src').value=l['Source']||'';document.getElementById('bk-dt').value=fmtDT(new Date());}
