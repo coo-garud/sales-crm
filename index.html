@@ -3546,12 +3546,12 @@ function renderAnMonthly(bks){
 }
 function renderAnConvTime(leads,bks){
   const pairs=[];
-  leads.forEach(l=>{
-    const ld=parseD(l['Created DT']);if(!ld)return;
-    const bk=bks.find(b=>b['Lead ID']&&b['Lead ID']===l['Lead ID']);if(!bk)return;
-    const bd=parseD(bk['Booking DT']);if(!bd)return;
-    const days=Math.max(0,daysBetween(ld,bd));
-    pairs.push(days);
+  const leadById={};leads.forEach(l=>{if(l['Lead ID'])leadById[l['Lead ID']]=l;});
+  bks.forEach(b=>{
+    const bd=parseD(b['Booking DT']);if(!bd)return;
+    const lead=leadById[b['Lead ID']];if(!lead)return;
+    const ld=parseD(lead['Created DT']);if(!ld)return;
+    pairs.push(Math.max(0,daysBetween(ld,bd)));
   });
   const el=document.getElementById('an-conv-stats');
   const note=document.getElementById('an-conv-note');
@@ -3569,19 +3569,30 @@ function renderAnConvTime(leads,bks){
 }
 function renderAnSources(leads,bks){
   const srcMap={};
+  // Build lead index for fast lookup
+  const leadById={};leads.forEach(l=>{if(l['Lead ID'])leadById[l['Lead ID']]=l;});
+  // Count leads per source
   leads.forEach(l=>{
     const src=(l['Source']||'Unknown').trim();
     if(!srcMap[src])srcMap[src]={leads:0,booked:0,days:[]};
     srcMap[src].leads++;
-    const bk=bks.find(b=>b['Lead ID']&&b['Lead ID']===l['Lead ID']);
-    if(bk){srcMap[src].booked++;const ld=parseD(l['Created DT']);const bd=parseD(bk['Booking DT']);if(ld&&bd)srcMap[src].days.push(Math.max(0,daysBetween(ld,bd)));}
   });
-  const rows=Object.entries(srcMap).sort((a,b)=>b[1].booked-a[1].booked);
+  // Count bookings per source — use booking's own Lead Source field as primary,
+  // fall back to linked lead's Source, then 'Unknown'
+  bks.forEach(b=>{
+    let src=(b['Lead Source']||'').trim();
+    if(!src){const lead=leadById[b['Lead ID']];src=lead?(lead['Source']||'Unknown').trim():'Unknown';}
+    if(!srcMap[src])srcMap[src]={leads:0,booked:0,days:[]};
+    srcMap[src].booked++;
+    const lead=leadById[b['Lead ID']];
+    if(lead){const ld=parseD(lead['Created DT']);const bd=parseD(b['Booking DT']);if(ld&&bd)srcMap[src].days.push(Math.max(0,daysBetween(ld,bd)));}
+  });
+  const rows=Object.entries(srcMap).sort((a,b)=>b[1].booked-a[1].booked||b[1].leads-a[1].leads);
   const tbody=document.getElementById('an-src-body');
   tbody.innerHTML=rows.map(([src,d])=>{
     const conv=d.leads?Math.round(d.booked/d.leads*100):0;
     const avgD=d.days.length?Math.round(d.days.reduce((s,v)=>s+v,0)/d.days.length):'-';
-    const bar=`<div class="conv-bar-bg"><div class="conv-bar-fill" style="width:${conv}%;background:${conv>=50?'var(--green)':conv>=25?'var(--amber)':'var(--red)'};"></div></div>`;
+    const bar=`<div class="conv-bar-bg"><div class="conv-bar-fill" style="width:${Math.min(conv,100)}%;background:${conv>=50?'var(--green)':conv>=25?'var(--amber)':'var(--red)'};"></div></div>`;
     return `<tr><td style="font-weight:700;">${src}</td><td>${d.leads}</td><td>${d.booked}</td><td>${conv}%${bar}</td><td>${avgD}${typeof avgD==='number'?'d':''}</td></tr>`;
   }).join('');
 }
