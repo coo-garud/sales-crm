@@ -468,46 +468,91 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   /* Loc bar — scrollable */
   .loc-bar{top:48px;padding:5px 10px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
   .loc-bar::-webkit-scrollbar{display:none;}
-  .loc-btn{font-size:11px;padding:3px 10px;}
+  .loc-btn{font-size:11px;padding:3px 10px;white-space:nowrap;}
 
-  /* Nav — scrollable tabs */
-  nav{top:80px;padding:0 6px;}
-  .tab{padding:9px 8px;font-size:11px;}
+  /* Nav — scrollable tabs; adjust for visible loc-bar */
+  nav{top:80px;padding:0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  nav::-webkit-scrollbar{display:none;}
+  .tab{padding:9px 8px;font-size:11px;white-space:nowrap;}
+
+  /* Nav top when loc-bar hidden */
+  .no-locbar nav{top:48px;}
 
   /* Main */
-  main{padding:10px 10px;}
+  main{padding:10px 8px;}
 
   /* Section header */
+  .sh{flex-direction:column;align-items:flex-start;gap:6px;}
   .sh-title{font-size:17px;}
-  .sh-acts{gap:5px;}
+  .sh-acts{gap:5px;flex-wrap:wrap;}
   .sh-acts .btn{font-size:11px;padding:5px 9px;}
+  .sh .last-ref{font-size:10px;}
 
   /* Stat rows */
   .srow{grid-template-columns:repeat(2,1fr);}
   .del-srow{grid-template-columns:repeat(2,1fr);}
   .del-srow>.del-sc:last-child{grid-column:1/-1;}
-  .fn-label{min-width:72px;font-size:11px;}
-  .fn-conv{min-width:44px;}
-  .fn-num{font-size:12px;}
-  .sc{padding:8px 10px;}.sc-val{font-size:22px;}.sc-lbl{font-size:9px;}
+  .sc{padding:8px 10px;min-width:0;overflow:hidden;}
+  .sc-val{font-size:20px;}
+  .sc-lbl{font-size:9px;}
+  .sc-sub{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  /* Dashboard grid already 1-col at 1100px */
+  /* Funnel */
+  .fn-label{min-width:68px;font-size:10px;}
+  .fn-conv{min-width:38px;font-size:10px;}
+  .fn-num{font-size:11px;}
+  .fn-bar-wrap{min-width:0;}
+
+  /* Dashboard cards — prevent overflow */
+  .card-hd{font-size:12px;padding:8px 12px;white-space:normal;}
+  .card-bd{padding:10px 12px;}
+
+  /* SP table — scrollable */
+  .comp-card{overflow-x:auto;}
+  .sp-table{font-size:10px;min-width:380px;}
+  .sp-table th,.sp-table td{padding:4px 6px;}
+
+  /* Target / leaderboard cards */
+  .sl-stats{display:none;}
+  .sl-bk{font-size:16px;}
+  .tc-name{min-width:70px;font-size:11px;}
+  .tc-pct{min-width:30px;}
+
+  /* Next deliveries */
+  .nd-date{min-width:58px;font-size:11px;}
+  .nd-name{font-size:11px;}
+
+  /* Close leads rows */
+  .clr{flex-wrap:wrap;gap:6px;}
+  .clr-meta{width:100%;}
+  .clr-sub{white-space:normal;word-break:break-word;}
 
   /* Lead cards */
   .lc-head{flex-wrap:wrap;gap:6px;}
   .lc-meta{margin-left:0;width:100%;justify-content:flex-start;}
   .lc-pills{flex-wrap:wrap;}
+  .lc-detail-row{flex-wrap:wrap;gap:5px;}
+  .lc-detail-row span{font-size:11px;}
+  .lc-actions{gap:4px;padding:6px 8px;flex-wrap:wrap;}
+  .lc-actions .btn{font-size:10px;padding:4px 7px;}
 
   /* Filter bar */
   .filter-bar{padding:6px 8px;gap:5px;}
-  .filter-bar select,.filter-bar input{font-size:11px;}
+  .filter-bar select,.filter-bar input{font-size:11px;max-width:140px;}
 
   /* Bookings */
-  .bk-head{gap:6px;}
-  .bk-foot{flex-direction:column;align-items:flex-start;}
+  .bk-tabs{overflow-x:auto;flex-wrap:nowrap;}
+  .bk-tabs::-webkit-scrollbar{display:none;}
+  .btab{white-space:nowrap;font-size:11px;padding:8px 10px;}
+  .bk-head{gap:6px;flex-wrap:wrap;}
+  .bk-body{flex-wrap:wrap;gap:5px;}
+  .bk-body span{font-size:11px;}
+  .bk-foot{flex-direction:column;align-items:flex-start;gap:6px;}
+  .bk-foot>div{flex-wrap:wrap;}
+  .tbl-btn{font-size:11px;padding:4px 8px;}
 
   /* Form cards */
-  .fb{padding:12px 12px;}
+  .fb{padding:12px 10px;}
   .fch{padding:9px 12px;font-size:13px;}
   .form-card{margin-bottom:10px;}
 
@@ -522,33 +567,20 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
   /* Login */
   .login-box{padding:28px 20px;}
 
-  /* Form grid — already 1-col at 700px but reinforce */
+  /* Form grid */
   .fg{grid-template-columns:1fr;}
   .full{grid-column:1;}
-
-  /* Buttons in action bars */
-  .lc-actions{gap:4px;padding:6px 10px;}
-  .lc-actions .btn{font-size:11px;padding:5px 8px;}
 
   /* WhatsApp picker */
   .wa-picker{right:10px;bottom:10px;min-width:240px;}
 
-  /* Two-col already 1-col at 900px */
-
-  /* Section header acts */
-  .sh{flex-direction:column;align-items:flex-start;}
-  .sh .last-ref{font-size:10px;}
-
-  /* Leaderboard */
-  .sl-stats{display:none;}
-
-  /* Next deliveries */
-  .nd-date{min-width:65px;font-size:12px;}
-
-  /* Prevent horizontal scroll on body */
+  /* Prevent horizontal scroll */
   body{overflow-x:hidden;}
   #app-screen{overflow-x:hidden;}
+  .section{overflow-x:hidden;}
 }
+/* Nav top when loc-bar hidden — all screen sizes */
+.no-locbar nav{top:52px;}
 /* ── Analytics ── */
 .an-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 .an-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-xs);}
@@ -3014,15 +3046,16 @@ function showApp(){
   document.getElementById('hdr-urole').textContent=ROLE_LABEL[currentUser.role]||currentUser.role.toUpperCase();
   document.getElementById('hdr-avatar').textContent=(currentUser.display||currentUser.username||'?')[0].toUpperCase();
   applyRoleTabs();
-  if((currentUser.role==='branch_head'||currentUser.role==='team_leader')&&currentUser.branch){
+  if(currentUser.role==='team_leader'&&currentUser.branch){
     currentLoc=currentUser.branch;
     document.querySelector('.loc-bar').style.display='none';
-    const sub=currentUser.role==='team_leader'?currentUser.display+' Team · '+currentUser.branch:currentUser.branch+' · Live Data';
-    document.getElementById('dash-sub').textContent=sub;
+    document.getElementById('dash-sub').textContent=currentUser.display+' Team · '+currentUser.branch;
+    document.getElementById('app-screen').classList.add('no-locbar');
   } else {
     currentLoc='ALL';
     document.querySelector('.loc-bar').style.display='';
     document.getElementById('dash-sub').textContent='All Locations · Live Data';
+    document.getElementById('app-screen').classList.remove('no-locbar');
   }
   if(allUsers.length>0){populateSPDropdowns();}
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
@@ -3340,7 +3373,7 @@ function isRelevantLead(l){
   const r=currentUser.role;
   if(r==='salesperson'){const spN=(l['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
   if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((l['Salesperson']||'').toLowerCase());}
-  if(r==='branch_head'||r==='manager'){return currentUser.branch?(l['Location']||'').includes(currentUser.branch):true;}
+  if(r==='branch_head'||r==='manager'){return true;}
   return true;
 }
 function isRelevantBk(b){
@@ -3348,7 +3381,7 @@ function isRelevantBk(b){
   const r=currentUser.role;
   if(r==='salesperson'){const spN=(b['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
   if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((b['Salesperson']||'').toLowerCase());}
-  if(r==='branch_head'||r==='manager'){return currentUser.branch?(b['Location']||'').includes(currentUser.branch):true;}
+  if(r==='branch_head'||r==='manager'){return true;}
   return true;
 }
 function checkNewLeadNotifs(isFirstLoad){
