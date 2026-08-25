@@ -1,8 +1,7 @@
 // Sales Command Centre — Apps Script v3
 // Auto-creates 6 sheets: Leads, FollowUps, Bookings, TestDrives, Stock, Users
 
-const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest","Punched By","Assigned DT","Reminder Sent"];
-const REASSIGN_SLA_HOURS=1;
+const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest","Punched By","Assigned DT","Customer Email"];
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
@@ -29,7 +28,6 @@ function handleReq(e){
       case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
       case "deleteLead":res=deleteLead(JSON.parse(p.data));break;
       case "bulkSetInsurance":res=bulkSetInsurance();break;
-      case "checkReassignmentSLA":res=checkOverdueReassignments();break;
       case "backfillPalamContactDT":res=backfillPalamContactDT();break;
       default:res={status:"ok",msg:"Sales CRM API v3 running"};
     }
@@ -57,14 +55,11 @@ function updateLead(d){
   const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
   const spCol=LH.indexOf("Salesperson")+1;
   const prevSP=spCol>0?String(sh.getRange(ri,spCol).getValue()||"").trim():"";
-  const editable=["Customer Name","Phone","Alt Phone","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes","Created DT","Exchange Interest"];
+  const editable=["Customer Name","Phone","Alt Phone","Customer Email","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes","Created DT","Exchange Interest"];
   editable.forEach(col=>{const ci=LH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
   const newSP=(d["Salesperson"]!==undefined?String(d["Salesperson"]).trim():prevSP);
   if(newSP&&newSP!==prevSP){
     const adCol=LH.indexOf("Assigned DT")+1;if(adCol>0)sh.getRange(ri,adCol).setValue(Utilities.formatDate(new Date(),Session.getScriptTimeZone(),"yyyy-MM-dd HH:mm"));
-    const rsCol=LH.indexOf("Reminder Sent")+1;if(rsCol>0)sh.getRange(ri,rsCol).setValue("");
-    const snapshot={};LH.forEach((h,i)=>{snapshot[h]=sh.getRange(ri,i+1).getValue();});
-    notifyLeadAssignment(newSP,snapshot,"assigned");
   }
   return{status:"ok"};
 }
@@ -76,79 +71,7 @@ function addLead(d){
   if(d["VoC Notes"]&&String(d["VoC Notes"]).trim()){d["First Contact DT"]=d["First Contact DT"]||d["Created DT"];d["Last Contact DT"]=d["Last Contact DT"]||d["Created DT"];}
   if(d["Salesperson"]&&String(d["Salesperson"]).trim())d["Assigned DT"]=d["Created DT"];
   sh.appendRow(LH.map(h=>d[h]||""));
-  if(d["Salesperson"]&&String(d["Salesperson"]).trim())notifyLeadAssignment(d["Salesperson"],d,"punched and assigned");
   return{status:"ok",leadId:d["Lead ID"]};
-}
-function checkOverdueReassignments(){
-  const sh=getOrCreate("Leads",LH);const last=sh.getLastRow();if(last<2)return{status:"ok",reminded:0};
-  const users=getUsers().users||[];
-  const tlByName={};users.filter(u=>u.role==='team_leader').forEach(u=>{tlByName[(u.display||u.username).toLowerCase()]=u;});
-  const data=sh.getRange(2,1,last-1,LH.length).getValues();
-  const spIdx=LH.indexOf("Salesperson"),adIdx=LH.indexOf("Assigned DT"),rsIdx=LH.indexOf("Reminder Sent"),stIdx=LH.indexOf("Status"),cdIdx=LH.indexOf("Created DT"),nameIdx=LH.indexOf("Customer Name"),phIdx=LH.indexOf("Phone"),mdIdx=LH.indexOf("Model Interest");
-  const now=new Date();const pending={};
-  data.forEach((row,i)=>{
-    const status=String(row[stIdx]||"");
-    if(status==="Lost"||status==="Booked")return;
-    const spName=String(row[spIdx]||"").trim();
-    const tl=tlByName[spName.toLowerCase()];
-    if(!tl)return;
-    if(String(row[rsIdx]||"").trim()==="Yes")return;
-    const adRaw=row[adIdx]||row[cdIdx];
-    const assignedDT=adRaw instanceof Date?adRaw:(adRaw?new Date(String(adRaw).replace(" ","T")):null);
-    if(!assignedDT||isNaN(assignedDT.getTime()))return;
-    const hrs=(now-assignedDT)/3600000;
-    if(hrs<REASSIGN_SLA_HOURS)return;
-    const key=tl.username;
-    if(!pending[key])pending[key]={tl:tl,leads:[]};
-    pending[key].leads.push({ri:i+2,name:row[nameIdx],phone:row[phIdx],model:row[mdIdx],hrs:hrs.toFixed(1)});
-  });
-  let reminded=0;
-  Object.values(pending).forEach(p=>{
-    p.leads.forEach(l=>sh.getRange(l.ri,rsIdx+1).setValue("Yes"));
-    reminded+=p.leads.length;
-    if(!p.tl.email)return;
-    const rowsHtml=p.leads.map(l=>'<tr><td>'+l.name+'</td><td>'+l.phone+'</td><td>'+l.model+'</td><td>'+l.hrs+'h</td></tr>').join('');
-    const body='<p>You have <strong>'+p.leads.length+'</strong> lead(s) still waiting to be reassigned to a salesperson (SLA: '+REASSIGN_SLA_HOURS+'h):</p>'+
-      '<table cellpadding="4" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;"><tr style="background:#f0f0f0;"><th>Customer</th><th>Phone</th><th>Model</th><th>Pending</th></tr>'+rowsHtml+'</table>'+
-      '<p>Please assign them to a salesperson as soon as possible.</p>';
-    try{MailApp.sendEmail({to:p.tl.email,subject:'⏰ '+p.leads.length+' lead(s) awaiting reassignment',htmlBody:body});}catch(e){}
-  });
-  return{status:"ok",reminded:reminded};
-}
-function installReassignmentReminderTrigger(){
-  ScriptApp.getProjectTriggers().forEach(t=>{if(t.getHandlerFunction()==='checkOverdueReassignments')ScriptApp.deleteTrigger(t);});
-  ScriptApp.newTrigger('checkOverdueReassignments').timeBased().everyHours(1).create();
-  return{status:"ok"};
-}
-function findUserByName(name,users){
-  if(!name)return null;
-  const list=users||(getUsers().users||[]);
-  const n=String(name).trim().toLowerCase();
-  return list.find(u=>(u.display||u.username||"").toLowerCase()===n||u.username.toLowerCase()===n)||null;
-}
-function notifyLeadAssignment(assigneeName,lead,eventLabel){
-  try{
-    const users=getUsers().users||[];
-    const u=findUserByName(assigneeName,users);
-    if(!u)return;
-    const rows=[
-      ["Lead ID",lead["Lead ID"]],["Customer",lead["Customer Name"]],["Phone",lead["Phone"]],
-      ["Source",lead["Source"]],["Location",lead["Location"]],["Model Interest",lead["Model Interest"]],
-      ["Punched By",lead["Punched By"]]
-    ].filter(r=>r[1]);
-    const tbl='<table cellpadding="4" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;">'+
-      rows.map(r=>'<tr><td style="color:#666;"><strong>'+r[0]+'</strong></td><td>'+r[1]+'</td></tr>').join('')+'</table>';
-    const subject='🆕 Lead '+eventLabel+' — '+(lead["Customer Name"]||"New Lead");
-    const recipients=[];
-    if(u.email)recipients.push({email:u.email,note:''});
-    if(u.role==='salesperson'&&u.team){
-      const tl=findUserByName(u.team,users);
-      if(tl&&tl.email)recipients.push({email:tl.email,note:' (assigned to your team member '+(u.display||u.username)+')'});
-    }
-    recipients.forEach(r=>{
-      try{MailApp.sendEmail({to:r.email,subject:subject,htmlBody:'<p>A lead has been <strong>'+eventLabel+'</strong> to <strong>'+(u.display||u.username)+'</strong>'+r.note+'.</p>'+tbl});}catch(e2){}
-    });
-  }catch(e){}
 }
 function addFollowUp(d){
   const fsh=getOrCreate("FollowUps",FH);const lsh=getOrCreate("Leads",LH);

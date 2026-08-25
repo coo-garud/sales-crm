@@ -914,6 +914,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <div class="field"><label>Customer Name <span class="req">*</span></label><input type="text" id="nl-name" placeholder="Full name"><span class="err">Required</span></div>
             <div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" id="nl-phone" placeholder="10-digit mobile"><span class="err">Required</span></div>
             <div class="field"><label>Alternate Phone</label><input type="tel" id="nl-altphone" placeholder="Optional"></div>
+            <div class="field"><label>Email ID</label><input type="email" id="nl-email" placeholder="customer@example.com"></div>
             <div class="field"><label>Model of Interest <span class="req">*</span></label>
               <select id="nl-model"><option value="">Select…</option><option>Tata Punch</option><option>Tata Nexon</option><option>Tata Harrier</option><option>Tata Safari</option><option>Tata Curvv</option><option>Tata Altroz</option><option>Tata Tiago</option><option>Tata Tigor</option><option>Tata Sierra</option><option>Other</option></select><span class="err">Required</span></div>
             <div class="field"><label>Variant Preference</label><input type="text" id="nl-variant" placeholder="e.g. XZ+"></div>
@@ -940,11 +941,9 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
       </div>
     </div>
     <div class="side-col">
-      <div class="rc"><div class="rc-hd" style="background:var(--red);">⏱ First Contact SLAs</div>
+      <div class="rc"><div class="rc-hd" style="background:var(--red);">⏱ First Contact SLA</div>
         <div class="rc-body" style="display:flex;flex-direction:column;gap:7px;font-size:12px;">
-          <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:5px;padding:7px 10px;"><strong>Walk-in / Tele-in</strong> → Log within <strong>1 hour</strong></div>
-          <div style="background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:5px;padding:7px 10px;"><strong>CarDekho / Spinny / Meta / 91 Wheels</strong> → First call within <strong>15 minutes</strong></div>
-          <div style="background:var(--green-bg);border:1px solid var(--green-bd);border-radius:5px;padding:7px 10px;"><strong>Reference</strong> → First call within <strong>24 hours</strong></div>
+          <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:5px;padding:7px 10px;"><strong>Every lead, every source</strong> → First contact within <strong>10 minutes</strong></div>
         </div>
       </div>
       <div class="rc"><div class="rc-hd hd-wa">💬 WhatsApp Quick-send</div>
@@ -1336,6 +1335,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
             <option value="masteradmin">Master Admin</option>
             <option value="receptionist">Receptionist</option>
             <option value="cre">CRE</option>
+            <option value="crm_manager">CRM Manager</option>
           </select>
           <span class="hint" id="um-dept-hint"></span>
         </div>
@@ -1351,7 +1351,7 @@ main{padding:14px 20px;max-width:1480px;margin:0 auto;}
           <select id="um-team" onchange="autoFillBranch()"><option value="">Select Team Leader…</option></select>
         </div>
         <div class="field"><label>Display Name</label><input type="text" id="um-display" placeholder="Full name shown in app"></div>
-        <div class="field" id="um-email-wrap"><label>Email <span class="req" id="um-email-req" style="display:none;">*</span></label><input type="email" id="um-email" placeholder="for lead-assignment alerts" autocomplete="off"><span class="hint">Used to send lead-punch/assignment email alerts.</span></div>
+        <div class="field" id="um-email-wrap"><label>Email</label><input type="email" id="um-email" placeholder="contact email (optional)" autocomplete="off"><span class="hint">Contact reference only — the portal uses in-app notifications, not email.</span></div>
         <div style="display:flex;gap:8px;margin-top:10px;">
           <button class="btn btn-success" style="flex:1;" onclick="saveUserUI()">Save User</button>
           <button class="btn btn-secondary" onclick="clearUserForm()">Clear</button>
@@ -1596,6 +1596,7 @@ function updateStock(d){
       <div class="field" style="grid-column:1/3;"><label>Customer Name <span class="req">*</span></label><input type="text" id="el-name"></div>
       <div class="field"><label>Phone <span class="req">*</span></label><input type="text" id="el-phone"></div>
       <div class="field"><label>Alt Phone</label><input type="text" id="el-altphone"></div>
+      <div class="field"><label>Email ID</label><input type="email" id="el-email"></div>
       <div class="field"><label>Source</label>
         <select id="el-source"><option value="">Select…</option><option>Walk-in</option><option>Tele-in</option><option>CarDekho</option><option>Spinny</option><option>Meta</option><option>Reference</option><option>Events</option><option>91 Wheels</option></select></div>
       <div class="field"><label>Location</label>
@@ -1946,7 +1947,8 @@ async function loadAll(){
 }
 
 // ═══ BUCKET LOGIC ═══
-function fcThr(src){if(['Walk-in','Tele-in'].includes(src))return 1;if(['CarDekho','Spinny','Meta','91 Wheels'].includes(src))return 0.25;return 24;}
+const FIRST_CONTACT_SLA_HOURS=10/60;
+function fcThr(src){return FIRST_CONTACT_SLA_HOURS;}
 function calcBucket(l){
   const st=l['Status'];if(st==='Booked'||st==='Delivered')return 'green';if(st==='Lost')return 'lost';
   const now=new Date();const cr=parseD(l['Created DT']);const lc=parseD(l['Last Contact DT']);const nf=parseD(l['Next Followup DT']);
@@ -1964,7 +1966,8 @@ function getTeamMembers(){
 }
 function canonicalSP(name){if(!name)return'Unassigned';const n=name.toLowerCase();const u=allUsers.find(u=>(u.display||u.username).toLowerCase()===n);return u?(u.display||u.username):name;}
 function isPunchOnlyRole(){return !!currentUser&&(currentUser.role==='receptionist'||currentUser.role==='cre');}
-const REASSIGN_SLA_HOURS=1;
+function hidesBooking(){return !!currentUser&&(isPunchOnlyRole()||currentUser.role==='crm_manager');}
+const REASSIGN_SLA_HOURS=10/60;
 function pendingTLFor(l){
   const spN=(l['Salesperson']||'').trim().toLowerCase();
   if(!spN)return null;
@@ -1976,6 +1979,8 @@ function reassignHoursPending(l){
   if(!ad)return 0;
   return hoursBetween(ad,new Date());
 }
+function reassignMinutesPending(l){return Math.max(0,Math.round(reassignHoursPending(l)*60));}
+function hasFirstCallLogged(l){return allFU.some(f=>f['Lead ID']===l['Lead ID']);}
 function canQuickAssign(l){
   if(!currentUser)return false;
   const tl=pendingTLFor(l);if(!tl)return false;
@@ -2067,7 +2072,7 @@ function renderDashSec(id,leads,type){
   el.innerHTML=shown.map(l=>{
     const age=Math.floor(hoursBetween(parseD(l['Created DT'])||now,now)/24);
     let timeTag='';
-    if(type==='red'){const lc=parseD(l['Last Contact DT']);const cr=parseD(l['Created DT']);if(!lc&&cr){const hrs=Math.round(hoursBetween(cr,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">${hrs}h uncontacted</span>`;}else{const nf=parseD(l['Next Followup DT']);if(nf){const ho=Math.round(hoursBetween(nf,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">FU ${ho}h overdue</span>`;}}}
+    if(type==='red'){const lc=parseD(l['Last Contact DT']);const cr=parseD(l['Created DT']);if(!lc&&cr){const totalMin=Math.round(hoursBetween(cr,now)*60);const dispMin=totalMin<60?totalMin+'min':Math.floor(totalMin/60)+'h '+(totalMin%60)+'min';timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">${dispMin} uncontacted</span>`;}else{const nf=parseD(l['Next Followup DT']);if(nf){const ho=Math.round(hoursBetween(nf,now));timeTag=`<span style="font-size:10.5px;font-weight:700;color:var(--red);">FU ${ho}h overdue</span>`;}}}
     else if(type==='amber'){const nf=parseD(l['Next Followup DT']);if(nf){const d=daysBetween(nf,now);timeTag=d>0?`<span class="ot">${d}d overdue</span>`:`<span class="dt">Due Today</span>`;}}
     const le=encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27');
     return `<div class="clr"><div class="clr-info" style="cursor:pointer;" onclick="goToLead('${le}')" title="View in Leads tab"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span>${hasTDDone(l['Lead ID'])?'<span class="pill pill-td" style="font-size:9px;padding:1px 5px;margin-left:5px;">🏁 TD</span>':''}</div><div class="clr-sub">${locTagHtml(l['Location'])} <span class="${srcCls(l['Source']||'')} pill" style="font-size:9px;padding:1px 5px;border:1px solid transparent;">${l['Source']||''}</span> · ${l['Model Interest']||'—'} · ${l['Salesperson']||'—'}</div></div><div class="clr-meta">${timeTag}${age>0?`<span style="font-size:10px;color:var(--gray-400);">${age}d</span>`:''}<button class="tbl-btn" onclick="prefillFU('${le}')">📞 FU</button><button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬</button></div></div>`;
@@ -2088,10 +2093,15 @@ function renderPendingReassign(){
   if(!list.length){el.innerHTML=`<div class="empty-st" style="padding:16px;"><div class="ico" style="font-size:20px;">✅</div><p style="font-size:12px;">Nothing pending reassignment.</p></div>`;return;}
   const shown=list.slice(0,8);
   el.innerHTML=shown.map(l=>{
-    const hrs=reassignHoursPending(l);const overdue=hrs>=REASSIGN_SLA_HOURS;
+    const mins=reassignMinutesPending(l);const overdue=reassignHoursPending(l)>=REASSIGN_SLA_HOURS;
+    const called=hasFirstCallLogged(l);
     const le=encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27');
     const tl=pendingTLFor(l);
-    return `<div class="clr"><div class="clr-info" style="cursor:pointer;" onclick="goToLead('${le}')" title="View in Leads tab"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span></div><div class="clr-sub">${locTagHtml(l['Location'])} · ${l['Model Interest']||'—'}${currentUser.role!=='team_leader'?' · TL: <strong>'+(tl?(tl.display||tl.username):'')+'</strong>':''}</div></div><div class="clr-meta"><span style="font-size:10.5px;font-weight:700;color:${overdue?'var(--red)':'#E65100'};">${hrs.toFixed(1)}h pending</span>${canQuickAssign(l)?`<button class="btn btn-xs" style="background:${overdue?'#B71C1C':'#E65100'};color:#fff;border:none;" onclick="openQuickAssign('${le}')">👉 Assign</button>`:''}</div></div>`;
+    let actionBtn='';
+    if(canQuickAssign(l)){
+      actionBtn=called?`<button class="btn btn-xs" style="background:${overdue?'#B71C1C':'#E65100'};color:#fff;border:none;" onclick="openQuickAssign('${le}')">👉 Assign</button>`:`<button class="btn btn-xs" style="background:${overdue?'#B71C1C':'#1565C0'};color:#fff;border:none;" onclick="prefillFU('${le}')">📞 Log First Call</button>`;
+    }
+    return `<div class="clr"><div class="clr-info" style="cursor:pointer;" onclick="goToLead('${le}')" title="View in Leads tab"><div class="clr-name">${l['Customer Name']||'—'} <span style="font-size:11px;color:var(--gray-400);">${l['Phone']||''}</span></div><div class="clr-sub">${locTagHtml(l['Location'])} · ${l['Model Interest']||'—'}${currentUser.role!=='team_leader'?' · TL: <strong>'+(tl?(tl.display||tl.username):'')+'</strong>':''}</div></div><div class="clr-meta"><span style="font-size:10.5px;font-weight:700;color:${overdue?'var(--red)':'#E65100'};">${mins}min pending</span>${actionBtn}</div></div>`;
   }).join('');
   if(list.length>8)el.innerHTML+=`<div style="text-align:center;padding:7px;font-size:11px;"><a onclick="showTab('leads')" style="color:var(--blue);cursor:pointer;font-weight:700;">View all ${list.length} →</a></div>`;
 }
@@ -2213,9 +2223,10 @@ function renderLeads(leads){
     const lc={red:'lred',amber:'lamber',hot:'lhot',warm:'lwarm',green:'lgreen',lost:'llost',cold:'lcold'}[b]||'lwarm';
     const le=encodeURIComponent(JSON.stringify(l)).replace(/'/g,'%27');
     const pendReassign=isPendingReassignment(l);
-    const pendHrs=pendReassign?reassignHoursPending(l):0;
-    const pendOverdue=pendReassign&&pendHrs>=REASSIGN_SLA_HOURS;
-    const pendPill=pendReassign?(pendOverdue?`<span class="pill" style="background:#FFEBEE;color:#B71C1C;border:1px solid #EF9A9A;font-weight:700;">🚨 Reassignment Overdue (${pendHrs.toFixed(1)}h)</span>`:`<span class="pill" style="background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;font-weight:700;">⏳ Awaiting Reassignment</span>`):'';
+    const pendMins=pendReassign?reassignMinutesPending(l):0;
+    const pendOverdue=pendReassign&&reassignHoursPending(l)>=REASSIGN_SLA_HOURS;
+    const pendCalled=pendReassign?hasFirstCallLogged(l):false;
+    const pendPill=!pendReassign?'':pendOverdue?`<span class="pill" style="background:#FFEBEE;color:#B71C1C;border:1px solid #EF9A9A;font-weight:700;">🚨 Reassignment Overdue (${pendMins}min)</span>`:!pendCalled?`<span class="pill" style="background:#E3F2FD;color:#0D47A1;border:1px solid #90CAF9;font-weight:700;">📞 First Call Needed</span>`:`<span class="pill" style="background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;font-weight:700;">⏳ Ready to Assign</span>`;
     return `<div class="lc ${lc}" id="lc-${i}">
       <div class="lc-head" onclick="togLC(${i})"><div><div class="lc-name">${l['Customer Name']||'—'}</div><div class="lc-phone">${l['Phone']||''}${l['Alt Phone']?' · '+l['Alt Phone']:''}</div></div>
         <div class="lc-pills"><span class="pill ${srcCls(l['Source']||'')}">${l['Source']||'—'}</span>${locTagHtml(l['Location'])}${intPill(l['Interest Level'])}${stPill(l['Status'])}${tdBadge(l)}${l['Exchange Interest']==='Yes'?'<span class="pill" style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;">🔄 Exchange</span>':''}${vocBadge(l)}${pendPill}</div>
@@ -2223,6 +2234,7 @@ function renderLeads(leads){
       <div class="lc-detail-row">
         <span>🚗 <strong>${l['Model Interest']||'—'}</strong>${l['Variant']?' '+l['Variant']:''}</span>
         <span>💰 ${l['Budget']||'—'}</span><span>💳 ${l['Finance/Cash']||'—'}</span>
+        ${l['Customer Email']?`<span>✉ ${l['Customer Email']}</span>`:''}
         ${l['Customer Area']?`<span>📍 ${l['Customer Area']}${l['Customer City']?', '+l['Customer City']:''}</span>`:''}
         ${l['Customer Expected Delivery']?`<span>📅 Wants: <strong>${l['Customer Expected Delivery']}</strong></span>`:''}
         <span>📞 Last: <strong>${lcTxt}</strong></span><span>📅 Next: ${fuTxt}</span>
@@ -2232,10 +2244,10 @@ function renderLeads(leads){
       ${l['VoC Notes']?`<div style="padding:5px 14px 8px;font-size:11px;color:var(--gray-700);background:var(--amber-bg);border-top:1px solid var(--amber-bd);"><strong>VoC:</strong>${l['VoC Notes'].split(' | ').map((e,i)=>`<div style="margin-top:3px;padding:2px 7px;border-left:2px solid var(--amber-bd);${i===0?'color:var(--gray-800);':''}">${e}</div>`).join('')}</div>`:''}
       ${missingBk?`<div style="padding:6px 14px;font-size:11.5px;font-weight:700;color:#7B3F00;background:#FFF3E0;border-top:2px solid #FFA000;display:flex;align-items:center;gap:8px;">⚠ Lead is marked Booked but no booking record exists — complete the booking form below.</div>`:''}
       <div class="lc-actions">
-        ${canQuickAssign(l)?`<button class="btn btn-xs" style="background:${pendOverdue?'#B71C1C':'#E65100'};color:#fff;font-weight:800;border:none;" onclick="openQuickAssign('${le}')">👉 Assign to Salesperson</button>`:''}
-        ${isPunchOnlyRole()?'':`<button class="btn btn-ghost btn-xs" onclick="prefillFU('${le}')">📞 Log Follow-up</button>`}
+        ${canQuickAssign(l)?(pendCalled?`<button class="btn btn-xs" style="background:${pendOverdue?'#B71C1C':'#E65100'};color:#fff;font-weight:800;border:none;" onclick="openQuickAssign('${le}')">👉 Assign to Salesperson</button>`:`<button class="btn btn-xs" style="background:${pendOverdue?'#B71C1C':'#1565C0'};color:#fff;font-weight:800;border:none;" onclick="prefillFU('${le}')">📞 Make First Call</button>`):''}
+        ${(isPunchOnlyRole()||(canQuickAssign(l)&&!pendCalled))?'':`<button class="btn btn-ghost btn-xs" onclick="prefillFU('${le}')">📞 Log Follow-up</button>`}
         <button class="btn-wa btn btn-xs" onclick="openWAPicker('${le}')">💬 WhatsApp</button>
-        ${isPunchOnlyRole()?'':`<button class="btn btn-xs" style="${missingBk?'background:#E65100;color:#fff;font-weight:800;border:none;':'background:var(--green);color:#fff;border:none;'}" onclick="prefillBooking('${le}')">${missingBk?'⚠ Create Booking Record':'🚗 Book'}</button>`}
+        ${hidesBooking()?'':`<button class="btn btn-xs" style="${missingBk?'background:#E65100;color:#fff;font-weight:800;border:none;':'background:var(--green);color:#fff;border:none;'}" onclick="prefillBooking('${le}')">${missingBk?'⚠ Create Booking Record':'🚗 Book'}</button>`}
         ${isPunchOnlyRole()?'':`<button class="btn btn-danger btn-xs" onclick="prefillFULost('${le}')">❌ Mark Lost</button>`}
         <button class="btn btn-ghost btn-xs" onclick="openEditLead('${le}')">✏ Edit</button>
         ${currentUser&&currentUser.role==='masteradmin'?`<button class="btn btn-xs" style="background:#B71C1C;color:#fff;border:none;" onclick="deleteLead('${le}')">🗑 Delete</button>`:''}
@@ -2256,6 +2268,7 @@ function openEditLead(enc){
   document.getElementById('el-name').value=l['Customer Name']||'';
   document.getElementById('el-phone').value=l['Phone']||'';
   document.getElementById('el-altphone').value=l['Alt Phone']||'';
+  document.getElementById('el-email').value=l['Customer Email']||'';
   document.getElementById('el-source').value=l['Source']||'';
   document.getElementById('el-loc').value=l['Location']||'';
   document.getElementById('el-model').value=l['Model Interest']||'';
@@ -2282,6 +2295,7 @@ function openEditLead(enc){
 function closeEditLead(){document.getElementById('edit-lead-modal').classList.remove('open');}
 function openQuickAssign(enc){
   const l=JSON.parse(decodeURIComponent(enc));
+  if(!hasFirstCallLogged(l)){alert('Log the first call with this customer before assigning to a salesperson.');prefillFU(enc);return;}
   const tl=pendingTLFor(l);
   const teamSPs=tl?allUsers.filter(u=>u.role==='salesperson'&&u.team===tl.username):[];
   document.getElementById('qa-ri').value=l.rowIndex||'';
@@ -2325,6 +2339,7 @@ async function submitEditLead(){
   if(!name||!phone){setMsg(document.getElementById('el-status-msg'),'err','✗ Name and Phone are required');return;}
   const d={rowIndex:ri,'Lead ID':lid,'Customer Name':name,'Phone':phone,
     'Alt Phone':document.getElementById('el-altphone').value,
+    'Customer Email':document.getElementById('el-email').value.trim(),
     'Source':document.getElementById('el-source').value,
     'Location':document.getElementById('el-loc').value,
     'Model Interest':document.getElementById('el-model').value,
@@ -2381,8 +2396,12 @@ function applyNewLeadRoleRestrictions(){
   const rolePill=document.getElementById('nl-role-pill');
   srcBtns.forEach(b=>b.style.display='');
   locBtns.forEach(b=>b.style.display='');
-  if(spLabel&&spLabel.firstChild)spLabel.firstChild.textContent=(role==='receptionist'||role==='cre')?'Assign to Team Leader ':'Salesperson ';
-  if(rolePill)rolePill.textContent=role==='receptionist'?'RECEPTIONIST':role==='cre'?'CRE':'SALES STAFF';
+  const isRouter=role==='receptionist'||role==='cre'||role==='crm_manager';
+  if(spLabel&&spLabel.firstChild)spLabel.firstChild.textContent=isRouter?'Assign to Team Leader ':'Salesperson ';
+  if(rolePill)rolePill.textContent=role==='receptionist'?'RECEPTIONIST':role==='cre'?'CRE':role==='crm_manager'?'CRM MANAGER':'SALES STAFF';
+  const financeField=document.getElementById('nl-finance');
+  const financeWrap=financeField?financeField.closest('.field'):null;
+  if(financeWrap)financeWrap.style.display=role==='receptionist'?'none':'';
   if(role==='receptionist'){
     srcBtns.forEach((b,i)=>{if(i!==0)b.style.display='none';});
     if(nlSrc!=='Walk-in')selSrc('Walk-in',srcBtns[0]);
@@ -2404,11 +2423,13 @@ async function submitNewLead(){
   const reqs=[{id:'nl-name',key:'Customer Name'},{id:'nl-sp',key:'Salesperson'},{id:'nl-phone',key:'Phone'},{id:'nl-model',key:'Model Interest'}];let ok=true;const d={};
   reqs.forEach(f=>{const el=document.getElementById(f.id);const fi=el.closest('.field');if(!el.value.trim()){fi.classList.add('invalid');ok=false;}else{fi.classList.remove('invalid');d[f.key]=el.value.trim();}});
   if(!ok){setMsg(document.getElementById('nl-status'),'err','✗ Fill required fields');return;}
+  d['VoC Notes']=document.getElementById('nl-notes').value;
+  if(currentUser&&currentUser.role==='cre'&&d['VoC Notes'].trim().length<30){document.getElementById('nl-notes').closest('.field').classList.add('invalid');setMsg(document.getElementById('nl-status'),'err','✗ Capture complete Voice-of-Customer notes for this lead (min. 30 characters) before saving.');return;}
   d['Source']=nlSrc;d['Location']=nlLocV;d['Created DT']=fmtDT(new Date());d['Interest Level']=nlInt||'Warm';
-  d['Alt Phone']=document.getElementById('nl-altphone').value;d['Variant']=document.getElementById('nl-variant').value;d['Color Pref']=document.getElementById('nl-color').value;
+  d['Alt Phone']=document.getElementById('nl-altphone').value;d['Customer Email']=document.getElementById('nl-email').value.trim();d['Variant']=document.getElementById('nl-variant').value;d['Color Pref']=document.getElementById('nl-color').value;
   d['Budget']=document.getElementById('nl-budget').value;d['Finance/Cash']=document.getElementById('nl-finance').value;
   d['Customer Area']=document.getElementById('nl-area').value;d['Customer City']=document.getElementById('nl-city').value;
-  d['VoC Notes']=document.getElementById('nl-notes').value;d['Next Followup DT']=document.getElementById('nl-nextfu').value;d['Status']='Active';
+  d['Next Followup DT']=document.getElementById('nl-nextfu').value;d['Status']='Active';
   d['Exchange Interest']=document.getElementById('nl-exchange').checked?'Yes':'';
   d['Punched By']=currentUser?(currentUser.display||currentUser.username):'';
   if(d['VoC Notes'].trim()){d['First Contact DT']=d['Created DT'];d['Last Contact DT']=d['Created DT'];}
@@ -2416,7 +2437,7 @@ async function submitNewLead(){
   const st=document.getElementById('nl-status');setMsg(st,'ld','⟳ Saving…');
   try{const r=await api({action:'addLead',data:JSON.stringify(d)});setMsg(st,'ok','✓ Lead saved! '+r.leadId);clearNLForm();allLeads.push({...d,'Lead ID':r.leadId,'Followup Count':'0'});renderDashboard();}catch(e){setMsg(st,'err','✗ '+e.message);}
 }
-function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.disabled=false;}});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;document.getElementById('nl-exchange').checked=false;document.getElementById('err-src').style.display='none';document.getElementById('err-loc').style.display='none';nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());populateSPDropdowns();applyNewLeadRoleRestrictions();}
+function clearNLForm(){['nl-name','nl-phone','nl-altphone','nl-email','nl-model','nl-variant','nl-color','nl-budget','nl-area','nl-city','nl-notes','nl-del-date'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.disabled=false;}});document.getElementById('nl-finance').value='';document.getElementById('nl-asap').checked=false;document.getElementById('nl-exchange').checked=false;document.getElementById('err-src').style.display='none';document.getElementById('err-loc').style.display='none';nlSrc='';nlLocV='';nlInt='Warm';document.getElementById('nl-source').value='';document.getElementById('nl-loc').value='';document.getElementById('nl-interest').value='Warm';document.querySelectorAll('#src-grp .seg-btn,#loc-grp .seg-btn').forEach(b=>b.classList.remove('sel-src','sel-palam','sel-naj','sel-nar'));document.querySelectorAll('#int-grp .seg-btn').forEach(b=>b.classList.remove('sel-hot','sel-warm','sel-cold'));document.querySelectorAll('#int-grp .seg-btn')[1].classList.add('sel-warm');document.querySelectorAll('#tab-new-lead .field').forEach(f=>f.classList.remove('invalid'));setNextFU(1,'nl-nextfu');document.getElementById('nl-created').value=fmtDT(new Date());populateSPDropdowns();applyNewLeadRoleRestrictions();}
 
 // ═══ FOLLOW-UP ═══
 function autoCheckTD(){const o=document.getElementById('fu-outcome').value;if(o.startsWith('Test Drive done')){document.getElementById('fu-td-chk').checked=true;document.getElementById('td-fields').style.display='block';}}
@@ -2728,17 +2749,19 @@ function renderDVS(){
 async function renderUsersTable(){
   const wrap=document.getElementById('um-table-wrap');if(!wrap)return;
   const canManageUsers=!!currentUser&&currentUser.role==='masteradmin';
-  const canReassignTeam=!!currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager');
+  const canReassignTeam=!!currentUser&&(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head');
+  const scopeBranch=(currentUser&&currentUser.role==='branch_head')?currentUser.branch:null;
   const formCard=document.getElementById('um-form-card');const layout=document.getElementById('um-layout');
   if(formCard)formCard.style.display=canManageUsers?'':'none';
   if(layout)layout.style.gridTemplateColumns=canManageUsers?'320px 1fr':'1fr';
   try{
-    const r=await api({action:'getUsers'});const users=r.users||[];
-    allUsers=users;
+    const r=await api({action:'getUsers'});const allFetched=r.users||[];
+    allUsers=allFetched;
     if(canManageUsers)toggleRoleFields();
+    const users=scopeBranch?allFetched.filter(u=>u.branch===scopeBranch):allFetched;
     if(!users.length){wrap.innerHTML='<div class="empty-st" style="padding:20px;"><div class="ico">👤</div><p>No users found.</p></div>';return;}
-    const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',team_leader:'#6A1B9A',salesperson:'#1565C0',receptionist:'#00838F',cre:'#AD1457'};
-    const tls=users.filter(u=>u.role==='team_leader');
+    const roleColor={masteradmin:'#C62828',manager:'#E65100',branch_head:'#2E7D32',team_leader:'#6A1B9A',salesperson:'#1565C0',receptionist:'#00838F',cre:'#AD1457',crm_manager:'#4527A0'};
+    const tls=allFetched.filter(u=>u.role==='team_leader');
     const tlMap=Object.fromEntries(tls.map(u=>[u.username,u.display||u.username]));
     const actionsHd=canManageUsers?'<th>Actions</th>':'';
     wrap.innerHTML='<table class="preview-tbl" style="width:100%;border-collapse:collapse;"><thead><tr><th>Username</th><th>Display Name</th><th>Role</th><th>Department</th><th>Branch</th><th>Team</th><th>Email</th>'+actionsHd+'</tr></thead><tbody>'+
@@ -2780,7 +2803,6 @@ async function saveUserUI(){
   if((role==='branch_head'||role==='team_leader'||role==='receptionist')&&!branch){st.textContent='Please select a branch for this role.';st.style.color='var(--red)';return;}
   if(role==='salesperson'&&!branch){st.textContent='Please select a branch for this salesperson.';st.style.color='var(--red)';return;}
   if(role==='salesperson'&&!team){st.textContent='Please assign a Team Leader for this salesperson.';st.style.color='var(--red)';return;}
-  if((role==='team_leader'||role==='salesperson')&&!email){st.textContent='Please provide an email — required for lead-assignment alerts.';st.style.color='var(--red)';return;}
   st.textContent='Saving…';st.style.color='var(--amber)';
   try{
     await api({action:'saveUser',data:JSON.stringify({username:uname,password:pass,role,display:display||uname,branch,team,email,department})});
@@ -2820,7 +2842,6 @@ function toggleRoleFields(){
   document.getElementById('um-branch-wrap').style.display=(r==='branch_head'||r==='team_leader'||r==='salesperson'||r==='receptionist')?'':'none';
   const tw=document.getElementById('um-team-wrap');tw.style.display=r==='salesperson'?'':'none';
   const dh=document.getElementById('um-dept-hint');if(dh)dh.textContent=ROLE_DEPARTMENT[r]?'Department: '+ROLE_DEPARTMENT[r]:'';
-  const er=document.getElementById('um-email-req');if(er)er.style.display=(r==='team_leader'||r==='salesperson')?'':'none';
   if(r==='salesperson'){
     const tls=allUsers.filter(u=>u.role==='team_leader');
     const cur=document.getElementById('um-team').value;
@@ -3180,14 +3201,15 @@ let currentUser=null;let allUsers=[];
 const ROLE_TABS={
   masteradmin: ['dashboard','leads','new-lead','followup','bookings','stock','analytics','setup'],
   manager:     ['dashboard','leads','new-lead','followup','bookings','stock','analytics','setup'],
-  branch_head: ['dashboard','leads','new-lead','followup','bookings','stock','analytics'],
+  branch_head: ['dashboard','leads','new-lead','followup','bookings','stock','analytics','setup'],
   team_leader: ['dashboard','leads','new-lead','followup','bookings','stock','analytics'],
   salesperson: ['dashboard','leads','new-lead','followup','bookings'],
   receptionist:['dashboard','leads','new-lead'],
-  cre:         ['dashboard','leads','new-lead']
+  cre:         ['dashboard','leads','new-lead'],
+  crm_manager: ['dashboard','leads','new-lead','followup']
 };
-const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',team_leader:'TEAM LEADER',salesperson:'SALESPERSON',receptionist:'RECEPTIONIST',cre:'CRE'};
-const ROLE_DEPARTMENT={masteradmin:'Sales',manager:'Sales',branch_head:'Sales',team_leader:'Sales',salesperson:'Sales',receptionist:'Front Office',cre:'CRM'};
+const ROLE_LABEL={masteradmin:'MASTER ADMIN',manager:'MANAGER',branch_head:'BRANCH HEAD',team_leader:'TEAM LEADER',salesperson:'SALESPERSON',receptionist:'RECEPTIONIST',cre:'CRE',crm_manager:'CRM MANAGER'};
+const ROLE_DEPARTMENT={masteradmin:'Sales',manager:'Sales',branch_head:'Sales',team_leader:'Sales',salesperson:'Sales',receptionist:'Front Office',cre:'CRM',crm_manager:'CRM'};
 async function doLogin(){
   const u=document.getElementById('lu').value.trim().toLowerCase();
   const p=document.getElementById('lp').value;
@@ -3215,10 +3237,10 @@ function showApp(){
   document.getElementById('hdr-avatar').textContent=(currentUser.display||currentUser.username||'?')[0].toUpperCase();
   applyRoleTabs();
   applyNewLeadRoleRestrictions();
-  if((currentUser.role==='team_leader'||currentUser.role==='receptionist')&&currentUser.branch){
+  if((currentUser.role==='team_leader'||currentUser.role==='receptionist'||currentUser.role==='branch_head')&&currentUser.branch){
     currentLoc=currentUser.branch;
     document.querySelector('.loc-bar').style.display='none';
-    document.getElementById('dash-sub').textContent=currentUser.display+(currentUser.role==='receptionist'?' · ':' Team · ')+currentUser.branch;
+    document.getElementById('dash-sub').textContent=currentUser.display+(currentUser.role==='team_leader'?' Team · ':' · ')+currentUser.branch;
     document.getElementById('app-screen').classList.add('no-locbar');
   } else {
     currentLoc='ALL';
@@ -3228,7 +3250,7 @@ function showApp(){
   }
   if(allUsers.length>0){populateSPDropdowns();}
   else{api({action:'getUsers'}).then(r=>{allUsers=r.users||[];populateSPDropdowns();renderDashboard();}).catch(()=>{});}
-  renderNotifBell();loadAll();if(currentUser.role==='masteradmin'||currentUser.role==='manager')renderUsersTable();
+  renderNotifBell();loadAll();if(currentUser.role==='masteradmin'||currentUser.role==='manager'||currentUser.role==='branch_head')renderUsersTable();
   const pastToggle=document.getElementById('bk-past-toggle');if(pastToggle){const r=currentUser.role;pastToggle.style.display=(r==='masteradmin'||r==='manager'||r==='branch_head')?'inline-flex':'none';}
   const _canDisc=currentUser.role==='masteradmin'||currentUser.role==='branch_head';
   ['bk-discount-row','ebk-discount-row'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=_canDisc?'':'none';});
@@ -3239,7 +3261,7 @@ function populateSPDropdowns(){
   const nlSp=document.getElementById('nl-sp');const bkSp=document.getElementById('bk-sp');
   if(bkSp)bkSp.innerHTML=opts;
   if(nlSp){
-    if(currentUser.role==='receptionist'||currentUser.role==='cre'){
+    if(currentUser.role==='receptionist'||currentUser.role==='cre'||currentUser.role==='crm_manager'){
       const tls=allUsers.filter(u=>u.role==='team_leader'&&(currentUser.role!=='receptionist'||u.branch===currentUser.branch));
       nlSp.innerHTML='<option value="">Select Team Leader…</option>'+tls.map(u=>`<option value="${u.display||u.username}">${u.display||u.username}${u.branch?' ('+u.branch+')':''}</option>`).join('');
     } else nlSp.innerHTML=opts;
@@ -3260,9 +3282,9 @@ function applyRoleTabs(){
   const spFilterEl=document.getElementById('fl-sp');if(spFilterEl)spFilterEl.closest('.filter-bar')&&(spFilterEl.style.display=(currentUser.role==='salesperson'||currentUser.role==='team_leader')?'none':'');
   const setupTabEl=document.querySelectorAll('nav .tab')[7];
   const setupTitleEl=document.getElementById('setup-sh-title');
-  const isManagerOnly=currentUser.role==='manager';
-  if(setupTabEl)setupTabEl.textContent=isManagerOnly?'👥 Team Assignment':'👥 Users';
-  if(setupTitleEl)setupTitleEl.textContent=isManagerOnly?'Team Assignment':'User Management';
+  const isTeamAssignOnly=currentUser.role==='manager'||currentUser.role==='branch_head';
+  if(setupTabEl)setupTabEl.textContent=isTeamAssignOnly?'👥 Team Assignment':'👥 Users';
+  if(setupTitleEl)setupTitleEl.textContent=isTeamAssignOnly?'Team Assignment':'User Management';
 }
 
 // ═══ BULK LEAD UPLOAD ═══
@@ -3553,8 +3575,8 @@ function isRelevantLead(l){
   const r=currentUser.role;
   if(r==='salesperson'){const spN=(l['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
   if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((l['Salesperson']||'').toLowerCase());}
-  if(r==='receptionist'){return !currentUser.branch||(l['Location']||'').includes(currentUser.branch);}
-  if(r==='branch_head'||r==='manager'||r==='cre'){return true;}
+  if(r==='receptionist'||r==='branch_head'){return !currentUser.branch||(l['Location']||'').includes(currentUser.branch);}
+  if(r==='manager'||r==='cre'||r==='crm_manager'){return true;}
   return true;
 }
 function isRelevantBk(b){
@@ -3562,7 +3584,8 @@ function isRelevantBk(b){
   const r=currentUser.role;
   if(r==='salesperson'){const spN=(b['Salesperson']||'').toLowerCase();return spN===currentUser.display.toLowerCase()||spN===currentUser.username.toLowerCase();}
   if(r==='team_leader'){const mem=getTeamMembers();return mem.includes((b['Salesperson']||'').toLowerCase());}
-  if(r==='branch_head'||r==='manager'){return true;}
+  if(r==='branch_head'){return !currentUser.branch||(b['Location']||'').includes(currentUser.branch);}
+  if(r==='manager'){return true;}
   return true;
 }
 function checkNewLeadNotifs(isFirstLoad){
