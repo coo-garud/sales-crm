@@ -1525,6 +1525,17 @@ function updateStock(d){
       <div class="an-hd">👤 Top Salesperson Performance</div>
       <div id="an-sp-perf"></div>
     </div>
+    <!-- Daily follow-up activity -->
+    <div class="an-card an-card-full">
+      <div class="an-hd">📞 Daily Follow-up Activity <input type="date" id="an-fu-date" onchange="renderAnFUActivity()" style="margin-left:auto;font-size:11px;padding:4px 7px;border:1px solid var(--gray-200);border-radius:5px;font-family:var(--font-b);"><button class="an-range-btn" style="margin-left:6px;" onclick="setAnFUToday()">Today</button></div>
+      <div style="overflow-x:auto;">
+        <table class="an-tbl" id="an-fu-tbl">
+          <thead><tr><th>Salesperson</th><th>Role</th><th>Follow-ups Logged</th></tr></thead>
+          <tbody id="an-fu-tbody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:11px;color:var(--gray-400);margin-top:6px;" id="an-fu-note"></div>
+    </div>
   </div>
 </div>
 </main>
@@ -3719,6 +3730,47 @@ function renderAnalytics(){
   renderAnSources(leads,bks);
   renderAnModels(bks);
   renderAnSPPerf(bks);
+  const fuDateEl=document.getElementById('an-fu-date');
+  if(fuDateEl&&!fuDateEl.value)fuDateEl.value=new Date().toISOString().slice(0,10);
+  renderAnFUActivity();
+}
+function setAnFUToday(){const el=document.getElementById('an-fu-date');if(el){el.value=new Date().toISOString().slice(0,10);renderAnFUActivity();}}
+function fuLoggerScopeOk(name){
+  if(!currentUser||!name)return true;
+  const r=currentUser.role;
+  if(r==='team_leader'){return getTeamMembers().includes(name.toLowerCase());}
+  if(r==='branch_head'){
+    const u=allUsers.find(x=>(x.display||x.username).toLowerCase()===name.toLowerCase());
+    return !currentUser.branch||!u||u.branch===currentUser.branch;
+  }
+  return true;
+}
+function renderAnFUActivity(){
+  const tbody=document.getElementById('an-fu-tbody');const note=document.getElementById('an-fu-note');
+  if(!tbody)return;
+  const dateEl=document.getElementById('an-fu-date');
+  const dateStr=(dateEl&&dateEl.value)||new Date().toISOString().slice(0,10);
+  const dayStart=new Date(dateStr+'T00:00:00');const dayEnd=new Date(dateStr+'T23:59:59');
+  const roleMap=Object.fromEntries(allUsers.map(u=>[(u.display||u.username).toLowerCase(),u.role]));
+  const counts={};
+  (allFU||[]).forEach(f=>{
+    const dt=parseD(f['DateTime']);if(!dt||dt<dayStart||dt>dayEnd)return;
+    const sp=(f['Salesperson']||'Unassigned').trim();if(!sp)return;
+    if(!fuLoggerScopeOk(sp))return;
+    counts[sp]=(counts[sp]||0)+1;
+  });
+  const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="3" style="padding:14px;text-align:center;color:var(--gray-400);">No follow-ups logged on this date.</td></tr>';}
+  else{
+    tbody.innerHTML=rows.map(([sp,cnt])=>{
+      const role=roleMap[sp.toLowerCase()];
+      const roleLbl=role?(ROLE_LABEL[role]||role):'—';
+      return `<tr><td style="font-weight:700;">${sp}</td><td style="font-size:11px;color:var(--gray-500);">${roleLbl}</td><td style="font-family:var(--font-h);font-weight:700;color:var(--blue);">${cnt}</td></tr>`;
+    }).join('');
+  }
+  const total=rows.reduce((s,[,c])=>s+c,0);
+  const dispDate=new Date(dateStr+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  if(note)note.textContent=`${total} follow-up${total!==1?'s':''} logged on ${dispDate} across ${rows.length} ${rows.length===1?'person':'people'}.`;
 }
 function renderAnWeekly(bks){
   const now=new Date();const labels=[],data=[];
