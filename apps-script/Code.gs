@@ -1,12 +1,13 @@
 // Sales Command Centre — Apps Script v3
 // Auto-creates 6 sheets: Leads, FollowUps, Bookings, TestDrives, Stock, Users
 
-const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest"];
+const LH=["Lead ID","Created DT","Location","Source","Customer Name","Phone","Alt Phone","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Status","Interest Level","First Contact DT","Last Contact DT","Next Followup DT","Followup Count","Lost Reason","VoC Notes","Customer Area","Customer City","Customer Expected Delivery","Exchange Interest","Punched By","Assigned DT","Reminder Sent"];
+const REASSIGN_SLA_HOURS=1;
 const FH=["FU ID","Lead ID","DateTime","Salesperson","Method","Outcome","Status After","Interest After","Notes","Next Followup DT"];
 const BH=["Booking ID","Lead ID","Booking DT","Location","Customer Name","Phone","Model","Variant","Color","Booking Amount","Payment Mode","Lead Source","Exchange","Old Car Make","Old Car Model","Old Car Year","Exchange Value","In-house Insurance","VC Number","Discount Amount","Customer Expected Delivery","In Stock","Stock Ref","Stockyard","Expected Arrival","Actual Delivery","Planned Delivery","Status","Salesperson","Notes","Cancellation Date","Cancellation Reason"];
 const TH=["TD ID","Lead ID","DateTime","Customer Name","Phone","Location","Model","Salesperson","Post-TD Interest","Notes"];
 const SH=["Stock ID","Chassis No","Model","Variant","Color","Added Date","Current Location","Status","Allocated To","Booking ID","Notes"];
-const UH=["Username","Password","Role","Display Name","Branch","Team"];
+const UH=["Username","Password","Role","Display Name","Branch","Team","Email","Department"];
 const DEFAULT_USERS=[
   ["masteradmin","Admin@123","masteradmin","Master Admin"],
   ["manager",    "Manager@123","manager",  "Manager"],
@@ -28,6 +29,7 @@ function handleReq(e){
       case "deleteUser":res=deleteUser(JSON.parse(p.data));break;
       case "deleteLead":res=deleteLead(JSON.parse(p.data));break;
       case "bulkSetInsurance":res=bulkSetInsurance();break;
+      case "checkReassignmentSLA":res=checkOverdueReassignments();break;
       case "backfillPalamContactDT":res=backfillPalamContactDT();break;
       default:res={status:"ok",msg:"Sales CRM API v3 running"};
     }
@@ -38,6 +40,9 @@ const SPREADSHEET_ID='1pw6BeI8uRd_hMHDdGyNi3AWfnBp8v0r_vSvg4fxcnwY';
 function getOrCreate(name,headers){
   const ss=SpreadsheetApp.openById(SPREADSHEET_ID);let sh=ss.getSheetByName(name);
   if(!sh){sh=ss.insertSheet(name);const r=sh.getRange(1,1,1,headers.length);r.setValues([headers]);r.setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");sh.setFrozenRows(1);}
+  else if(sh.getLastColumn()<headers.length){
+    for(let i=sh.getLastColumn();i<headers.length;i++){sh.getRange(1,i+1).setValue(headers[i]).setFontWeight("bold").setBackground("#003A6B").setFontColor("#FFFFFF");}
+  }
   return sh;
 }
 function sheetToArr(sh,headers){
@@ -50,8 +55,17 @@ function sheetToArr(sh,headers){
 function getAll(){return{status:"ok",leads:sheetToArr(getOrCreate("Leads",LH),LH),followups:sheetToArr(getOrCreate("FollowUps",FH),FH),bookings:sheetToArr(getOrCreate("Bookings",BH),BH),testdrives:sheetToArr(getOrCreate("TestDrives",TH),TH),stock:sheetToArr(getOrCreate("Stock",SH),SH)};}
 function updateLead(d){
   const sh=getOrCreate("Leads",LH);const ri=parseInt(d.rowIndex);if(!ri||ri<2)throw new Error("Invalid row");
+  const spCol=LH.indexOf("Salesperson")+1;
+  const prevSP=spCol>0?String(sh.getRange(ri,spCol).getValue()||"").trim():"";
   const editable=["Customer Name","Phone","Alt Phone","Source","Location","Model Interest","Variant","Color Pref","Budget","Finance/Cash","Salesperson","Interest Level","Status","Customer Area","Customer City","Customer Expected Delivery","VoC Notes","Created DT","Exchange Interest"];
   editable.forEach(col=>{const ci=LH.indexOf(col)+1;if(ci>0&&d[col]!==undefined)sh.getRange(ri,ci).setValue(d[col]);});
+  const newSP=(d["Salesperson"]!==undefined?String(d["Salesperson"]).trim():prevSP);
+  if(newSP&&newSP!==prevSP){
+    const adCol=LH.indexOf("Assigned DT")+1;if(adCol>0)sh.getRange(ri,adCol).setValue(Utilities.formatDate(new Date(),Session.getScriptTimeZone(),"yyyy-MM-dd HH:mm"));
+    const rsCol=LH.indexOf("Reminder Sent")+1;if(rsCol>0)sh.getRange(ri,rsCol).setValue("");
+    const snapshot={};LH.forEach((h,i)=>{snapshot[h]=sh.getRange(ri,i+1).getValue();});
+    notifyLeadAssignment(newSP,snapshot,"assigned");
+  }
   return{status:"ok"};
 }
 function addLead(d){
@@ -60,7 +74,81 @@ function addLead(d){
   d["Created DT"]=d["Created DT"]||Utilities.formatDate(new Date(),tz,"yyyy-MM-dd HH:mm");
   d["Status"]=d["Status"]||"Active";d["Interest Level"]=d["Interest Level"]||"Warm";d["Followup Count"]="0";
   if(d["VoC Notes"]&&String(d["VoC Notes"]).trim()){d["First Contact DT"]=d["First Contact DT"]||d["Created DT"];d["Last Contact DT"]=d["Last Contact DT"]||d["Created DT"];}
-  sh.appendRow(LH.map(h=>d[h]||""));return{status:"ok",leadId:d["Lead ID"]};
+  if(d["Salesperson"]&&String(d["Salesperson"]).trim())d["Assigned DT"]=d["Created DT"];
+  sh.appendRow(LH.map(h=>d[h]||""));
+  if(d["Salesperson"]&&String(d["Salesperson"]).trim())notifyLeadAssignment(d["Salesperson"],d,"punched and assigned");
+  return{status:"ok",leadId:d["Lead ID"]};
+}
+function checkOverdueReassignments(){
+  const sh=getOrCreate("Leads",LH);const last=sh.getLastRow();if(last<2)return{status:"ok",reminded:0};
+  const users=getUsers().users||[];
+  const tlByName={};users.filter(u=>u.role==='team_leader').forEach(u=>{tlByName[(u.display||u.username).toLowerCase()]=u;});
+  const data=sh.getRange(2,1,last-1,LH.length).getValues();
+  const spIdx=LH.indexOf("Salesperson"),adIdx=LH.indexOf("Assigned DT"),rsIdx=LH.indexOf("Reminder Sent"),stIdx=LH.indexOf("Status"),cdIdx=LH.indexOf("Created DT"),nameIdx=LH.indexOf("Customer Name"),phIdx=LH.indexOf("Phone"),mdIdx=LH.indexOf("Model Interest");
+  const now=new Date();const pending={};
+  data.forEach((row,i)=>{
+    const status=String(row[stIdx]||"");
+    if(status==="Lost"||status==="Booked")return;
+    const spName=String(row[spIdx]||"").trim();
+    const tl=tlByName[spName.toLowerCase()];
+    if(!tl)return;
+    if(String(row[rsIdx]||"").trim()==="Yes")return;
+    const adRaw=row[adIdx]||row[cdIdx];
+    const assignedDT=adRaw instanceof Date?adRaw:(adRaw?new Date(String(adRaw).replace(" ","T")):null);
+    if(!assignedDT||isNaN(assignedDT.getTime()))return;
+    const hrs=(now-assignedDT)/3600000;
+    if(hrs<REASSIGN_SLA_HOURS)return;
+    const key=tl.username;
+    if(!pending[key])pending[key]={tl:tl,leads:[]};
+    pending[key].leads.push({ri:i+2,name:row[nameIdx],phone:row[phIdx],model:row[mdIdx],hrs:hrs.toFixed(1)});
+  });
+  let reminded=0;
+  Object.values(pending).forEach(p=>{
+    p.leads.forEach(l=>sh.getRange(l.ri,rsIdx+1).setValue("Yes"));
+    reminded+=p.leads.length;
+    if(!p.tl.email)return;
+    const rowsHtml=p.leads.map(l=>'<tr><td>'+l.name+'</td><td>'+l.phone+'</td><td>'+l.model+'</td><td>'+l.hrs+'h</td></tr>').join('');
+    const body='<p>You have <strong>'+p.leads.length+'</strong> lead(s) still waiting to be reassigned to a salesperson (SLA: '+REASSIGN_SLA_HOURS+'h):</p>'+
+      '<table cellpadding="4" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;"><tr style="background:#f0f0f0;"><th>Customer</th><th>Phone</th><th>Model</th><th>Pending</th></tr>'+rowsHtml+'</table>'+
+      '<p>Please assign them to a salesperson as soon as possible.</p>';
+    try{MailApp.sendEmail({to:p.tl.email,subject:'⏰ '+p.leads.length+' lead(s) awaiting reassignment',htmlBody:body});}catch(e){}
+  });
+  return{status:"ok",reminded:reminded};
+}
+function installReassignmentReminderTrigger(){
+  ScriptApp.getProjectTriggers().forEach(t=>{if(t.getHandlerFunction()==='checkOverdueReassignments')ScriptApp.deleteTrigger(t);});
+  ScriptApp.newTrigger('checkOverdueReassignments').timeBased().everyHours(1).create();
+  return{status:"ok"};
+}
+function findUserByName(name,users){
+  if(!name)return null;
+  const list=users||(getUsers().users||[]);
+  const n=String(name).trim().toLowerCase();
+  return list.find(u=>(u.display||u.username||"").toLowerCase()===n||u.username.toLowerCase()===n)||null;
+}
+function notifyLeadAssignment(assigneeName,lead,eventLabel){
+  try{
+    const users=getUsers().users||[];
+    const u=findUserByName(assigneeName,users);
+    if(!u)return;
+    const rows=[
+      ["Lead ID",lead["Lead ID"]],["Customer",lead["Customer Name"]],["Phone",lead["Phone"]],
+      ["Source",lead["Source"]],["Location",lead["Location"]],["Model Interest",lead["Model Interest"]],
+      ["Punched By",lead["Punched By"]]
+    ].filter(r=>r[1]);
+    const tbl='<table cellpadding="4" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;">'+
+      rows.map(r=>'<tr><td style="color:#666;"><strong>'+r[0]+'</strong></td><td>'+r[1]+'</td></tr>').join('')+'</table>';
+    const subject='🆕 Lead '+eventLabel+' — '+(lead["Customer Name"]||"New Lead");
+    const recipients=[];
+    if(u.email)recipients.push({email:u.email,note:''});
+    if(u.role==='salesperson'&&u.team){
+      const tl=findUserByName(u.team,users);
+      if(tl&&tl.email)recipients.push({email:tl.email,note:' (assigned to your team member '+(u.display||u.username)+')'});
+    }
+    recipients.forEach(r=>{
+      try{MailApp.sendEmail({to:r.email,subject:subject,htmlBody:'<p>A lead has been <strong>'+eventLabel+'</strong> to <strong>'+(u.display||u.username)+'</strong>'+r.note+'.</p>'+tbl});}catch(e2){}
+    });
+  }catch(e){}
 }
 function addFollowUp(d){
   const fsh=getOrCreate("FollowUps",FH);const lsh=getOrCreate("Leads",LH);
@@ -150,16 +238,16 @@ function getUsersSheet(){
 }
 function getUsers(){
   const sh=getUsersSheet();const last=sh.getLastRow();if(last<2)return{status:"ok",users:[]};
-  const cols=Math.max(sh.getLastColumn(),4);
+  const cols=Math.max(sh.getLastColumn(),UH.length);
   const rows=sh.getRange(2,1,last-1,cols).getValues();
-  const users=rows.filter(r=>r[0]).map(r=>({username:String(r[0]),password:String(r[1]),role:String(r[2]),display:String(r[3]||r[0]),branch:String(r[4]||''),team:String(r[5]||'')}));
+  const users=rows.filter(r=>r[0]).map(r=>({username:String(r[0]),password:String(r[1]),role:String(r[2]),display:String(r[3]||r[0]),branch:String(r[4]||''),team:String(r[5]||''),email:String(r[6]||''),department:String(r[7]||'')}));
   return{status:"ok",users};
 }
 function saveUser(d){
   const sh=getUsersSheet();const last=sh.getLastRow();let found=false;
-  const row=[d.username,d.password,d.role,d.display||d.username,d.branch||'',d.team||''];
+  const row=[d.username,d.password,d.role,d.display||d.username,d.branch||'',d.team||'',d.email||'',d.department||''];
   if(last>=2){const ids=sh.getRange(2,1,last-1,1).getValues().flat().map(String);const ix=ids.indexOf(String(d.username));
-    if(ix>=0){sh.getRange(ix+2,1,1,6).setValues([row]);found=true;}}
+    if(ix>=0){sh.getRange(ix+2,1,1,row.length).setValues([row]);found=true;}}
   if(!found)sh.appendRow(row);
   return{status:"ok"};
 }
